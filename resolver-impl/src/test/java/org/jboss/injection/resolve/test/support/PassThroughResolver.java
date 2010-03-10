@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.support;
+package org.jboss.injection.resolve.test.support;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.spi.Resolver;
@@ -31,35 +31,25 @@ import org.jboss.injection.resolve.spi.ResolverResult;
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
-public class PassThroughResolver implements Resolver<PassThroughResolver.PassThrouhMetaData> {
+public class PassThroughResolver<M> implements Resolver<M> {
 
-   public ResolverResult resolve(DeploymentUnit unit, final PassThrouhMetaData metaData) {
+   private final String beanName;
+   private final String jndiName;
+
+   public PassThroughResolver(final String beanName, final String jndiName) {
+      this.beanName = beanName;
+      this.jndiName = jndiName;
+   }
+
+   public ResolverResult resolve(DeploymentUnit unit, final M metaData) {
       return new ResolverResult() {
          public String getBeanName() {
-            return metaData.getBeanName();
+            return beanName;
          }
 
          public String getJndiName() {
-            return metaData.getJndiName();
+            return jndiName;
          }
       };
-   }
-
-   public static class PassThrouhMetaData {
-      private final String jndiName;
-      private final String beanName;
-
-      public PassThrouhMetaData(final String jndiName, final String beanName) {
-         this.jndiName = jndiName;
-         this.beanName = beanName;
-      }
-
-      public String getBeanName() {
-         return beanName;
-      }
-
-      public String getJndiName() {
-         return jndiName;
-      }
    }
 }

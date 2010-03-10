@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test;
+package org.jboss.injection.inject.test.unit;
 
 import org.jboss.bootstrap.api.descriptor.BootstrapDescriptor;
 import org.jboss.bootstrap.api.descriptor.UrlBootstrapDescriptor;

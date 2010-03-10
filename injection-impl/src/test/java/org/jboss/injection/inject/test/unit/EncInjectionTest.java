@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test;
+package org.jboss.injection.inject.test.unit;
 
 import org.jboss.injection.inject.InjectionFactory;
 import org.jboss.injection.inject.enc.EncInjectionPoint;
@@ -30,8 +30,8 @@ import org.jboss.injection.inject.jndi.JndiValueRetriever;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
 import org.jboss.injection.inject.pojo.PojoInjector;
 import org.jboss.injection.inject.spi.Injection;
-import org.jboss.injection.inject.support.SimpleObject;
-import org.jboss.injection.inject.support.SimpleValueRetriever;
+import org.jboss.injection.inject.test.support.SimpleObject;
+import org.jboss.injection.inject.test.support.SimpleValueRetriever;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
