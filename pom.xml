@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.injection</groupId>
+    <artifactId>jboss-injection</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>4.0.CR1</version>
+    </parent>
+
+    <properties>
+        <version.jboss.deployers>2.2.0.Alpha3</version.jboss.deployers>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.deployers</groupId>
+            <artifactId>jboss-deployers-structure-spi</artifactId>
+            <version>${version.jboss.deployers}</version>
+        </dependency>
+
+        <dependency>
+           <groupId>org.jboss.logging</groupId>
+           <artifactId>jboss-logging-spi</artifactId>
+           <version>2.2.0.CR1</version>
+        </dependency>
+
+        <dependency>
+           <groupId>org.jboss.logging</groupId>
+           <artifactId>jboss-logging-log4j</artifactId>
+           <version>2.2.0.CR1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-test</artifactId>
+            <version>1.0.5.GA</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.bootstrap</groupId>
+            <artifactId>jboss-bootstrap-impl-mc</artifactId>
+            <version>2.1.0-alpha-4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-common-core</artifactId>
+            <version>2.2.17.GA</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.naming</groupId>
+            <artifactId>jnpserver</artifactId>
+            <version>5.0.1.GA</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
