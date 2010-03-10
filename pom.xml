@@ -2,30 +2,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-         
-         
+
+
     <!-- Parent -->
     <parent>
-       <groupId>org.jboss</groupId>
-       <artifactId>jboss-parent</artifactId>
-       <version>4</version>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>4</version>
     </parent>
-    
+
     <!-- Model Information -->
     <modelVersion>4.0.0</modelVersion>
-    
+
     <!-- Artifact Information  -->
     <groupId>org.jboss.injection</groupId>
-    <artifactId>jboss-injection</artifactId>
+    <artifactId>jboss-injection-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>JBoss Injection</name>
+    <packaging>pom</packaging>
+    <name>JBoss Injection Parent</name>
     <url>http://www.jboss.org</url>
-    <description>Components used for injection</description>
+    <description>JBoss Injection Parent</description>
 
+    <modules>
+        <module>injection-spi</module>
+        <module>injection-impl</module>
+        <module>resolver-spi</module>
+        <module>resolver-impl</module>
+    </modules>
+        
     <!-- Dependency Versions -->
     <properties>
         <version.jboss.deployers>2.2.0.Alpha3</version.jboss.deployers>
+        <version.jboss.metadata.common>2.0.0.Alpha12</version.jboss.metadata.common>
+        <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
         <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
         <version.jboss.naming>5.0.1.GA</version.jboss.naming>
         <version.jboss.bootstrap>2.1.0-alpha-4</version.jboss.bootstrap>
@@ -33,62 +42,4 @@
         <version.jboss.test>1.0.5.GA</version.jboss.test>
         <version.junit>4.7</version.junit>
     </properties>
-
-    <dependencies>
-        <!-- Compile Dependencies -->
-        <dependency>
-            <groupId>org.jboss.deployers</groupId>
-            <artifactId>jboss-deployers-structure-spi</artifactId>
-            <version>${version.jboss.deployers}</version>
-        </dependency>
-
-        <dependency>
-           <groupId>org.jboss.logging</groupId>
-           <artifactId>jboss-logging-spi</artifactId>
-           <version>${version.jboss.logging}</version>
-        </dependency>
-
-        <dependency>
-           <groupId>org.jboss.logging</groupId>
-           <artifactId>jboss-logging-log4j</artifactId>
-           <version>${version.jboss.logging}</version>
-        </dependency>
-
-        <!-- Test Dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${version.junit}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-test</artifactId>
-            <version>${version.jboss.test}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.bootstrap</groupId>
-            <artifactId>jboss-bootstrap-impl-mc</artifactId>
-            <version>${version.jboss.bootstrap}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-common-core</artifactId>
-            <version>${version.jboss.common.core}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.naming</groupId>
-            <artifactId>jnpserver</artifactId>
-            <version>${version.jboss.naming}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
 </project>

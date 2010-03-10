@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+
+    <!-- Parent -->
+    <parent>
+        <groupId>org.jboss.injection</groupId>
+        <artifactId>jboss-injection-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <!-- Model Information -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Artifact Information  -->
+    <groupId>org.jboss.injection</groupId>
+    <artifactId>jboss-injection-impl</artifactId>
+    <packaging>jar</packaging>
+    <name>JBoss Injection Implementation</name>
+    <url>http://www.jboss.org</url>
+    <description>JBoss Injection Implementation</description>
+
+    <dependencies>
+        <!-- Compile Dependencies -->
+        <dependency>
+            <groupId>org.jboss.injection</groupId>
+            <artifactId>jboss-injection-spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>    
+        
+        <dependency>
+            <groupId>org.jboss.deployers</groupId>
+            <artifactId>jboss-deployers-structure-spi</artifactId>
+            <version>${version.jboss.deployers}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-spi</artifactId>
+            <version>${version.jboss.logging}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-log4j</artifactId>
+            <version>${version.jboss.logging}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.metadata</groupId>
+            <artifactId>jboss-metadata-common</artifactId>
+            <version>${version.jboss.metadata.common}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${version.junit}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-test</artifactId>
+            <version>${version.jboss.test}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.bootstrap</groupId>
+            <artifactId>jboss-bootstrap-impl-mc</artifactId>
+            <version>${version.jboss.bootstrap}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-common-core</artifactId>
+            <version>${version.jboss.common.core}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.naming</groupId>
+            <artifactId>jnpserver</artifactId>
+            <version>${version.jboss.naming}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-mdr</artifactId>
+            <version>${version.jboss.mdr}</version>
+        </dependency>
+    </dependencies>
+
+</project>
