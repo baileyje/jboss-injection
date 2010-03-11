@@ -1,4 +1,4 @@
-package org.jboss.injection.inject.enc;
+package org.jboss.injection.resolve.enc;
 
 import org.jboss.injection.inject.spi.Injector;
 

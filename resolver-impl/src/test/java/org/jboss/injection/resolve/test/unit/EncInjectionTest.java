@@ -19,14 +19,14 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.unit;
+package org.jboss.injection.resolve.test.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.enc.EncInjectionPoint;
-import org.jboss.injection.inject.enc.EncPopulator;
-import org.jboss.injection.inject.enc.LinkRefValueRetriever;
+import org.jboss.injection.resolve.enc.EncInjectionPoint;
+import org.jboss.injection.resolve.enc.EncPopulator;
+import org.jboss.injection.resolve.enc.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.test.support.SimpleValueRetriever;
+import org.jboss.injection.resolve.test.support.SimpleValueRetriever;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,9 +34,7 @@ import org.junit.Test;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
@@ -44,7 +42,7 @@ import java.util.Arrays;
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncInjectionTest extends AbstractInjectionTestCase {
+public class EncInjectionTest extends AbstractResolverTestCase {
 
    private Context context;
 

@@ -22,6 +22,10 @@
     <url>http://www.jboss.org</url>
     <description>JBoss Resolver Implementation</description>
 
+    <properties>
+        <version.jboss.injection>${project.version}</version.jboss.injection>
+    </properties>
+
     <dependencies>
         <!-- Compile Dependencies -->
         <dependency>
@@ -33,8 +37,14 @@
         <dependency>
             <groupId>org.jboss.injection</groupId>
             <artifactId>jboss-injection-spi</artifactId>
-            <version>${project.version}</version>
-        </dependency>    
+            <version>${version.jboss.injection}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.injection</groupId>
+            <artifactId>jboss-injection-impl</artifactId>
+            <version>${version.jboss.injection}</version>
+        </dependency>
         
         <dependency>
             <groupId>org.jboss.deployers</groupId>

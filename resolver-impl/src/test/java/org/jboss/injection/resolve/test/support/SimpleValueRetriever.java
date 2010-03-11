@@ -19,29 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject;
+package org.jboss.injection.resolve.test.support;
 
-import org.jboss.injection.inject.spi.InjectionPoint;
-import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 
 /**
- * Create an Injector based on an InjectionPoint and a ValueRetriever
+ * SimpleValueRetriever -
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class InjectorFactory {
+public class SimpleValueRetriever<V> implements ValueRetriever<V> {
+   private final V value;
 
-   /**
-    * Create an Injection with the required components.
-    *
-    * @param injectionPoint The injection point to inject the value
-    * @param valueRetriever Value retriever responsible for getting the value to inject
-    * @param <T> The injection target type
-    * @param <V> The injection value type
-    * @return An injector that can inject into the target type
-    */
-   public static <T, V> Injector<T> create(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever) {
-      return new DefaultInjector<T, V>(injectionPoint, valueRetriever);
+   public SimpleValueRetriever(final V value) {
+      this.value = value;
+   }
+
+   public V getValue() {
+      return value;
    }
 }

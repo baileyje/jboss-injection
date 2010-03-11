@@ -19,33 +19,42 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.enc;
+package org.jboss.injection.inject;
 
+import org.jboss.injection.inject.spi.InjectionPoint;
+import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 
-import javax.naming.LinkRef;
-
 /**
- * ValueRetriever implementation which creates a LinkRef instances for a JNDI name.
+ * Default injector that performs the basic injection logic with parametrized types.
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @param <T> The target object type
+ * @param <V> The injected value type
  */
-public class LinkRefValueRetriever implements ValueRetriever<LinkRef>{
+public class DefaultInjector<T, V> implements Injector<T> {
 
-   private final String jndiName;
+   private InjectionPoint<T, V> injectionPoint;
+   private ValueRetriever<V> valueRetriever;
 
    /**
-    * Construct a new LinkRefValueRetriever with a specific JNDI name.
+    * Create a new Injector with an injection point and value retriever
     * 
-    * @param jndiName The JNDI name to link to
+    * @param injectionPoint
+    * @param valueRetriever
     */
-   public LinkRefValueRetriever(final String jndiName) {
-      this.jndiName = jndiName;
+   public DefaultInjector(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever) {
+      this.injectionPoint = injectionPoint;
+      this.valueRetriever = valueRetriever;
    }
 
    /** {@inheritDoc} */
-   public LinkRef getValue() {
-      // TODO: Look into ways to verify the jndi name points to a valid location.
-      return new LinkRef(jndiName);
+   public void inject(final T target) {
+      final V vaue = getValue();
+      injectionPoint.set(target, vaue);
+   }
+
+   protected V getValue() {
+      return valueRetriever.getValue();
    }
 }
