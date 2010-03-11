@@ -21,11 +21,10 @@
  */
 package org.jboss.injection.inject.test.unit;
 
-import org.jboss.injection.inject.InjectionFactory;
-import org.jboss.injection.inject.spi.Injection;
+import org.jboss.injection.inject.InjectorFactory;
+import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.test.support.SimpleObject;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
-import org.jboss.injection.inject.pojo.PojoInjector;
 import org.jboss.injection.inject.jndi.JndiValueRetriever;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,13 +42,11 @@ import java.lang.reflect.Field;
 public class JndiInjectionTest extends AbstractInjectionTestCase {
 
    private Context context;
-   private PojoInjector injector;
    private SimpleObject simpleObject = new SimpleObject();
 
    @Before
    public void setUp() throws Exception {
       context = new InitialContext();
-      injector = new PojoInjector();
    }
 
    @Test
@@ -57,8 +54,8 @@ public class JndiInjectionTest extends AbstractInjectionTestCase {
       context.rebind("java:test", "Test Value");
       FieldInjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
 
-      Injection<Object> injection = InjectionFactory.create(injector, injectionPoint, new JndiValueRetriever(context, "java:test"));
-      injection.perform(simpleObject);
+      Injector<Object> injector = InjectorFactory.create(injectionPoint, new JndiValueRetriever(context, "java:test"));
+      injector.inject(simpleObject);
 
       Assert.assertNotNull(simpleObject.getSimpleProperty());
       Assert.assertEquals("Test Value", simpleObject.getSimpleProperty());

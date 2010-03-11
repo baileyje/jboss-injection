@@ -22,20 +22,17 @@
 package org.jboss.injection.inject.spi;
 
 /**
- * Injectors perform an inject into a target at an injection point.
+ * Injectors perform an inject into a target.
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  * @param <T> The target object type
- * @param <V> The injected value type
  */
-public interface Injector<T, V> {
+public interface Injector<T> {
 
    /**
     * Performs the injection
     *
     * @param target The target object receiving the injection
-    * @param injectionPoint The location to inject the value
-    * @param valueRetriever Value retriever providing the value when exectuing 
     */
-   void inject(T target, InjectionPoint<T, V> injectionPoint, ValueRetriever<V> valueRetriever);
+   void inject(T target);
 }

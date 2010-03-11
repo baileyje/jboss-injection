@@ -19,19 +19,29 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.enc;
+package org.jboss.injection.inject;
 
-import org.jboss.injection.inject.InjectorBase;
-
-import javax.naming.Context;
+import org.jboss.injection.inject.spi.InjectionPoint;
+import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.spi.ValueRetriever;
 
 /**
- * Injector implemenation used to inject values into a naming context.
- * This class does not provide functionality, but establishes a contract 
- * for injecting into a Context.
+ * Create aN InjectOR based on an InjectionPoit and a ValueRetriever
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
- * @param <V> The type of the value being injected
  */
-public class EncInjector<V> extends InjectorBase<Context, V> {
+public class InjectorFactory {
+
+   /**
+    * Create an Injection with the required components.
+    *
+    * @param injectionPoint The injection point to inject the value
+    * @param valueRetriever Value retriever responsible for getting the value to inject
+    * @param <T> The injection target type
+    * @param <V> The injection value type
+    * @return An injector that can inject into the target type
+    */
+   public static <T, V> Injector<T> create(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever) {
+      return new InjectorBase<T, V>(injectionPoint, valueRetriever);
+   }
 }

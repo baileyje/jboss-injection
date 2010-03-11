@@ -1,6 +1,6 @@
 package org.jboss.injection.inject.enc;
 
-import org.jboss.injection.inject.spi.Injection;
+import org.jboss.injection.inject.spi.Injector;
 
 import javax.naming.Context;
 import java.util.List;
@@ -12,20 +12,20 @@ import java.util.List;
  */
 public class EncPopulator {
 
-   private final List<Injection<Context>> injections;
+   private final List<Injector<Context>> injectors;
    private final Context enc;
 
-   public EncPopulator(final Context enc, final List<Injection<Context>> injections) {
+   public EncPopulator(final Context enc, final List<Injector<Context>> injectors) {
       if(enc == null) throw new IllegalArgumentException("ENC context is required");
       this.enc = enc;
-      this.injections = injections;
+      this.injectors = injectors;
    }
 
    public void start() {
-      if(injections == null)
+      if(injectors == null)
          return;
-      for(Injection<Context> injection : injections) {
-         injection.perform(enc);
+      for(Injector<Context> injection : injectors) {
+         injection.inject(enc);
       }
    }
 }
