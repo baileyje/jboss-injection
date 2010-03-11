@@ -33,6 +33,13 @@ import org.jboss.injection.resolve.spi.ResolverResult;
 public interface Resolver<M> {
 
    /**
+    * Get type of metadata this Resolver supports.
+    * 
+    * @return The class object for this resolver type.
+    */
+   Class<M> getMetaDataType();
+
+   /**
     * This method takes the provided metadata and determines the
     * global JNDI name being referenced as well as the MC bean name
     * that is responsible for ensuring the dependency is bound into

@@ -48,6 +48,14 @@ public class EnvironmentProcessor {
    public Map<Class<?>, Resolver<?>> resolvers;
 
    /**
+    * Construct a new processor.  There will be no resolvers available.  
+    *
+    */
+   public EnvironmentProcessor() {
+      this(new HashMap<Class<?>, Resolver<?>>());
+   }
+
+   /**
     * Construct a new processor with a Map of resolvers.
     *
     * @param resolvers A map from class to Resolver
@@ -63,14 +71,14 @@ public class EnvironmentProcessor {
     * @return The resolver results
     */
    public List<ResolverResult> process(Environment environment) {
-      List<ResolverResult> results = new LinkedList<ResolverResult>();
+      final List<ResolverResult> results = new LinkedList<ResolverResult>();
       process(environment.getEjbReferences(), EJBReferenceMetaData.class, results);
       process(environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, results);
       process(environment.getResourceReferences(), ResourceReferenceMetaData.class, results);
       return results;
    }
 
-   private <M extends Iterable<T>, T> void process(M references, Class<T> childType, List<ResolverResult> results) {
+   protected <M extends Iterable<T>, T> void process(M references, Class<T> childType, List<ResolverResult> results) {
       if(references == null)
          return;
       for(T reference : references) {
@@ -78,22 +86,27 @@ public class EnvironmentProcessor {
       }
    }
 
-   private <M> void process(M reference,Class<M> referenceType, List<ResolverResult> results) {
+   protected <M> void process(M reference, Class<M> referenceType, List<ResolverResult> results) {
       if(reference == null)
          return;
 
-      Resolver<M> resolver = getResolver(referenceType);
+      final Resolver<M> resolver = getResolver(referenceType);
 
       if(resolver == null)
          throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + reference + "]");
 
-      ResolverResult result = resolver.resolve(null, reference);
+      final ResolverResult result = resolver.resolve(null, reference);
       if(result != null) {
          results.add(result);
       }
    }
 
-   private <M> Resolver<M> getResolver(Class<M> metaDataType) {
+   protected <M> Resolver<M> getResolver(Class<M> metaDataType) {
       return (Resolver<M>) resolvers.get(metaDataType);
+   }
+
+   public void addResolver(Resolver<?> resolver) {
+      Class<?> metaDataType = resolver.getMetaDataType();
+      resolvers.put(metaDataType, resolver);
    }
 }

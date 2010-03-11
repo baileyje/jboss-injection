@@ -19,14 +19,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.test.unit;
+package org.jboss.injection.inject.test.enc.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.resolve.enc.EncInjectionPoint;
-import org.jboss.injection.resolve.enc.EncPopulator;
-import org.jboss.injection.resolve.enc.LinkRefValueRetriever;
+import org.jboss.injection.inject.test.unit.AbstractInjectionTestCase;
+import org.jboss.injection.inject.enc.EncInjectionPoint;
+import org.jboss.injection.inject.enc.EncPopulator;
+import org.jboss.injection.inject.enc.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.resolve.test.support.SimpleValueRetriever;
+import org.jboss.injection.inject.test.support.SimpleValueRetriever;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ import java.util.Arrays;
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncInjectionTest extends AbstractResolverTestCase {
+public class EncInjectionTest extends AbstractInjectionTestCase {
 
    private Context context;
 
@@ -84,7 +85,7 @@ public class EncInjectionTest extends AbstractResolverTestCase {
             new EncInjectionPoint<String>("java:testThree"),
             new SimpleValueRetriever("Test Value Three"));
 
-      EncPopulator encPopulator = new EncPopulator(context, Arrays.asList(injectorOne, injectorTwo,injectorThree));
+      EncPopulator encPopulator = new EncPopulator(Arrays.asList(injectorOne, injectorTwo,injectorThree));
 
       assertNameNotFound("java:testOne");
       assertNameNotFound("java:testTwo");

@@ -74,22 +74,22 @@ public class EnvironmentProcessorTest {
 
       Environment environment = new MockEnvironment(referencesMetaData);
 
-      Map<Class<?>, Resolver<?>> resolvers = new HashMap<Class<?>, Resolver<?>>();
 
-      EnvironmentProcessor processor = new EnvironmentProcessor(resolvers);
+      EnvironmentProcessor processor = new EnvironmentProcessor();
 
       try {
          processor.process(environment);
          Assert.fail("Should throw exception if no Resolver can be found");
       } catch(IllegalStateException expected){}  
 
-      resolvers.put(EJBReferenceMetaData.class, new PassThroughResolver<EJBReferenceMetaData>("testBean", "java:testBean"));
+      processor.addResolver(new PassThroughResolver<EJBReferenceMetaData>(EJBReferenceMetaData.class, "testBean", "java:testBean", "java:comp/testBean"));
 
       List<ResolverResult> results = processor.process(environment);
       Assert.assertNotNull(results);
       Assert.assertEquals(1, results.size());
       Assert.assertEquals("testBean", results.get(0).getBeanName());
-      Assert.assertEquals("java:testBean", results.get(0).getJndiName());
+      Assert.assertEquals("java:testBean", results.get(0).getGlobalJndiName());
+      Assert.assertEquals("java:comp/testBean", results.get(0).getEncJndiName());  
    }
 
    private static class MockEnvironment implements Environment {

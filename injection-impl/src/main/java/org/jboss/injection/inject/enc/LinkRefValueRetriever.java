@@ -19,39 +19,33 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.enc;
+package org.jboss.injection.inject.enc;
 
-import org.jboss.injection.inject.spi.InjectionPoint;
+import org.jboss.injection.inject.spi.ValueRetriever;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
+import javax.naming.LinkRef;
 
 /**
- * InjectionPoint instance capable of injecting a value into a Context  
+ * ValueRetriever implementation which creates a LinkRef instances for a JNDI name.
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
- * @param <V> The type of the object being injected
  */
-public class EncInjectionPoint<V> implements InjectionPoint<Context, V> {
+public class LinkRefValueRetriever implements ValueRetriever<LinkRef>{
 
    private final String jndiName;
 
    /**
-    * Construct a new EncInjectionPoint with a target jndi name.
-    *
-    * @param jndiName The jndi name to use when injecting into the context
+    * Construct a new LinkRefValueRetriever with a specific JNDI name.
+    * 
+    * @param jndiName The JNDI name to link to
     */
-   public EncInjectionPoint(final String jndiName) {
-      if(jndiName == null) throw new IllegalArgumentException("JNDI name can not be null");
+   public LinkRefValueRetriever(final String jndiName) {
       this.jndiName = jndiName;
    }
 
    /** {@inheritDoc} */
-   public void set(final Context context, final V value) {
-      try {
-         context.bind(jndiName, value);
-      } catch(NamingException e) {
-         throw new RuntimeException("Failed to bind value [" + value + "] into context [" + context + "] with jndi name [" + jndiName + "]");
-      }
+   public LinkRef getValue() {
+      // TODO: Look into ways to verify the jndi name points to a valid location.
+      return new LinkRef(jndiName);
    }
 }
