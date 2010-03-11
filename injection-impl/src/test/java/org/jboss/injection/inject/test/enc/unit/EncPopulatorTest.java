@@ -22,47 +22,44 @@
 package org.jboss.injection.inject.test.enc.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.test.unit.AbstractInjectionTestCase;
 import org.jboss.injection.inject.enc.EncInjectionPoint;
 import org.jboss.injection.inject.enc.EncPopulator;
-import org.jboss.injection.inject.enc.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.test.support.SimpleValueRetriever;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.LinkRef;
-import javax.naming.NamingException;
 import java.util.Arrays;
 
 /**
- * Basic test to verify EncInjection function as expected.
+ * EncPopulatorTest -
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncInjectionTest extends AbstractEncTestCase {
+public class EncPopulatorTest extends AbstractEncTestCase {
 
    @Test
-   public void testEncInjection() throws Exception {
-      Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint<String>("java:test"), new SimpleValueRetriever("Test Value"));
+   public void testEncPopulator() throws Exception {
+      Injector<Context> injectorOne = InjectorFactory.create(
+         new EncInjectionPoint<String>("java:testOne"),
+         new SimpleValueRetriever("Test Value One"));
+      Injector<Context> injectorTwo = InjectorFactory.create(
+         new EncInjectionPoint<String>("java:testTwo"),
+         new SimpleValueRetriever("Test Value Two"));
+      Injector<Context> injectorThree = InjectorFactory.create(
+         new EncInjectionPoint<String>("java:testThree"),
+         new SimpleValueRetriever("Test Value Three"));
 
-      injector.inject(context);
+      EncPopulator encPopulator = new EncPopulator(Arrays.asList(injectorOne, injectorTwo, injectorThree));
 
-      assertContextValue("java:test", "Test Value");
-   }
+      assertNameNotFound("java:testOne");
+      assertNameNotFound("java:testTwo");
+      assertNameNotFound("java:testThree");
 
-   @Test
-   public void testEncLinkInjection() throws Exception {
-      context.rebind("java:test", "Test Value");
+      encPopulator.start();
 
-      Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint<LinkRef>("java:comp/test"), new LinkRefValueRetriever("java:test"));
-
-      assertNameNotFound("java:comp/test");
-      injector.inject(context);
-
-      assertContextValue("java:comp/test", "Test Value");
+      assertContextValue("java:testOne", "Test Value One");
+      assertContextValue("java:testTwo", "Test Value Two");
+      assertContextValue("java:testThree", "Test Value Three");
    }
 }

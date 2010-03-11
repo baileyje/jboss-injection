@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+    <bean name="EncPopulatorDeployer" class="org.jboss.injection.inject.enc.deployer.EncPopulatorDeployer"/>
+
+    <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.enc.EnvironmentProcessor">
+        <incallback method="addResolver"/>
+    </bean>
+</deployment>

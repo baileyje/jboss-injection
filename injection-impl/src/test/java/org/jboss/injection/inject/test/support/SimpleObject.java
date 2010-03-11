@@ -24,7 +24,7 @@ package org.jboss.injection.inject.test.support;
 /**
  * SimpleObject -
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class SimpleObject {
     private String simpleProperty;

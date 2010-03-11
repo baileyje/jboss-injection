@@ -31,7 +31,7 @@ import java.lang.reflect.TypeVariable;
 /**
  * PassThroughResolver -
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
 public class PassThroughResolver<M> implements Resolver<M> {

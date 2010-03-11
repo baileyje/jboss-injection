@@ -59,7 +59,7 @@ import java.util.Map;
 /**
  * Test to ensure the functionality of the EnvironmentProcessor
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class EnvironmentProcessorTest {
 
@@ -192,5 +192,4 @@ public class EnvironmentProcessorTest {
          return null;
       }
    }
-
 }

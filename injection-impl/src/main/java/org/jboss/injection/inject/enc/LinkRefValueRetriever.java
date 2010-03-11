@@ -28,7 +28,7 @@ import javax.naming.LinkRef;
 /**
  * ValueRetriever implementation which creates a LinkRef instances for a JNDI name.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class LinkRefValueRetriever implements ValueRetriever<LinkRef>{
 

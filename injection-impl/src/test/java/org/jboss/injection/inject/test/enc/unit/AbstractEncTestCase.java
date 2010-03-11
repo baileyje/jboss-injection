@@ -19,55 +19,41 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.jndi;
+package org.jboss.injection.inject.test.enc.unit;
 
-import org.jboss.injection.inject.spi.ValueRetriever;
+import org.jboss.injection.inject.test.unit.AbstractInjectionTestCase;
+import org.junit.Assert;
+import org.junit.Before;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
- * Value retriever used to get values from JNDI
+ * AbstractEncTestCase -
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class JndiValueRetriever<M> implements ValueRetriever<Object> {
+public abstract class AbstractEncTestCase extends AbstractInjectionTestCase {
 
-   private Context context;
-   private final String jndiName;
+   protected Context context;
 
-   public JndiValueRetriever(String jndiName) {
-      this(null, jndiName);
+   @Before
+   public void initializeContext() throws Exception {
+      context = new InitialContext();
    }
 
-   public JndiValueRetriever(final Context context, String jndiName) {
-      this.context = context;
-      this.jndiName = jndiName;
+   protected void assertContextValue(String jndiName, Object value) throws Exception {
+      String actual = (String) context.lookup(jndiName);
+      Assert.assertEquals(value, actual);
    }
 
-   public Object getValue() {
-      return lookup(jndiName);
-   }
-
-   protected Object lookup(final String jndiName) {
-      Object dependency = null;
+   protected void assertNameNotFound(String name) {
       try {
-         final Context context = getContext();
-         dependency = context.lookup(jndiName);
+         context.lookup(name);
+         Assert.fail("The name should not be found in the context: " + name);
+      } catch(NamingException expected) {
       }
-      catch(NamingException e) {
-         Throwable cause = e;
-         while(cause.getCause() != null)
-            cause = cause.getCause();
-         throw new RuntimeException("Unable to lookup jndi value: " + jndiName + cause.getMessage(), e);
-      }
-      return dependency;
    }
 
-   private Context getContext() throws NamingException {
-      if(context == null)
-         context = new InitialContext();
-      return context;
-   }
 }

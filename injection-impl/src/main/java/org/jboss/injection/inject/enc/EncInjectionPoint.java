@@ -29,7 +29,7 @@ import javax.naming.NamingException;
 /**
  * InjectionPoint instance capable of injecting a value into a Context  
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <V> The type of the object being injected
  */
 public class EncInjectionPoint<V> implements InjectionPoint<Context, V> {

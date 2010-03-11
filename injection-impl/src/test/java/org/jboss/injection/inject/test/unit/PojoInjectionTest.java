@@ -37,7 +37,7 @@ import java.lang.reflect.Method;
 /**
  * Basic test to verify injection facilities using pojo targets and values.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class PojoInjectionTest {
 

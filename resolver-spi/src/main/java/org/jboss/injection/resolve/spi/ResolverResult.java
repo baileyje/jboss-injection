@@ -24,7 +24,7 @@ package org.jboss.injection.resolve.spi;
 /**
  * The results of executing a Resolver.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class ResolverResult {
 

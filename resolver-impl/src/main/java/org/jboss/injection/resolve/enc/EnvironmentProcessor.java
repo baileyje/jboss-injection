@@ -41,7 +41,7 @@ import java.util.Map;
  * Process an {@link Environment} instance and creates all the {@link ResolverResult}
  * instances for all references that can be resolved.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class EnvironmentProcessor {
 

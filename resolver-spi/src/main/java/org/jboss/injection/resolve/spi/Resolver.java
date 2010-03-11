@@ -27,7 +27,7 @@ import org.jboss.injection.resolve.spi.ResolverResult;
 /**
  * Resolves a JNDI name and MC Bean name from the provided dependency metadata. 
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <M> The required metadata type
  */
 public interface Resolver<M> {

@@ -21,15 +21,15 @@
  */
 package org.jboss.injection.inject.enc.deployer;
 
+import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;
 import org.jboss.beans.metadata.spi.BeanMetaData;
-import org.jboss.beans.metadata.spi.DependencyMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.jndi.JndiValueRetriever;
+import org.jboss.injection.inject.enc.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.enc.EncInjectionPoint;
 import org.jboss.injection.inject.enc.EncPopulator;
@@ -39,14 +39,13 @@ import org.jboss.metadata.javaee.spec.Environment;
 
 import javax.naming.Context;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Deployer capable of create an EncPopulator bean from EnvironmentMetaData
+ * Deployer capable of create an EncPopulator bean from EnvironmentMetaData.
+ * TODO: Determine if we should be looking for Environment.  (Maybe SessionMetaData. etc) 
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href=mailto:"jbailey@redhat.com">John Bailey</a>
  */
 public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment> {
 
@@ -54,7 +53,7 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
 
    public EncPopulatorDeployer() {
       super(Environment.class);
-      setComponentsOnly(true);
+      //setComponentsOnly(true);
       setOutput(BeanMetaData.class);
    }
 
@@ -64,10 +63,9 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
 
       final List<ResolverResult> resolverResults = processEnvironment(environment);
 
-
       if(resolverResults != null && !resolverResults.isEmpty()) {
          final BeanMetaData beanMetaData = createBeanMetaData(name, resolverResults);
-         unit.getParent().addAttachment(BeanMetaData.class.getName() + "." + name, beanMetaData, BeanMetaData.class);
+         unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + name, beanMetaData, BeanMetaData.class);
       }
    }
 
@@ -89,7 +87,7 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
    private EncPopulator createEncPopulator(final List<ResolverResult> resolverResults) {
       final List<Injector<Context>> injectors = new ArrayList<Injector<Context>>(resolverResults.size());
       for(ResolverResult resolverResult : resolverResults) {
-         final Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint(resolverResult.getEncJndiName()), new JndiValueRetriever(resolverResult.getGlobalJndiName()));
+         final Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint(resolverResult.getEncJndiName()), new LinkRefValueRetriever(resolverResult.getGlobalJndiName()));
          injectors.add(injector);
       }
       return new EncPopulator(injectors);
@@ -99,6 +97,7 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
       return environmentProcessor;
    }
 
+   @Inject
    public void setEnvironmentProcessor(final EnvironmentProcessor environmentProcessor) {
       this.environmentProcessor = environmentProcessor;
    }
