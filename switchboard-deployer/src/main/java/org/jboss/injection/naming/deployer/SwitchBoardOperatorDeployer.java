@@ -42,63 +42,78 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Deployer capable of create an EncPopulator bean from EnvironmentMetaData.
- * TODO: Determine if we should be looking for Environment.  (Maybe SessionMetaData. etc) 
+ * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
  *
  * @author <a href=mailto:"jbailey@redhat.com">John Bailey</a>
  */
-public class SwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<Environment> {
+public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
+{
 
-   private EnvironmentProcessor environmentProcessor;
+   private EnvironmentProcessor<DeploymentUnit> environmentProcessor;
 
-   public SwitchBoardOperatorDeployer() {
-      super(Environment.class);
-      //setComponentsOnly(true);
+   public SwitchBoardOperatorDeployer(Class<M> metadataClass)
+   {
+      super(metadataClass);
       setOutput(BeanMetaData.class);
    }
 
    @Override
-   public void deploy(final DeploymentUnit unit, final Environment environment) throws DeploymentException {
-      final String name = "jboss:service=EncPopulator,name=" + unit.getName();
+   public void deploy(final DeploymentUnit unit, final M deployment) throws DeploymentException
+   {
+      final Environment environment = getEnvironment(deployment);
+      deploy(unit, deployment, environment);
+   }
 
-      final List<ResolverResult> resolverResults = processEnvironment(environment);
+   protected abstract Environment getEnvironment(M deployment);
 
-      if(resolverResults != null && !resolverResults.isEmpty()) {
+   protected void deploy(final DeploymentUnit unit, final M metaData, final Environment environment) throws DeploymentException
+   {
+      final String name = "jboss:service=SwitchBoardOperator,name=" + unit.getName();
+
+      final EnvironmentProcessor<DeploymentUnit> environmentProcessor = getEnvironmentProcessor();
+      if(environmentProcessor == null)
+         throw new IllegalStateException("SwitchBoardOperator deployers require an EnvironmentPorcessor, which has not been set.");
+
+      final List<ResolverResult> resolverResults = environmentProcessor.process(unit, environment);
+
+      if(resolverResults != null && !resolverResults.isEmpty())
+      {
          final BeanMetaData beanMetaData = createBeanMetaData(name, resolverResults);
          unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + name, beanMetaData, BeanMetaData.class);
       }
    }
 
-   private BeanMetaData createBeanMetaData(final String name, final List<ResolverResult> resolverResults) {
+   protected BeanMetaData createBeanMetaData(final String name, final List<ResolverResult> resolverResults)
+   {
       final BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, SwitchBoardOperator.class.getName());
       builder.setConstructorValue(createSwitchBoardOperator(resolverResults));
 
-      for(ResolverResult resolverResult : resolverResults) {
+      for(ResolverResult resolverResult : resolverResults)
+      {
          builder.addDependency(resolverResult.getBeanName());
       }
       return builder.getBeanMetaData();
    }
 
-   private List<ResolverResult> processEnvironment(Environment environment) {
-      final EnvironmentProcessor environmentProcessor = getEnvironmentProcessor();
-      return environmentProcessor.process(environment);
-   }
-
-   private SwitchBoardOperator createSwitchBoardOperator(final List<ResolverResult> resolverResults) {
+   protected SwitchBoardOperator createSwitchBoardOperator(final List<ResolverResult> resolverResults)
+   {
       final List<Injector<Context>> injectors = new ArrayList<Injector<Context>>(resolverResults.size());
-      for(ResolverResult resolverResult : resolverResults) {
+      for(ResolverResult resolverResult : resolverResults)
+      {
          final Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint(resolverResult.getRefName()), new LinkRefValueRetriever(resolverResult.getJndiName()));
          injectors.add(injector);
       }
       return new SwitchBoardOperator(injectors);
    }
 
-   public EnvironmentProcessor getEnvironmentProcessor() {
+   protected EnvironmentProcessor<DeploymentUnit> getEnvironmentProcessor()
+   {
       return environmentProcessor;
    }
 
    @Inject
-   public void setEnvironmentProcessor(final EnvironmentProcessor environmentProcessor) {
+   public void setEnvironmentProcessor(final EnvironmentProcessor<DeploymentUnit> environmentProcessor)
+   {
       this.environmentProcessor = environmentProcessor;
    }
 }

@@ -26,7 +26,8 @@ package org.jboss.injection.resolve.spi;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ResolverResult {
+public class ResolverResult
+{
    private String jndiName;
    private String refName;
    private String beanName;

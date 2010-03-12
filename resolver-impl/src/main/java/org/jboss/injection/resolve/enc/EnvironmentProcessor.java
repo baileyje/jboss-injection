@@ -42,20 +42,21 @@ import java.util.Map;
 /**
  * Process an {@link Environment} instance and creates all the {@link ResolverResult}
  * instances for all references that can be resolved.
- *
+ * <p/>
  * C is the resolving context (usually DeploymentUnit)
- * 
+ *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EnvironmentProcessor<C> {
+public class EnvironmentProcessor<C>
+{
 
    public Map<Class<?>, Resolver<?, C>> resolvers;
 
    /**
     * Construct a new processor.  There will be no resolvers available.
-    *
     */
-   public EnvironmentProcessor() {
+   public EnvironmentProcessor()
+   {
       this(new HashMap<Class<?>, Resolver<?, C>>());
    }
 
@@ -64,7 +65,8 @@ public class EnvironmentProcessor<C> {
     *
     * @param resolvers A map from class to Resolver
     */
-   public EnvironmentProcessor(final Map<Class<?>, Resolver<?, C>> resolvers) {
+   public EnvironmentProcessor(final Map<Class<?>, Resolver<?, C>> resolvers)
+   {
       this.resolvers = resolvers;
    }
 
@@ -76,18 +78,20 @@ public class EnvironmentProcessor<C> {
     * @deprecated specifying a context will become mandatory
     */
    @Deprecated
-   public List<ResolverResult> process(Environment environment) {
+   public List<ResolverResult> process(Environment environment)
+   {
       return process(null, environment);
    }
 
    /**
     * Processes the Environment and returns the resolver results.
     *
-    * @param context the context in which to resolve (usually DeploymentUnit)
+    * @param context     the context in which to resolve (usually DeploymentUnit)
     * @param environment An Environment to process references for
     * @return The resolver results
     */
-   public List<ResolverResult> process(C context, Environment environment) {
+   public List<ResolverResult> process(C context, Environment environment)
+   {
       final List<ResolverResult> results = new LinkedList<ResolverResult>();
 
       // TODO: configurable via visitors
@@ -106,15 +110,18 @@ public class EnvironmentProcessor<C> {
       return results;
    }
 
-   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(C context, M references, Class<T> childType, List<ResolverResult> results) {
+   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(C context, M references, Class<T> childType, List<ResolverResult> results)
+   {
       if(references == null)
          return;
-      for(T reference : references) {
+      for(T reference : references)
+      {
          process(context, reference, childType, results);
       }
    }
 
-   protected <M extends ResourceInjectionMetaData> void process(C context, M reference, Class<M> referenceType, List<ResolverResult> results) {
+   protected <M extends ResourceInjectionMetaData> void process(C context, M reference, Class<M> referenceType, List<ResolverResult> results)
+   {
       if(reference == null)
          return;
 
@@ -124,17 +131,20 @@ public class EnvironmentProcessor<C> {
          throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + reference + "]");
 
       final ResolverResult result = resolver.resolve(context, reference);
-      if(result != null) {
+      if(result != null)
+      {
          results.add(result);
       }
    }
 
    @SuppressWarnings("unchecked")
-   protected <M> Resolver<M, C> getResolver(Class<M> metaDataType) {
+   protected <M> Resolver<M, C> getResolver(Class<M> metaDataType)
+   {
       return (Resolver<M, C>) resolvers.get(metaDataType);
    }
 
-   public void addResolver(Resolver<?, C> resolver) {
+   public void addResolver(Resolver<?, C> resolver)
+   {
       Class<?> metaDataType = resolver.getMetaDataType();
       resolvers.put(metaDataType, resolver);
    }

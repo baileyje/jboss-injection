@@ -39,13 +39,15 @@ import java.lang.reflect.Method;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class PojoInjectionTest {
+public class PojoInjectionTest
+{
 
    private SimpleValueRetriever valueRetriever = new SimpleValueRetriever("Test Value");
    private SimpleObject simpleObject = new SimpleObject();
 
    @Test
-   public void testFieldInjection() throws Exception {
+   public void testFieldInjection() throws Exception
+   {
       InjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
       Injector<Object> injector = InjectorFactory.create(injectionPoint, valueRetriever);
       injector.inject(simpleObject);
@@ -55,7 +57,8 @@ public class PojoInjectionTest {
    }
 
    @Test
-   public void testMethodInjection() throws Exception {
+   public void testMethodInjection() throws Exception
+   {
       InjectionPoint injectionPoint = new MethodInjectionPoint(SimpleObject.class.getDeclaredMethod("setSimpleProperty", String.class));
       Injector<Object> injector = InjectorFactory.create(injectionPoint, valueRetriever);
       injector.inject(simpleObject);
@@ -65,22 +68,26 @@ public class PojoInjectionTest {
    }
 
    @Test
-   public void testMethodInjectionInvalidMethod() throws Exception {
+   public void testMethodInjectionInvalidMethod() throws Exception
+   {
       Method method = SimpleObject.class.getDeclaredMethod("getSimpleProperty");
-      try {
+      try
+      {
          new MethodInjectionPoint(method);
          Assert.fail("Should not be able to create a MethodInjectionPoint for a not setter method");
-      } catch(AssertionError expected) {
+      } catch(AssertionError expected)
+      {
       }
    }
 
    @Test
-   public void testInjectionPointReuse() throws Exception {
+   public void testInjectionPointReuse() throws Exception
+   {
       // Setup common injection point and injector
       Field simpleField = SimpleObject.class.getDeclaredField("simpleProperty");
       InjectionPoint injectionPoint = new FieldInjectionPoint(simpleField);
 
-      
+
       // Reuse same injection point for multiple targets
       Injector<Object> injector = InjectorFactory.create(injectionPoint, new SimpleValueRetriever("Test Value One"));
       injector.inject(simpleObject);

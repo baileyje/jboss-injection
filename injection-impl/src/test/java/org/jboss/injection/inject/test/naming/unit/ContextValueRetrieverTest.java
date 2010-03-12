@@ -35,12 +35,14 @@ import org.junit.Test;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ContextValueRetrieverTest extends AbstractNamingTestCase {
+public class ContextValueRetrieverTest extends AbstractNamingTestCase
+{
 
    private SimpleObject simpleObject = new SimpleObject();
 
    @Test
-   public void testJndiInjection() throws Exception {
+   public void testJndiInjection() throws Exception
+   {
       context.rebind("java:test", "Test Value");
       FieldInjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
 

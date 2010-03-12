@@ -27,7 +27,8 @@ package org.jboss.injection.inject.spi;
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <T> The target object type
  */
-public interface Injector<T> {
+public interface Injector<T>
+{
 
    /**
     * Performs the injection

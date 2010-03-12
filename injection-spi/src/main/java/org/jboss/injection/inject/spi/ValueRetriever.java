@@ -27,7 +27,8 @@ package org.jboss.injection.inject.spi;
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <V> The type of value returned
  */
-public interface ValueRetriever<V> {
+public interface ValueRetriever<V>
+{
    /**
     * Retrieve the actual value
     *

@@ -29,13 +29,14 @@ package org.jboss.injection.inject.spi;
  * @param <T> The target object type
  * @param <V> The injected value type
  */
-public interface InjectionPoint<T, V> {
+public interface InjectionPoint<T, V>
+{
 
    /**
     * Set the value on the target at this injection point.
     *
     * @param target The target object receiving the injection
-    * @param value The value being injected at this injection point
+    * @param value  The value being injected at this injection point
     */
    void set(T target, V value);
 }

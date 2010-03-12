@@ -29,35 +29,44 @@ import java.lang.reflect.Method;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class MethodInjectionPoint extends AbstractAccessibleObjectBeanProperty<Method> {
+public class MethodInjectionPoint extends AbstractAccessibleObjectBeanProperty<Method>
+{
 
    /**
     * Constructs a new instance with the provided method.
     *
     * @param method The method used for injection
     */
-   public MethodInjectionPoint(final Method method) {
+   public MethodInjectionPoint(final Method method)
+   {
       super(method);
       assert method.getReturnType() == Void.TYPE;
       assert method.getParameterTypes().length == 1;
       assert method.getName().startsWith("set");
    }
 
-   /**{@inheritDoc} */
-   public void set(final Object target, final Object value) {
+   /**
+    * {@inheritDoc}
+    */
+   public void set(final Object target, final Object value)
+   {
       Method method = getAccessibleObject();
       Object args[] = {value};
-      try {
+      try
+      {
          method.invoke(target, args);
       }
-      catch(IllegalAccessException e) {
+      catch(IllegalAccessException e)
+      {
          throw new RuntimeException(e);
       }
-      catch(IllegalArgumentException e) {
+      catch(IllegalArgumentException e)
+      {
          String msg = "failed to set value " + value + " with setter " + method;
          throw new IllegalArgumentException(msg);
       }
-      catch(InvocationTargetException e) {
+      catch(InvocationTargetException e)
+      {
          Throwable cause = e.getCause();
          if(cause instanceof Error)
             throw (Error) cause;

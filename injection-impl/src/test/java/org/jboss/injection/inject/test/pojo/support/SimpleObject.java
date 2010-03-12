@@ -26,14 +26,17 @@ package org.jboss.injection.inject.test.pojo.support;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class SimpleObject {
-    private String simpleProperty;
+public class SimpleObject
+{
+   private String simpleProperty;
 
-    public String getSimpleProperty() {
-        return simpleProperty;
-    }
+   public String getSimpleProperty()
+   {
+      return simpleProperty;
+   }
 
-    public void setSimpleProperty(final String simpleProperty) {
-        this.simpleProperty = simpleProperty;
-    }
+   public void setSimpleProperty(final String simpleProperty)
+   {
+      this.simpleProperty = simpleProperty;
+   }
 }

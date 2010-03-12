@@ -28,14 +28,17 @@ import org.jboss.injection.inject.spi.ValueRetriever;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class SimpleValueRetriever<V> implements ValueRetriever<V> {
+public class SimpleValueRetriever<V> implements ValueRetriever<V>
+{
    private final V value;
 
-   public SimpleValueRetriever(final V value) {
+   public SimpleValueRetriever(final V value)
+   {
       this.value = value;
    }
 
-   public V getValue() {
+   public V getValue()
+   {
       return value;
    }
 }

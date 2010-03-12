@@ -31,24 +31,28 @@ import org.jboss.injection.resolve.spi.ResolverResult;
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
-public class PassThroughResolver<M> implements Resolver<M, DeploymentUnit> {
+public class PassThroughResolver<M> implements Resolver<M, DeploymentUnit>
+{
    private final Class<M> metaDataType;
    private final String beanName;
    private final String globalJndiName;
    private final String encJndiName;
 
-   public PassThroughResolver(Class<M> metaDataType, final String beanName, final String globalJndiName, final String encJndiName) {
+   public PassThroughResolver(Class<M> metaDataType, final String beanName, final String globalJndiName, final String encJndiName)
+   {
       this.metaDataType = metaDataType;
       this.beanName = beanName;
       this.globalJndiName = globalJndiName;
       this.encJndiName = encJndiName;
    }
 
-   public Class<M> getMetaDataType() {
+   public Class<M> getMetaDataType()
+   {
       return metaDataType;
    }
 
-   public ResolverResult resolve(DeploymentUnit unit, final Object metaData) {
+   public ResolverResult resolve(DeploymentUnit unit, final Object metaData)
+   {
       if(unit == null)
          throw new IllegalArgumentException("unit is null");
       return new ResolverResult(globalJndiName, encJndiName, beanName);

@@ -30,13 +30,13 @@
         <module>resolver-impl</module>
         <module>switchboard-deployer</module>
     </modules>
-        
+
     <!-- Dependency Versions -->
     <properties>
         <version.jboss.classloading>2.2.0.Alpha3</version.jboss.classloading>
         <version.jboss.deployers>2.2.0.Alpha3</version.jboss.deployers>
         <version.jboss.kernel>2.2.0.Alpha3</version.jboss.kernel>
-        <version.jboss.metadata.common>2.0.0.Alpha12</version.jboss.metadata.common>
+        <version.jboss.metadata.common>2.0.0.Alpha14</version.jboss.metadata.common>
         <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
         <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
         <version.jboss.naming>5.0.1.GA</version.jboss.naming>

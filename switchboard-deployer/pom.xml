@@ -22,6 +22,12 @@
     <url>http://www.jboss.org</url>
     <description>JBoss SwitchBoard Deployer</description>
 
+    <!-- Component Versions -->
+    <properties>
+        <version.jboss.metadata.ejb>2.0.0-alpha-7</version.jboss.metadata.ejb>
+        <version.mockito>1.8.1</version.mockito>
+    </properties>
+
     <dependencies>
         <!-- Compile Dependencies -->
         <dependency>
@@ -29,7 +35,7 @@
             <artifactId>jboss-injection-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.jboss.injection</groupId>
             <artifactId>jboss-injection-impl</artifactId>
@@ -82,6 +88,12 @@
             <groupId>org.jboss.metadata</groupId>
             <artifactId>jboss-metadata-common</artifactId>
             <version>${version.jboss.metadata.common}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.metadata</groupId>
+            <artifactId>jboss-metadata-ejb</artifactId>
+            <version>${version.jboss.metadata.ejb}</version>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -143,6 +155,13 @@
             <groupId>org.jboss</groupId>
             <artifactId>jboss-mdr</artifactId>
             <version>${version.jboss.mdr}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${version.mockito}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

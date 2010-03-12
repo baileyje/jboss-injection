@@ -30,18 +30,20 @@ import org.jboss.injection.inject.spi.ValueRetriever;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class InjectorFactory {
+public class InjectorFactory
+{
 
    /**
     * Create an Injection with the required components.
     *
     * @param injectionPoint The injection point to inject the value
     * @param valueRetriever Value retriever responsible for getting the value to inject
-    * @param <T> The injection target type
-    * @param <V> The injection value type
+    * @param <T>            The injection target type
+    * @param <V>            The injection value type
     * @return An injector that can inject into the target type
     */
-   public static <T, V> Injector<T> create(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever) {
+   public static <T, V> Injector<T> create(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
+   {
       return new DefaultInjector<T, V>(injectionPoint, valueRetriever);
    }
 }

@@ -37,10 +37,12 @@ import javax.naming.LinkRef;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ContextInjectionTest extends AbstractNamingTestCase {
+public class ContextInjectionTest extends AbstractNamingTestCase
+{
 
    @Test
-   public void testEncInjection() throws Exception {
+   public void testEncInjection() throws Exception
+   {
       Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<String>("java:test"), new SimpleValueRetriever("Test Value"));
 
       injector.inject(context);
@@ -49,7 +51,8 @@ public class ContextInjectionTest extends AbstractNamingTestCase {
    }
 
    @Test
-   public void testEncLinkInjection() throws Exception {
+   public void testEncLinkInjection() throws Exception
+   {
       context.rebind("java:test", "Test Value");
 
       Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<LinkRef>("java:comp/test"), new LinkRefValueRetriever("java:test"));

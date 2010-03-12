@@ -28,5 +28,6 @@ import org.jboss.injection.inject.spi.InjectionPoint;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public interface PojoInjectionPoint extends InjectionPoint<Object, Object> {
+public interface PojoInjectionPoint extends InjectionPoint<Object, Object>
+{
 }

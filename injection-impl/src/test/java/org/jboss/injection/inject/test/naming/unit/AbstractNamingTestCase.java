@@ -40,14 +40,16 @@ import java.util.List;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public abstract class AbstractNamingTestCase {
+public abstract class AbstractNamingTestCase
+{
 
    protected Context context;
 
    protected static MCServer server;
 
    @BeforeClass
-   public static void setupServer() throws Exception {
+   public static void setupServer() throws Exception
+   {
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
       server = MCServerFactory.createServer(classLoader);
@@ -58,29 +60,36 @@ public abstract class AbstractNamingTestCase {
 
       ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
       Thread.currentThread().setContextClassLoader(classLoader);
-      try {
+      try
+      {
          server.start();
       }
-      finally {
+      finally
+      {
          Thread.currentThread().setContextClassLoader(oldClassLoader);
       }
    }
 
    @Before
-   public void initializeContext() throws Exception {
+   public void initializeContext() throws Exception
+   {
       context = new InitialContext();
    }
 
-   protected void assertContextValue(String jndiName, Object value) throws Exception {
+   protected void assertContextValue(String jndiName, Object value) throws Exception
+   {
       String actual = (String) context.lookup(jndiName);
       Assert.assertEquals(value, actual);
    }
 
-   protected void assertNameNotFound(String name) {
-      try {
+   protected void assertNameNotFound(String name)
+   {
+      try
+      {
          context.lookup(name);
          Assert.fail("The name should not be found in the context: " + name);
-      } catch(NamingException expected) {
+      } catch(NamingException expected)
+      {
       }
    }
 

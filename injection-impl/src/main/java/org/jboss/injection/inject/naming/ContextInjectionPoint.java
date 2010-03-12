@@ -27,12 +27,13 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 /**
- * InjectionPoint instance capable of injecting a value into a Context  
+ * InjectionPoint instance capable of injecting a value into a Context
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <V> The type of the object being injected
  */
-public class ContextInjectionPoint<V> implements InjectionPoint<Context, V> {
+public class ContextInjectionPoint<V> implements InjectionPoint<Context, V>
+{
 
    private final String jndiName;
 
@@ -41,16 +42,22 @@ public class ContextInjectionPoint<V> implements InjectionPoint<Context, V> {
     *
     * @param jndiName The jndi name to use when injecting into the context
     */
-   public ContextInjectionPoint(final String jndiName) {
+   public ContextInjectionPoint(final String jndiName)
+   {
       if(jndiName == null) throw new IllegalArgumentException("JNDI name can not be null");
       this.jndiName = jndiName;
    }
 
-   /** {@inheritDoc} */
-   public void set(final Context context, final V value) {
-      try {
+   /**
+    * {@inheritDoc}
+    */
+   public void set(final Context context, final V value)
+   {
+      try
+      {
          context.bind(jndiName, value);
-      } catch(NamingException e) {
+      } catch(NamingException e)
+      {
          throw new RuntimeException("Failed to bind value [" + value + "] into context [" + context + "] with jndi name [" + jndiName + "]");
       }
    }

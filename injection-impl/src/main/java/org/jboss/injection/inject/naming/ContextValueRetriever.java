@@ -32,31 +32,38 @@ import javax.naming.NamingException;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ContextValueRetriever<M> implements ValueRetriever<Object> {
+public class ContextValueRetriever<M> implements ValueRetriever<Object>
+{
 
    private Context context;
    private final String jndiName;
 
-   public ContextValueRetriever(String jndiName) {
+   public ContextValueRetriever(String jndiName)
+   {
       this(null, jndiName);
    }
 
-   public ContextValueRetriever(final Context context, String jndiName) {
+   public ContextValueRetriever(final Context context, String jndiName)
+   {
       this.context = context;
       this.jndiName = jndiName;
    }
 
-   public Object getValue() {
+   public Object getValue()
+   {
       return lookup(jndiName);
    }
 
-   protected Object lookup(final String jndiName) {
+   protected Object lookup(final String jndiName)
+   {
       Object dependency = null;
-      try {
+      try
+      {
          final Context context = getContext();
          dependency = context.lookup(jndiName);
       }
-      catch(NamingException e) {
+      catch(NamingException e)
+      {
          Throwable cause = e;
          while(cause.getCause() != null)
             cause = cause.getCause();
@@ -65,7 +72,8 @@ public class ContextValueRetriever<M> implements ValueRetriever<Object> {
       return dependency;
    }
 
-   private Context getContext() throws NamingException {
+   private Context getContext() throws NamingException
+   {
       if(context == null)
          context = new InitialContext();
       return context;

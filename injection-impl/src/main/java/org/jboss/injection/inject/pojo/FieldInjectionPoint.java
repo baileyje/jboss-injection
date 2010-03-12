@@ -28,29 +28,35 @@ import java.lang.reflect.Field;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class FieldInjectionPoint extends AbstractAccessibleObjectBeanProperty<Field> {
+public class FieldInjectionPoint extends AbstractAccessibleObjectBeanProperty<Field>
+{
 
    /**
     * Constructs a new instance with the provided method.
     *
     * @param field The field used for injection
     */
-   public FieldInjectionPoint(final Field field) {
+   public FieldInjectionPoint(final Field field)
+   {
       super(field);
    }
 
    /**
     * {@inheritDoc}
     */
-   public void set(final Object target, final Object value) {
+   public void set(final Object target, final Object value)
+   {
       Field field = getAccessibleObject();
-      try {
+      try
+      {
          field.set(target, value);
       }
-      catch(IllegalAccessException e) {
+      catch(IllegalAccessException e)
+      {
          throw new RuntimeException(e);
       }
-      catch(IllegalArgumentException e) {
+      catch(IllegalArgumentException e)
+      {
          String msg = "failed to set value " + value + " on field " + field;
 
          // Help out with the error message; let the developer know if the
@@ -59,7 +65,8 @@ public class FieldInjectionPoint extends AbstractAccessibleObjectBeanProperty<Fi
          ClassLoader valueLoader = value.getClass().getClassLoader();
          // Equal if both are null (some JDKs use this to represent Bootstrap CL), or they're equal - EJBTHREE-1694
          boolean equalLoaders = (fieldLoader == null && valueLoader == null) ? true : fieldLoader.equals(valueLoader);
-         if(!equalLoaders) {
+         if(!equalLoaders)
+         {
             msg = msg + "; Reason: ClassLoaders of value and target are not equal";
 
          }

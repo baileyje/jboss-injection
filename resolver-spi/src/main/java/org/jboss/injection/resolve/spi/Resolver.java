@@ -22,15 +22,16 @@
 package org.jboss.injection.resolve.spi;
 
 /**
- * Resolves a JNDI name and MC Bean name from the provided dependency metadata. 
- *
+ * Resolves a JNDI name and MC Bean name from the provided dependency metadata.
+ * <p/>
  * M the meta data class
  * C the context in which to resolve (usually DeploymentUnit)
- * 
+ *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <M> The required metadata type
  */
-public interface Resolver<M, C> {
+public interface Resolver<M, C>
+{
    /**
     * Return the type of metaData that can be resolved.
     *
@@ -44,7 +45,7 @@ public interface Resolver<M, C> {
     * that is responsible for ensuring the dependency is bound into
     * JNDI.
     *
-    * @param context The resolving context (usually DeploymentUnit)
+    * @param context  The resolving context (usually DeploymentUnit)
     * @param metaData The metadata referencing a dependency
     * @return The ResolverResult
     */

@@ -28,14 +28,17 @@ import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOperatorDeployerTestCase<JBossEnterpriseBeanMetaData> {
+public class EJBSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOperatorDeployerTestCase<JBossEnterpriseBeanMetaData>
+{
    @Override
-   protected Class<JBossEnterpriseBeanMetaData> getMetaDataType() {
+   protected Class<JBossEnterpriseBeanMetaData> getMetaDataType()
+   {
       return JBossEnterpriseBeanMetaData.class;
    }
 
    @Override
-   protected SwitchBoardOperatorDeployer<JBossEnterpriseBeanMetaData> getDeployer() {
+   protected SwitchBoardOperatorDeployer<JBossEnterpriseBeanMetaData> getDeployer()
+   {
       return new EJBSwitchBoardOperatorDeployer();
    }
 }

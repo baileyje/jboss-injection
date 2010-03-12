@@ -32,29 +32,35 @@ import org.jboss.injection.inject.spi.ValueRetriever;
  * @param <T> The target object type
  * @param <V> The injected value type
  */
-public class DefaultInjector<T, V> implements Injector<T> {
+public class DefaultInjector<T, V> implements Injector<T>
+{
 
    private InjectionPoint<T, V> injectionPoint;
    private ValueRetriever<V> valueRetriever;
 
    /**
     * Create a new Injector with an injection point and value retriever
-    * 
+    *
     * @param injectionPoint
     * @param valueRetriever
     */
-   public DefaultInjector(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever) {
+   public DefaultInjector(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
+   {
       this.injectionPoint = injectionPoint;
       this.valueRetriever = valueRetriever;
    }
 
-   /** {@inheritDoc} */
-   public void inject(final T target) {
+   /**
+    * {@inheritDoc}
+    */
+   public void inject(final T target)
+   {
       final V vaue = getValue();
       injectionPoint.set(target, vaue);
    }
 
-   protected V getValue() {
+   protected V getValue()
+   {
       return valueRetriever.getValue();
    }
 }

@@ -60,10 +60,12 @@ import static org.mockito.Mockito.mock;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EnvironmentProcessorTest {
+public class EnvironmentProcessorTest
+{
 
    @Test
-   public void testResolverMatching() throws Exception {
+   public void testResolverMatching() throws Exception
+   {
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
 
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
@@ -76,10 +78,13 @@ public class EnvironmentProcessorTest {
 
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
 
-      try {
+      try
+      {
          processor.process(environment);
          Assert.fail("Should throw exception if no Resolver can be found");
-      } catch(IllegalStateException expected){}  
+      } catch(IllegalStateException expected)
+      {
+      }
 
       processor.addResolver(new PassThroughResolver<EJBReferenceMetaData>(EJBReferenceMetaData.class, "testBean", "java:testBean", "java:comp/testBean"));
 
@@ -92,103 +97,128 @@ public class EnvironmentProcessorTest {
       Assert.assertEquals("java:testBean", results.get(0).getJndiName());
    }
 
-   private static class MockEnvironment implements Environment {
+   private static class MockEnvironment implements Environment
+   {
 
       private final EJBReferencesMetaData ejbReferencesMetaData;
 
-      private MockEnvironment(final EJBReferencesMetaData ejbReferencesMetaData) {
+      private MockEnvironment(final EJBReferencesMetaData ejbReferencesMetaData)
+      {
          this.ejbReferencesMetaData = ejbReferencesMetaData;
       }
 
-      public DataSourceMetaData getDataSourceByName(final String name) {
+      public DataSourceMetaData getDataSourceByName(final String name)
+      {
          return null;
       }
 
-      public EJBLocalReferencesMetaData getEjbLocalReferences() {
+      public EJBLocalReferencesMetaData getEjbLocalReferences()
+      {
          return null;
       }
 
-      public EJBLocalReferenceMetaData getEjbLocalReferenceByName(final String name) {
+      public EJBLocalReferenceMetaData getEjbLocalReferenceByName(final String name)
+      {
          return null;
       }
 
-      public PersistenceContextReferencesMetaData getPersistenceContextRefs() {
+      public PersistenceContextReferencesMetaData getPersistenceContextRefs()
+      {
          return null;
       }
 
-      public PersistenceContextReferenceMetaData getPersistenceContextReferenceByName(final String name) {
+      public PersistenceContextReferenceMetaData getPersistenceContextReferenceByName(final String name)
+      {
          return null;
       }
 
-      public DataSourcesMetaData getDataSources() {
+      public DataSourcesMetaData getDataSources()
+      {
          return null;
       }
 
-      public EnvironmentEntriesMetaData getEnvironmentEntries() {
+      public EnvironmentEntriesMetaData getEnvironmentEntries()
+      {
          return null;
       }
 
-      public EnvironmentEntryMetaData getEnvironmentEntryByName(final String name) {
+      public EnvironmentEntryMetaData getEnvironmentEntryByName(final String name)
+      {
          return null;
       }
 
-      public EJBReferencesMetaData getEjbReferences() {
+      public EJBReferencesMetaData getEjbReferences()
+      {
          return ejbReferencesMetaData;
       }
 
-      public AnnotatedEJBReferencesMetaData getAnnotatedEjbReferences() {
+      public AnnotatedEJBReferencesMetaData getAnnotatedEjbReferences()
+      {
          return null;
       }
 
-      public EJBReferenceMetaData getEjbReferenceByName(final String name) {
+      public EJBReferenceMetaData getEjbReferenceByName(final String name)
+      {
          return null;
       }
 
-      public ServiceReferencesMetaData getServiceReferences() {
+      public ServiceReferencesMetaData getServiceReferences()
+      {
          return null;
       }
 
-      public ServiceReferenceMetaData getServiceReferenceByName(final String name) {
+      public ServiceReferenceMetaData getServiceReferenceByName(final String name)
+      {
          return null;
       }
 
-      public ResourceReferencesMetaData getResourceReferences() {
+      public ResourceReferencesMetaData getResourceReferences()
+      {
          return null;
       }
 
-      public ResourceReferenceMetaData getResourceReferenceByName(final String name) {
+      public ResourceReferenceMetaData getResourceReferenceByName(final String name)
+      {
          return null;
       }
 
-      public ResourceEnvironmentReferencesMetaData getResourceEnvironmentReferences() {
+      public ResourceEnvironmentReferencesMetaData getResourceEnvironmentReferences()
+      {
          return null;
       }
 
-      public ResourceEnvironmentReferenceMetaData getResourceEnvironmentReferenceByName(final String name) {
+      public ResourceEnvironmentReferenceMetaData getResourceEnvironmentReferenceByName(final String name)
+      {
          return null;
       }
 
-      public MessageDestinationReferencesMetaData getMessageDestinationReferences() {
+      public MessageDestinationReferencesMetaData getMessageDestinationReferences()
+      {
          return null;
       }
 
-      public MessageDestinationReferenceMetaData getMessageDestinationReferenceByName(final String name) {
+      public MessageDestinationReferenceMetaData getMessageDestinationReferenceByName(final String name)
+      {
          return null;
       }
 
-      public LifecycleCallbacksMetaData getPostConstructs() {
+      public LifecycleCallbacksMetaData getPostConstructs()
+      {
          return null;
       }
 
-      public LifecycleCallbacksMetaData getPreDestroys() {
+      public LifecycleCallbacksMetaData getPreDestroys()
+      {
          return null;
       }
 
-      public PersistenceUnitReferencesMetaData getPersistenceUnitRefs() {
+      public PersistenceUnitReferencesMetaData getPersistenceUnitRefs()
+      {
          return null;
       }
 
-      public PersistenceUnitReferenceMetaData getPersistenceUnitReferenceByName(final String name) {
+      public PersistenceUnitReferenceMetaData getPersistenceUnitReferenceByName(final String name)
+      {
          return null;
       }
    }

@@ -37,10 +37,12 @@ import java.util.Arrays;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class SwitchBoardOperatorTest extends AbstractNamingTestCase {
+public class SwitchBoardOperatorTest extends AbstractNamingTestCase
+{
 
    @Test
-   public void testEncPopulator() throws Exception {
+   public void testEncPopulator() throws Exception
+   {
       Injector<Context> injectorOne = InjectorFactory.create(
          new ContextInjectionPoint<String>("java:testOne"),
          new SimpleValueRetriever("Test Value One"));

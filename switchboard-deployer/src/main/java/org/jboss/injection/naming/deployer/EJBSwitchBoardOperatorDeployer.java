@@ -19,38 +19,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.naming;
+package org.jboss.injection.naming.deployer;
 
-import org.jboss.injection.inject.spi.ValueRetriever;
-
-import javax.naming.LinkRef;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
+import org.jboss.metadata.javaee.spec.Environment;
 
 /**
- * ValueRetriever implementation which creates a LinkRef instances for a JNDI name.
+ * SwitchBoardOperatorDeployer implementation based on JBossEnterpriseBeanMetaData.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class LinkRefValueRetriever implements ValueRetriever<LinkRef>
+public class EJBSwitchBoardOperatorDeployer extends SwitchBoardOperatorDeployer<JBossEnterpriseBeanMetaData>
 {
 
-   private final String jndiName;
-
-   /**
-    * Construct a new LinkRefValueRetriever with a specific JNDI name.
-    *
-    * @param jndiName The JNDI name to link to
-    */
-   public LinkRefValueRetriever(final String jndiName)
+   public EJBSwitchBoardOperatorDeployer()
    {
-      this.jndiName = jndiName;
+      super(JBossEnterpriseBeanMetaData.class);
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public LinkRef getValue()
+   @Override
+   protected Environment getEnvironment(final JBossEnterpriseBeanMetaData deployment)
    {
-      // TODO: Look into ways to verify the jndi name points to a valid location.
-      return new LinkRef(jndiName);
+      return deployment;
    }
 }
