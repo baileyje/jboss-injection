@@ -20,13 +20,4 @@
     <name>JBoss Resolver SPI</name>
     <url>http://www.jboss.org</url>
     <description>Resolver SPI</description>
-        
-    <dependencies>
-        <!-- Compile Dependencies -->
-        <dependency>
-            <groupId>org.jboss.deployers</groupId>
-            <artifactId>jboss-deployers-structure-spi</artifactId>
-            <version>${version.jboss.deployers}</version>
-        </dependency>
-    </dependencies>
 </project>

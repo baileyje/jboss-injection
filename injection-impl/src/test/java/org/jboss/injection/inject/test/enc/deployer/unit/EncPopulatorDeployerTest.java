@@ -83,7 +83,7 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
    @Before
    public void deployMockResolver() throws Throwable {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("MockResolver", Resolver.class.getName());
-      Resolver<EJBReferenceMetaData> resolver = createMockResolver(EJBReferenceMetaData.class, new ResolverResult("java:test", "java:otherTest", "mc-bean-test"));
+      Resolver<EJBReferenceMetaData, DeploymentUnit> resolver = createMockResolver(EJBReferenceMetaData.class, new ResolverResult("java:test", "java:otherTest", "mc-bean-test"));
       builder.setConstructorValue(resolver);
       deployBean(builder.getBeanMetaData());
    }
@@ -185,14 +185,14 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
       undeploy(envDeployment, dependencyDeployment);
    }
 
-   private EnvironmentProcessor getEnvironmentProcessor() {
-      EnvironmentProcessor environmentProcessor = new EnvironmentProcessor();
+   private EnvironmentProcessor<DeploymentUnit> getEnvironmentProcessor() {
+      EnvironmentProcessor<DeploymentUnit> environmentProcessor = new EnvironmentProcessor<DeploymentUnit>();
       environmentProcessor.addResolver(createMockResolver(EJBReferenceMetaData.class, new ResolverResult("java:test", "java:otherTest", "mc-bean-test")));
       return environmentProcessor;
    }
 
-   private <M> Resolver<M> createMockResolver(final Class<M> type, final ResolverResult defaultResult) {
-      return new Resolver<M>() {
+   private <M> Resolver<M, DeploymentUnit> createMockResolver(final Class<M> type, final ResolverResult defaultResult) {
+      return new Resolver<M, DeploymentUnit>() {
          public Class<M> getMetaDataType() {
             return type;
          }

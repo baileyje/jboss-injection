@@ -21,6 +21,7 @@
  */
 package org.jboss.injection.resolve.test.unit;
 
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.enc.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.injection.resolve.test.support.PassThroughResolver;
@@ -52,6 +53,8 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * Test to ensure the functionality of the EnvironmentProcessor
  *
@@ -71,7 +74,7 @@ public class EnvironmentProcessorTest {
       Environment environment = new MockEnvironment(referencesMetaData);
 
 
-      EnvironmentProcessor processor = new EnvironmentProcessor();
+      EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
 
       try {
          processor.process(environment);
@@ -80,7 +83,9 @@ public class EnvironmentProcessorTest {
 
       processor.addResolver(new PassThroughResolver<EJBReferenceMetaData>(EJBReferenceMetaData.class, "testBean", "java:testBean", "java:comp/testBean"));
 
-      List<ResolverResult> results = processor.process(environment);
+      DeploymentUnit unit = mock(DeploymentUnit.class);
+
+      List<ResolverResult> results = processor.process(unit, environment);
       Assert.assertNotNull(results);
       Assert.assertEquals(1, results.size());
       Assert.assertEquals("testBean", results.get(0).getBeanName());

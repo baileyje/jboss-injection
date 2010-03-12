@@ -43,18 +43,20 @@ import java.util.Map;
  * Process an {@link Environment} instance and creates all the {@link ResolverResult}
  * instances for all references that can be resolved.
  *
+ * C is the resolving context (usually DeploymentUnit)
+ * 
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EnvironmentProcessor {
+public class EnvironmentProcessor<C> {
 
-   public Map<Class<?>, Resolver<?>> resolvers;
+   public Map<Class<?>, Resolver<?, C>> resolvers;
 
    /**
     * Construct a new processor.  There will be no resolvers available.
     *
     */
    public EnvironmentProcessor() {
-      this(new HashMap<Class<?>, Resolver<?>>());
+      this(new HashMap<Class<?>, Resolver<?, C>>());
    }
 
    /**
@@ -62,7 +64,7 @@ public class EnvironmentProcessor {
     *
     * @param resolvers A map from class to Resolver
     */
-   public EnvironmentProcessor(final Map<Class<?>, Resolver<?>> resolvers) {
+   public EnvironmentProcessor(final Map<Class<?>, Resolver<?, C>> resolvers) {
       this.resolvers = resolvers;
    }
 
@@ -71,52 +73,68 @@ public class EnvironmentProcessor {
     *
     * @param environment An Environment to process references for
     * @return The resolver results
+    * @deprecated specifying a context will become mandatory
     */
+   @Deprecated
    public List<ResolverResult> process(Environment environment) {
+      return process(null, environment);
+   }
+
+   /**
+    * Processes the Environment and returns the resolver results.
+    *
+    * @param context the context in which to resolve (usually DeploymentUnit)
+    * @param environment An Environment to process references for
+    * @return The resolver results
+    */
+   public List<ResolverResult> process(C context, Environment environment) {
       final List<ResolverResult> results = new LinkedList<ResolverResult>();
+
+      // TODO: configurable via visitors
       // references
-      process(environment.getEjbLocalReferences(), EJBLocalReferenceMetaData.class, results);
-      process(environment.getEjbReferences(), EJBReferenceMetaData.class, results);
-      process(environment.getEnvironmentEntries(), EnvironmentEntryMetaData.class, results);
-      process(environment.getMessageDestinationReferences(), MessageDestinationReferenceMetaData.class, results);
-      process(environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, results);
-      process(environment.getResourceReferences(), ResourceReferenceMetaData.class, results);
-      process(environment.getResourceEnvironmentReferences(), ResourceEnvironmentReferenceMetaData.class, results);
-      process(environment.getServiceReferences(), ServiceReferenceMetaData.class, results);
+      process(context, environment.getEjbLocalReferences(), EJBLocalReferenceMetaData.class, results);
+      process(context, environment.getEjbReferences(), EJBReferenceMetaData.class, results);
+      process(context, environment.getEnvironmentEntries(), EnvironmentEntryMetaData.class, results);
+      process(context, environment.getMessageDestinationReferences(), MessageDestinationReferenceMetaData.class, results);
+      process(context, environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, results);
+      process(context, environment.getResourceReferences(), ResourceReferenceMetaData.class, results);
+      process(context, environment.getResourceEnvironmentReferences(), ResourceEnvironmentReferenceMetaData.class, results);
+      process(context, environment.getServiceReferences(), ServiceReferenceMetaData.class, results);
 
       // TODO: data sources
       // environment.getDataSources()
       return results;
    }
 
-   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(M references, Class<T> childType, List<ResolverResult> results) {
+   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(C context, M references, Class<T> childType, List<ResolverResult> results) {
       if(references == null)
          return;
       for(T reference : references) {
-         process(reference, childType, results);
+         process(context, reference, childType, results);
       }
    }
 
-   protected <M extends ResourceInjectionMetaData> void process(M reference, Class<M> referenceType, List<ResolverResult> results) {
+   protected <M extends ResourceInjectionMetaData> void process(C context, M reference, Class<M> referenceType, List<ResolverResult> results) {
       if(reference == null)
          return;
 
-      final Resolver<M> resolver = getResolver(referenceType);
+      final Resolver<M, C> resolver = getResolver(referenceType);
 
       if(resolver == null)
          throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + reference + "]");
 
-      final ResolverResult result = resolver.resolve(null, reference);
+      final ResolverResult result = resolver.resolve(context, reference);
       if(result != null) {
          results.add(result);
       }
    }
 
-   protected <M> Resolver<M> getResolver(Class<M> metaDataType) {
-      return (Resolver<M>) resolvers.get(metaDataType);
+   @SuppressWarnings("unchecked")
+   protected <M> Resolver<M, C> getResolver(Class<M> metaDataType) {
+      return (Resolver<M, C>) resolvers.get(metaDataType);
    }
 
-   public void addResolver(Resolver<?> resolver) {
+   public void addResolver(Resolver<?, C> resolver) {
       Class<?> metaDataType = resolver.getMetaDataType();
       resolvers.put(metaDataType, resolver);
    }
