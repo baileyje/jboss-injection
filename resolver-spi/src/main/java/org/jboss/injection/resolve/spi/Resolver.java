@@ -22,7 +22,6 @@
 package org.jboss.injection.resolve.spi;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.resolve.spi.ResolverResult;
 
 /**
  * Resolves a JNDI name and MC Bean name from the provided dependency metadata. 
@@ -31,6 +30,10 @@ import org.jboss.injection.resolve.spi.ResolverResult;
  * @param <M> The required metadata type
  */
 public interface Resolver<M> {
+   /**
+    * Return the type of metaData that can be resolved.
+    */
+   Class<M> getMetaDataType();
 
    /**
     * This method takes the provided metadata and determines the

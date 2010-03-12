@@ -31,7 +31,7 @@ import org.jboss.injection.resolve.spi.ResolverResult;
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
-public class PassThroughResolver<M> implements Resolver<M> {
+public abstract class PassThroughResolver<M> implements Resolver<M> {
 
    private final String beanName;
    private final String jndiName;

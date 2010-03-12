@@ -51,7 +51,6 @@ import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +82,12 @@ public class EnvironmentProcessorTest {
          Assert.fail("Should throw exception if no Resolver can be found");
       } catch(IllegalStateException expected){}  
 
-      resolvers.put(EJBReferenceMetaData.class, new PassThroughResolver<EJBReferenceMetaData>("testBean", "java:testBean"));
+      resolvers.put(EJBReferenceMetaData.class, new PassThroughResolver<EJBReferenceMetaData>("testBean", "java:testBean") {
+         public Class<EJBReferenceMetaData> getMetaDataType()
+         {
+            return EJBReferenceMetaData.class;
+         }
+      });
 
       List<ResolverResult> results = processor.process(environment);
       Assert.assertNotNull(results);

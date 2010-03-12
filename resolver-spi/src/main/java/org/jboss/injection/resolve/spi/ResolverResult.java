@@ -26,18 +26,39 @@ package org.jboss.injection.resolve.spi;
  *
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  */
-public interface ResolverResult {
+public class ResolverResult {
+   private String jndiName;
+   private String beanName;
+
+   @Deprecated
+   protected ResolverResult()
+   {
+
+   }
+   
+   public ResolverResult(String jndiName, String beanName)
+   {
+      this.jndiName = jndiName;
+      this.beanName = beanName;
+   }
+
    /**
     * Get the resolved global JNDI entry for a component.
     *
     * @return The JNDI name
     */
-   String getJndiName();
+   public String getJndiName()
+   {
+      return jndiName;
+   }
 
    /**
     * Get the resolved MC bean name that will be binding the component into JNDI.
     *
     * @return The MC bean name
     */
-   String getBeanName();
+   public String getBeanName()
+   {
+      return beanName;
+   }
 }
