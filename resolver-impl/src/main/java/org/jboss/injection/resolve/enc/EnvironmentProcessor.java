@@ -23,14 +23,16 @@ package org.jboss.injection.resolve.enc;
 
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
-import org.jboss.metadata.javaee.spec.AbstractEJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBLocalReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBLocalReferencesMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
+import org.jboss.metadata.javaee.spec.MessageDestinationReferenceMetaData;
 import org.jboss.metadata.javaee.spec.PersistenceUnitReferenceMetaData;
+import org.jboss.metadata.javaee.spec.ResourceEnvironmentReferenceMetaData;
+import org.jboss.metadata.javaee.spec.ResourceInjectionMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
+import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -48,7 +50,7 @@ public class EnvironmentProcessor {
    public Map<Class<?>, Resolver<?>> resolvers;
 
    /**
-    * Construct a new processor.  There will be no resolvers available.  
+    * Construct a new processor.  There will be no resolvers available.
     *
     */
    public EnvironmentProcessor() {
@@ -72,13 +74,22 @@ public class EnvironmentProcessor {
     */
    public List<ResolverResult> process(Environment environment) {
       final List<ResolverResult> results = new LinkedList<ResolverResult>();
+      // references
+      process(environment.getEjbLocalReferences(), EJBLocalReferenceMetaData.class, results);
       process(environment.getEjbReferences(), EJBReferenceMetaData.class, results);
+      process(environment.getEnvironmentEntries(), EnvironmentEntryMetaData.class, results);
+      process(environment.getMessageDestinationReferences(), MessageDestinationReferenceMetaData.class, results);
       process(environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, results);
       process(environment.getResourceReferences(), ResourceReferenceMetaData.class, results);
+      process(environment.getResourceEnvironmentReferences(), ResourceEnvironmentReferenceMetaData.class, results);
+      process(environment.getServiceReferences(), ServiceReferenceMetaData.class, results);
+
+      // TODO: data sources
+      // environment.getDataSources()
       return results;
    }
 
-   protected <M extends Iterable<T>, T> void process(M references, Class<T> childType, List<ResolverResult> results) {
+   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(M references, Class<T> childType, List<ResolverResult> results) {
       if(references == null)
          return;
       for(T reference : references) {
@@ -86,7 +97,7 @@ public class EnvironmentProcessor {
       }
    }
 
-   protected <M> void process(M reference, Class<M> referenceType, List<ResolverResult> results) {
+   protected <M extends ResourceInjectionMetaData> void process(M reference, Class<M> referenceType, List<ResolverResult> results) {
       if(reference == null)
          return;
 
