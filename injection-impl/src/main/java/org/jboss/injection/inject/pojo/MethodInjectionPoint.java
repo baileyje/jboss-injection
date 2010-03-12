@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 /**
  * Provides a InjectionPoint representing a method.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class MethodInjectionPoint extends AbstractAccessibleObjectBeanProperty<Method> {
 

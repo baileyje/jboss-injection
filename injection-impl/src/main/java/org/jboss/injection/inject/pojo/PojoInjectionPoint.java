@@ -26,7 +26,7 @@ import org.jboss.injection.inject.spi.InjectionPoint;
 /**
  * Marker interface used to formalize the contract for POJO based injection.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public interface PojoInjectionPoint extends InjectionPoint<Object, Object> {
 }

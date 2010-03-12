@@ -24,10 +24,11 @@ package org.jboss.injection.resolve.spi;
 /**
  * The results of executing a Resolver.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class ResolverResult {
    private String jndiName;
+   private String refName;
    private String beanName;
 
    @Deprecated
@@ -36,16 +37,17 @@ public class ResolverResult {
 
    }
    
-   public ResolverResult(String jndiName, String beanName)
+   public ResolverResult(String jndiName, String refName, String beanName)
    {
       this.jndiName = jndiName;
+      this.refName = refName;
       this.beanName = beanName;
    }
 
    /**
     * Get the resolved global JNDI entry for a component.
     *
-    * @return The JNDI name
+    * @return The global JNDI name
     */
    public String getJndiName()
    {
@@ -60,5 +62,26 @@ public class ResolverResult {
    public String getBeanName()
    {
       return beanName;
+   }
+
+   @Deprecated
+   public String getEncJndiName()
+   {
+      return getRefName();
+   }
+
+   @Deprecated
+   public String getGlobalJndiName()
+   {
+      return getJndiName();
+   }
+
+   /**
+    * Get the reference name.
+    * Since a resolver knows the reference name, this allows polymorphic access.
+    */
+   public String getRefName()
+   {
+      return refName;
    }
 }

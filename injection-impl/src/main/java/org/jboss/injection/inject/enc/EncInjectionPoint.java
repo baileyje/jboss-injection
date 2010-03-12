@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.enc;
+package org.jboss.injection.inject.enc;
 
 import org.jboss.injection.inject.spi.InjectionPoint;
 
@@ -29,7 +29,7 @@ import javax.naming.NamingException;
 /**
  * InjectionPoint instance capable of injecting a value into a Context  
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <V> The type of the object being injected
  */
 public class EncInjectionPoint<V> implements InjectionPoint<Context, V> {

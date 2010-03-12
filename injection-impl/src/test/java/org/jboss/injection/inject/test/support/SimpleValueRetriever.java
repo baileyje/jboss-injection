@@ -26,7 +26,7 @@ import org.jboss.injection.inject.spi.ValueRetriever;
 /**
  * SimpleValueRetriever -
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class SimpleValueRetriever<V> implements ValueRetriever<V> {
    private final V value;

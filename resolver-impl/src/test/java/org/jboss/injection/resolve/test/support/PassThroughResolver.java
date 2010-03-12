@@ -28,28 +28,27 @@ import org.jboss.injection.resolve.spi.ResolverResult;
 /**
  * PassThroughResolver -
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
-public abstract class PassThroughResolver<M> implements Resolver<M> {
-
+public class PassThroughResolver<M> implements Resolver<M> {
+   private final Class<M> metaDataType;
    private final String beanName;
-   private final String jndiName;
+   private final String globalJndiName;
+   private final String encJndiName;
 
-   public PassThroughResolver(final String beanName, final String jndiName) {
+   public PassThroughResolver(Class<M> metaDataType, final String beanName, final String globalJndiName, final String encJndiName) {
+      this.metaDataType = metaDataType;
       this.beanName = beanName;
-      this.jndiName = jndiName;
+      this.globalJndiName = globalJndiName;
+      this.encJndiName = encJndiName;
    }
 
-   public ResolverResult resolve(DeploymentUnit unit, final M metaData) {
-      return new ResolverResult() {
-         public String getBeanName() {
-            return beanName;
-         }
+   public Class<M> getMetaDataType() {
+      return metaDataType;
+   }
 
-         public String getJndiName() {
-            return jndiName;
-         }
-      };
+   public ResolverResult resolve(DeploymentUnit unit, final Object metaData) {
+      return new ResolverResult(globalJndiName, encJndiName, beanName);
    }
 }

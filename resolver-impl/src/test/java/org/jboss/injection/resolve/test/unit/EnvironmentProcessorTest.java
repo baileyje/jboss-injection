@@ -22,7 +22,6 @@
 package org.jboss.injection.resolve.test.unit;
 
 import org.jboss.injection.resolve.enc.EnvironmentProcessor;
-import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.injection.resolve.test.support.PassThroughResolver;
 import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
@@ -51,14 +50,12 @@ import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test to ensure the functionality of the EnvironmentProcessor
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class EnvironmentProcessorTest {
 
@@ -73,21 +70,15 @@ public class EnvironmentProcessorTest {
 
       Environment environment = new MockEnvironment(referencesMetaData);
 
-      Map<Class<?>, Resolver<?>> resolvers = new HashMap<Class<?>, Resolver<?>>();
 
-      EnvironmentProcessor processor = new EnvironmentProcessor(resolvers);
+      EnvironmentProcessor processor = new EnvironmentProcessor();
 
       try {
          processor.process(environment);
          Assert.fail("Should throw exception if no Resolver can be found");
       } catch(IllegalStateException expected){}  
 
-      resolvers.put(EJBReferenceMetaData.class, new PassThroughResolver<EJBReferenceMetaData>("testBean", "java:testBean") {
-         public Class<EJBReferenceMetaData> getMetaDataType()
-         {
-            return EJBReferenceMetaData.class;
-         }
-      });
+      processor.addResolver(new PassThroughResolver<EJBReferenceMetaData>(EJBReferenceMetaData.class, "testBean", "java:testBean", "java:comp/testBean"));
 
       List<ResolverResult> results = processor.process(environment);
       Assert.assertNotNull(results);
@@ -196,5 +187,4 @@ public class EnvironmentProcessorTest {
          return null;
       }
    }
-
 }

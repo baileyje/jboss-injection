@@ -24,17 +24,22 @@ package org.jboss.injection.inject.jndi;
 import org.jboss.injection.inject.spi.ValueRetriever;
 
 import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
  * Value retriever used to get values from JNDI
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class JndiValueRetriever<M> implements ValueRetriever<Object> {
 
-   private final Context context;
+   private Context context;
    private final String jndiName;
+
+   public JndiValueRetriever(String jndiName) {
+      this(null, jndiName);
+   }
 
    public JndiValueRetriever(final Context context, String jndiName) {
       this.context = context;
@@ -42,13 +47,13 @@ public class JndiValueRetriever<M> implements ValueRetriever<Object> {
    }
 
    public Object getValue() {
-      Object value = lookup(jndiName);
-      return value;
+      return lookup(jndiName);
    }
 
    protected Object lookup(final String jndiName) {
       Object dependency = null;
       try {
+         final Context context = getContext();
          dependency = context.lookup(jndiName);
       }
       catch(NamingException e) {
@@ -58,5 +63,11 @@ public class JndiValueRetriever<M> implements ValueRetriever<Object> {
          throw new RuntimeException("Unable to lookup jndi value: " + jndiName + cause.getMessage(), e);
       }
       return dependency;
+   }
+
+   private Context getContext() throws NamingException {
+      if(context == null)
+         context = new InitialContext();
+      return context;
    }
 }

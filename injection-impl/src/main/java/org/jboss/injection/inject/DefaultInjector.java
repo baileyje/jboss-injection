@@ -28,7 +28,7 @@ import org.jboss.injection.inject.spi.ValueRetriever;
 /**
  * Default injector that performs the basic injection logic with parametrized types.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <T> The target object type
  * @param <V> The injected value type
  */

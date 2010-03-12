@@ -37,7 +37,7 @@ import java.lang.reflect.Field;
 /**
  * Basic test to verify injection facilities using pojo targets and JNDI retrieved values.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class JndiInjectionTest extends AbstractInjectionTestCase {
 

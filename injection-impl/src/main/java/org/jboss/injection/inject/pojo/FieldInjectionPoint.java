@@ -26,7 +26,7 @@ import java.lang.reflect.Field;
 /**
  * Provides a InjectionPoint representing a field.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class FieldInjectionPoint extends AbstractAccessibleObjectBeanProperty<Field> {
 

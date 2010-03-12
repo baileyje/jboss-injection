@@ -33,6 +33,7 @@
     <!-- Dependency Versions -->
     <properties>
         <version.jboss.deployers>2.2.0.Alpha3</version.jboss.deployers>
+        <version.jboss.kernel>2.2.0.Alpha3</version.jboss.kernel>
         <version.jboss.metadata.common>2.0.0.Alpha12</version.jboss.metadata.common>
         <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
         <version.jboss.logging>2.2.0.CR1</version.jboss.logging>

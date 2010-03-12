@@ -19,14 +19,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.test.unit;
+package org.jboss.injection.inject.test.enc.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.resolve.enc.EncInjectionPoint;
-import org.jboss.injection.resolve.enc.EncPopulator;
-import org.jboss.injection.resolve.enc.LinkRefValueRetriever;
+import org.jboss.injection.inject.test.unit.AbstractInjectionTestCase;
+import org.jboss.injection.inject.enc.EncInjectionPoint;
+import org.jboss.injection.inject.enc.EncPopulator;
+import org.jboss.injection.inject.enc.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.resolve.test.support.SimpleValueRetriever;
+import org.jboss.injection.inject.test.support.SimpleValueRetriever;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,16 +41,9 @@ import java.util.Arrays;
 /**
  * Basic test to verify EncInjection function as expected.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncInjectionTest extends AbstractResolverTestCase {
-
-   private Context context;
-
-   @Before
-   public void setUp() throws Exception {
-      context = new InitialContext();
-   }
+public class EncInjectionTest extends AbstractEncTestCase {
 
    @Test
    public void testEncInjection() throws Exception {
@@ -70,43 +64,5 @@ public class EncInjectionTest extends AbstractResolverTestCase {
       injector.inject(context);
 
       assertContextValue("java:comp/test", "Test Value");
-   }
-
-   @Test
-   public void testEncPopulator() throws Exception {
-      Injector<Context> injectorOne = InjectorFactory.create(
-            new EncInjectionPoint<String>("java:testOne"),
-            new SimpleValueRetriever("Test Value One"));
-      Injector<Context> injectorTwo = InjectorFactory.create(
-            new EncInjectionPoint<String>("java:testTwo"),
-            new SimpleValueRetriever("Test Value Two"));
-      Injector<Context> injectorThree = InjectorFactory.create(
-            new EncInjectionPoint<String>("java:testThree"),
-            new SimpleValueRetriever("Test Value Three"));
-
-      EncPopulator encPopulator = new EncPopulator(context, Arrays.asList(injectorOne, injectorTwo,injectorThree));
-
-      assertNameNotFound("java:testOne");
-      assertNameNotFound("java:testTwo");
-      assertNameNotFound("java:testThree");
-
-      encPopulator.start();
-
-      assertContextValue("java:testOne", "Test Value One");
-      assertContextValue("java:testTwo", "Test Value Two");
-      assertContextValue("java:testThree", "Test Value Three");
-   }
-
-   private void assertContextValue(String jndiName, Object value) throws Exception {
-      String actual = (String)context.lookup(jndiName);
-      Assert.assertEquals(value, actual);
-   }
-
-   private void assertNameNotFound(String name) {
-      try {
-         context.lookup(name);
-         Assert.fail("The name should not be found in the context: " + name);
-      } catch(NamingException expected) {
-      }
    }
 }

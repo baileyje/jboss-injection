@@ -28,7 +28,7 @@ import org.jboss.injection.inject.spi.ValueRetriever;
 /**
  * Create an Injector based on an InjectionPoint and a ValueRetriever
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class InjectorFactory {
 

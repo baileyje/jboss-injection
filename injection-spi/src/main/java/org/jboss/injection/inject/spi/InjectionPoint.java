@@ -25,7 +25,7 @@ package org.jboss.injection.inject.spi;
  * A location that an inject can occur.  This must be able to perform
  * the injection onto a specific target.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <T> The target object type
  * @param <V> The injected value type
  */
