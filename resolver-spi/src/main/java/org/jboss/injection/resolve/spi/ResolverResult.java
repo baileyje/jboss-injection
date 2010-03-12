@@ -31,12 +31,6 @@ public class ResolverResult {
    private String refName;
    private String beanName;
 
-   @Deprecated
-   protected ResolverResult()
-   {
-
-   }
-   
    public ResolverResult(String jndiName, String refName, String beanName)
    {
       this.jndiName = jndiName;
@@ -62,18 +56,6 @@ public class ResolverResult {
    public String getBeanName()
    {
       return beanName;
-   }
-
-   @Deprecated
-   public String getEncJndiName()
-   {
-      return getRefName();
-   }
-
-   @Deprecated
-   public String getGlobalJndiName()
-   {
-      return getJndiName();
    }
 
    /**

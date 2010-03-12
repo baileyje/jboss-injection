@@ -87,7 +87,7 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
    private EncPopulator createEncPopulator(final List<ResolverResult> resolverResults) {
       final List<Injector<Context>> injectors = new ArrayList<Injector<Context>>(resolverResults.size());
       for(ResolverResult resolverResult : resolverResults) {
-         final Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint(resolverResult.getEncJndiName()), new LinkRefValueRetriever(resolverResult.getGlobalJndiName()));
+         final Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint(resolverResult.getRefName()), new LinkRefValueRetriever(resolverResult.getJndiName()));
          injectors.add(injector);
       }
       return new EncPopulator(injectors);
