@@ -168,7 +168,6 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
       assertNameNotFound("java:otherTest");
       deploy(envDeployment, dependencyDeployment);
       assertContextValue("java:otherTest", "Test Value");
-      undeployBean("mc-bean-test");
       context.unbind("java:otherTest");
       undeploy(dependencyDeployment, envDeployment);
    }
@@ -181,7 +180,6 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
       assertNameNotFound("java:otherTest");
       deploy(envDeployment, dependencyDeployment);
       assertContextValue("java:otherTest", "Test Value");
-      undeployBean("mc-bean-test");
       context.unbind("java:otherTest");
       undeploy(envDeployment, dependencyDeployment);
    }
