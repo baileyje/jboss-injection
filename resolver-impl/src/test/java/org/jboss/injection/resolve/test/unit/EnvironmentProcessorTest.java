@@ -21,8 +21,8 @@
  */
 package org.jboss.injection.resolve.test.unit;
 
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.enc.EnvironmentProcessor;
-import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.injection.resolve.test.support.PassThroughResolver;
 import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
@@ -51,10 +51,9 @@ import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Test to ensure the functionality of the EnvironmentProcessor
@@ -75,7 +74,7 @@ public class EnvironmentProcessorTest {
       Environment environment = new MockEnvironment(referencesMetaData);
 
 
-      EnvironmentProcessor processor = new EnvironmentProcessor();
+      EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
 
       try {
          processor.process(environment);
@@ -84,12 +83,13 @@ public class EnvironmentProcessorTest {
 
       processor.addResolver(new PassThroughResolver<EJBReferenceMetaData>(EJBReferenceMetaData.class, "testBean", "java:testBean", "java:comp/testBean"));
 
-      List<ResolverResult> results = processor.process(environment);
+      DeploymentUnit unit = mock(DeploymentUnit.class);
+
+      List<ResolverResult> results = processor.process(unit, environment);
       Assert.assertNotNull(results);
       Assert.assertEquals(1, results.size());
       Assert.assertEquals("testBean", results.get(0).getBeanName());
-      Assert.assertEquals("java:testBean", results.get(0).getGlobalJndiName());
-      Assert.assertEquals("java:comp/testBean", results.get(0).getEncJndiName());  
+      Assert.assertEquals("java:testBean", results.get(0).getJndiName());
    }
 
    private static class MockEnvironment implements Environment {

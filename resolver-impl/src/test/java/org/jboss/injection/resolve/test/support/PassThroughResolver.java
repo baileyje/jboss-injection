@@ -25,17 +25,13 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 
-import javax.lang.model.element.TypeParameterElement;
-import java.lang.reflect.TypeVariable;
-
 /**
  * PassThroughResolver -
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
-public class PassThroughResolver<M> implements Resolver<M> {
-
+public class PassThroughResolver<M> implements Resolver<M, DeploymentUnit> {
    private final Class<M> metaDataType;
    private final String beanName;
    private final String globalJndiName;
@@ -53,8 +49,8 @@ public class PassThroughResolver<M> implements Resolver<M> {
    }
 
    public ResolverResult resolve(DeploymentUnit unit, final Object metaData) {
+      if(unit == null)
+         throw new IllegalArgumentException("unit is null");
       return new ResolverResult(globalJndiName, encJndiName, beanName);
    }
-
-   
 }

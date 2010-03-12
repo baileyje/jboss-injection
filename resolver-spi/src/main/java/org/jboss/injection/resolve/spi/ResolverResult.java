@@ -27,14 +27,20 @@ package org.jboss.injection.resolve.spi;
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class ResolverResult {
+   private String jndiName;
+   private String refName;
+   private String beanName;
 
-   private final String globalJndiName;
-   private final String encJndiName;
-   private final String beanName;
+   @Deprecated
+   protected ResolverResult()
+   {
 
-   public ResolverResult(final String globalJndiName, final String encJndiName, final String beanName) {
-      this.globalJndiName = globalJndiName;
-      this.encJndiName = encJndiName;
+   }
+   
+   public ResolverResult(String jndiName, String refName, String beanName)
+   {
+      this.jndiName = jndiName;
+      this.refName = refName;
       this.beanName = beanName;
    }
 
@@ -43,19 +49,9 @@ public class ResolverResult {
     *
     * @return The global JNDI name
     */
-   public String getGlobalJndiName() {
-      return globalJndiName;
-   }
-
-   /**
-    * Get the ENC JNDI entry for mapping.
-    *
-    * TODO:  Should this be determined by Resolvers..
-    *
-    * @return The ENC JNDI name
-    */
-   public String getEncJndiName() {
-      return encJndiName;
+   public String getJndiName()
+   {
+      return jndiName;
    }
 
    /**
@@ -63,7 +59,29 @@ public class ResolverResult {
     *
     * @return The MC bean name
     */
-   public String getBeanName() {
+   public String getBeanName()
+   {
       return beanName;
+   }
+
+   @Deprecated
+   public String getEncJndiName()
+   {
+      return getRefName();
+   }
+
+   @Deprecated
+   public String getGlobalJndiName()
+   {
+      return getJndiName();
+   }
+
+   /**
+    * Get the reference name.
+    * Since a resolver knows the reference name, this allows polymorphic access.
+    */
+   public String getRefName()
+   {
+      return refName;
    }
 }
