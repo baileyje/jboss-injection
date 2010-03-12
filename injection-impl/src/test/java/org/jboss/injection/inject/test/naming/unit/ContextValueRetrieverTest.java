@@ -19,42 +19,37 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.unit;
+package org.jboss.injection.inject.test.naming.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.test.support.SimpleObject;
+import org.jboss.injection.inject.test.pojo.support.SimpleObject;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
-import org.jboss.injection.inject.jndi.JndiValueRetriever;
+import org.jboss.injection.inject.naming.ContextValueRetriever;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import java.lang.reflect.Field;
 
 /**
  * Basic test to verify injection facilities using pojo targets and JNDI retrieved values.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class JndiInjectionTest extends AbstractInjectionTestCase {
+public class ContextValueRetrieverTest extends AbstractNamingTestCase {
 
-   private Context context;
-   private SimpleObject simpleObject = new SimpleObject();
-
-   @Before
-   public void setUp() throws Exception {
-      context = new InitialContext();
+   @BeforeClass
+   public static void setupMcServer() throws Exception {
+      AbstractNamingTestCase.setupServer(ContextValueRetrieverTest.class);
    }
+
+   private SimpleObject simpleObject = new SimpleObject();
 
    @Test
    public void testJndiInjection() throws Exception {
       context.rebind("java:test", "Test Value");
       FieldInjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
 
-      Injector<Object> injector = InjectorFactory.create(injectionPoint, new JndiValueRetriever(context, "java:test"));
+      Injector<Object> injector = InjectorFactory.create(injectionPoint, new ContextValueRetriever(context, "java:test"));
       injector.inject(simpleObject);
 
       Assert.assertNotNull(simpleObject.getSimpleProperty());

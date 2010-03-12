@@ -1,6 +1,5 @@
-package org.jboss.injection.inject.enc;
+package org.jboss.injection.inject.naming;
 
-import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.injection.inject.spi.Injector;
 
 import javax.naming.Context;
@@ -13,7 +12,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncPopulator {
+public class SwitchBoardOperator {
 
    private final List<Injector<Context>> injectors;
 
@@ -22,7 +21,7 @@ public class EncPopulator {
     * 
     * @param injectors Injectors used to populate the context
     */
-   public EncPopulator(final List<Injector<Context>> injectors) {
+   public SwitchBoardOperator(final List<Injector<Context>> injectors) {
       this.injectors = injectors;
    }
 

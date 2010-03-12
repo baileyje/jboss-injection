@@ -19,41 +19,33 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.enc.unit;
+package org.jboss.injection.inject.naming;
 
-import org.jboss.injection.inject.test.unit.AbstractInjectionTestCase;
-import org.junit.Assert;
-import org.junit.Before;
+import org.jboss.injection.inject.spi.ValueRetriever;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.naming.LinkRef;
 
 /**
- * AbstractEncTestCase -
+ * ValueRetriever implementation which creates a LinkRef instances for a JNDI name.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public abstract class AbstractEncTestCase extends AbstractInjectionTestCase {
+public class LinkRefValueRetriever implements ValueRetriever<LinkRef>{
 
-   protected Context context;
+   private final String jndiName;
 
-   @Before
-   public void initializeContext() throws Exception {
-      context = new InitialContext();
+   /**
+    * Construct a new LinkRefValueRetriever with a specific JNDI name.
+    * 
+    * @param jndiName The JNDI name to link to
+    */
+   public LinkRefValueRetriever(final String jndiName) {
+      this.jndiName = jndiName;
    }
 
-   protected void assertContextValue(String jndiName, Object value) throws Exception {
-      String actual = (String) context.lookup(jndiName);
-      Assert.assertEquals(value, actual);
+   /** {@inheritDoc} */
+   public LinkRef getValue() {
+      // TODO: Look into ways to verify the jndi name points to a valid location.
+      return new LinkRef(jndiName);
    }
-
-   protected void assertNameNotFound(String name) {
-      try {
-         context.lookup(name);
-         Assert.fail("The name should not be found in the context: " + name);
-      } catch(NamingException expected) {
-      }
-   }
-
 }

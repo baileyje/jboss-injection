@@ -19,28 +19,36 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.enc.deployer.unit;
+package org.jboss.injection.inject.test.naming.deployer.unit;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.ConstructorMetaData;
 import org.jboss.beans.metadata.spi.DependencyMetaData;
 import org.jboss.beans.metadata.spi.ValueMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
+import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
+import org.jboss.deployers.client.spi.main.MainDeployer;
 import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.structure.spi.DeploymentContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.structure.spi.helpers.AbstractDeploymentContext;
 import org.jboss.deployers.structure.spi.helpers.AbstractDeploymentUnit;
-import org.jboss.injection.inject.enc.EncInjectionPoint;
-import org.jboss.injection.inject.enc.EncPopulator;
-import org.jboss.injection.inject.enc.LinkRefValueRetriever;
-import org.jboss.injection.inject.enc.deployer.EncPopulatorDeployer;
+import org.jboss.deployers.vfs.spi.client.VFSDeployment;
+import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
+import org.jboss.injection.inject.naming.ContextInjectionPoint;
+import org.jboss.injection.inject.naming.LinkRefValueRetriever;
+import org.jboss.injection.inject.naming.SwitchBoardOperator;
+import org.jboss.injection.inject.naming.deployer.SwitchBoardOperatorDeployer;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.test.enc.unit.AbstractEncTestCase;
+import org.jboss.injection.inject.test.naming.unit.AbstractNamingTestCase;
+import org.jboss.injection.inject.test.naming.unit.SwitchBoardOperatorTest;
 import org.jboss.injection.resolve.enc.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
+import org.jboss.kernel.spi.dependency.KernelController;
+import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.DataSourceMetaData;
 import org.jboss.metadata.javaee.spec.DataSourcesMetaData;
@@ -64,9 +72,12 @@ import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
+import org.jboss.vfs.VFS;
+import org.jboss.vfs.VirtualFile;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -74,11 +85,19 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * EncPopulatorDeployerTest -
+ * SwitchBoardOperatorDeployerTest
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncPopulatorDeployerTest extends AbstractEncTestCase {
+public class SwitchBoardOperatorDeployerTest extends AbstractNamingTestCase {
+
+   private static MainDeployer mainDeployer;
+
+   @BeforeClass
+   public static void setupMcServer() throws Exception {
+      AbstractNamingTestCase.setupServer(SwitchBoardOperatorTest.class, "/conf/bootstrap/classloader.xml", "/conf/bootstrap/deployers.xml", "/conf/bootstrap/pojo.xml", "/conf/bootstrap/switchboard-operator-deployer.xml");
+      mainDeployer = getBean("MainDeployer", ControllerState.INSTALLED, MainDeployer.class);
+   }
 
    @Before
    public void deployMockResolver() throws Throwable {
@@ -95,7 +114,7 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
 
    @Test
    public void testDeployNoMc() throws Exception {
-      EncPopulatorDeployer deployer = new EncPopulatorDeployer();
+      SwitchBoardOperatorDeployer deployer = new SwitchBoardOperatorDeployer();
 
       deployer.setEnvironmentProcessor(getEnvironmentProcessor());
 
@@ -111,15 +130,15 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
       ValueMetaData constructorValueMetaData = constructorMetaData.getValue();
       Object constructorValue = constructorValueMetaData.getUnderlyingValue();
 
-      Assert.assertTrue(constructorValue instanceof EncPopulator);
+      Assert.assertTrue(constructorValue instanceof SwitchBoardOperator);
 
-      EncPopulator encPopulator = EncPopulator.class.cast(constructorValue);
+      SwitchBoardOperator encPopulator = SwitchBoardOperator.class.cast(constructorValue);
 
       List<Injector<?>> injectors = getPrivateField(encPopulator, "injectors", List.class);
       Assert.assertNotNull(injectors);
       Assert.assertEquals(1, injectors.size());
       Injector<?> injector = injectors.get(0);
-      EncInjectionPoint<LinkRefValueRetriever> injectionPoint = (EncInjectionPoint<LinkRefValueRetriever>) getPrivateField(injector, "injectionPoint", EncInjectionPoint.class);
+      ContextInjectionPoint<LinkRefValueRetriever> injectionPoint = (ContextInjectionPoint<LinkRefValueRetriever>) getPrivateField(injector, "injectionPoint", ContextInjectionPoint.class);
       String encJndiName = getPrivateField(injectionPoint, "jndiName", String.class);
       Assert.assertEquals("java:otherTest", encJndiName);
       LinkRefValueRetriever valueRetriever = getPrivateField(injector, "valueRetriever", LinkRefValueRetriever.class);
@@ -219,6 +238,84 @@ public class EncPopulatorDeployerTest extends AbstractEncTestCase {
       Field field = object.getClass().getDeclaredField(fieldName);
       field.setAccessible(true);
       return (T) field.get(object);
+   }
+
+    protected static void deploy(Deployment... deployments) throws DeploymentException {
+      mainDeployer.deploy(deployments);
+   }
+
+   protected static void undeploy(Deployment... deployments) throws DeploymentException {
+      mainDeployer.undeploy(deployments);
+   }
+
+   protected static <T> Deployment deployment(String name, Class<T> attachmentType, T attachment) {
+      try {
+         VirtualFile root = VFS.getChild(name);
+         VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(root);
+         MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
+         attachments.addAttachment(attachmentType, attachment);
+         return deployment;
+      }
+      catch(Exception e) {
+         throw new RuntimeException(e);
+      }
+   }
+
+   /**
+    * Get a bean
+    *
+    * @param name  the name of the bean
+    * @param state the state of the bean
+    * @return the bean
+    * @throws IllegalStateException when the bean does not exist at that state
+    */
+   protected static Object getBean(final Object name, final ControllerState state) throws IllegalStateException {
+      KernelControllerContext context = getControllerContext(name, state);
+      return context.getTarget();
+   }
+
+   /**
+    * Get a bean
+    *
+    * @param <T>      the expected type
+    * @param name     the name of the bean
+    * @param state    the state of the bean
+    * @param expected the expected type
+    * @return the bean
+    * @throws ClassCastException    when the bean can not be cast to the expected type
+    * @throws IllegalStateException when the bean does not exist at that state
+    */
+   protected static <T> T getBean(final Object name, final ControllerState state, final Class<T> expected) throws ClassCastException, IllegalStateException {
+      if(expected == null)
+         throw new IllegalArgumentException("Null expected");
+      Object bean = getBean(name, state);
+      return expected.cast(bean);
+   }
+
+   /**
+    * Get a context
+    *
+    * @param name  the name of the bean
+    * @param state the state of the bean
+    * @return the context
+    * @throws IllegalStateException when the context does not exist at that state
+    */
+   protected static KernelControllerContext getControllerContext(final Object name, final ControllerState state) throws IllegalStateException {
+      KernelController controller = server.getKernel().getController();
+      KernelControllerContext context = (KernelControllerContext) controller.getContext(name, state);
+      if(context == null)
+         throw new IllegalStateException("Bean not found " + name + " at state " + state + " in controller " + controller);
+      return context;
+   }
+
+   protected void deployBean(BeanMetaData beanMetaData) throws Throwable {
+      KernelController controller = server.getKernel().getController();
+      controller.install(beanMetaData);
+   }
+
+   protected void undeployBean(String beanName) throws Throwable {
+      KernelController controller = server.getKernel().getController();
+      controller.uninstall(beanName);
    }
 
    private static class MockEnvironment implements Environment {

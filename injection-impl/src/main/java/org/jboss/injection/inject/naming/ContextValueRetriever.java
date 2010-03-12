@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.jndi;
+package org.jboss.injection.inject.naming;
 
 import org.jboss.injection.inject.spi.ValueRetriever;
 
@@ -32,16 +32,16 @@ import javax.naming.NamingException;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class JndiValueRetriever<M> implements ValueRetriever<Object> {
+public class ContextValueRetriever<M> implements ValueRetriever<Object> {
 
    private Context context;
    private final String jndiName;
 
-   public JndiValueRetriever(String jndiName) {
+   public ContextValueRetriever(String jndiName) {
       this(null, jndiName);
    }
 
-   public JndiValueRetriever(final Context context, String jndiName) {
+   public ContextValueRetriever(final Context context, String jndiName) {
       this.context = context;
       this.jndiName = jndiName;
    }

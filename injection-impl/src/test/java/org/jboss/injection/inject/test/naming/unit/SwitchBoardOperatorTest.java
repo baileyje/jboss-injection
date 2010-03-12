@@ -19,38 +19,44 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.enc.unit;
+package org.jboss.injection.inject.test.naming.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.enc.EncInjectionPoint;
-import org.jboss.injection.inject.enc.EncPopulator;
+import org.jboss.injection.inject.naming.ContextInjectionPoint;
+import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.test.support.SimpleValueRetriever;
+import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.naming.Context;
 import java.util.Arrays;
 
 /**
- * EncPopulatorTest -
+ * SwitchBoardOperatorTest
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncPopulatorTest extends AbstractEncTestCase {
+public class SwitchBoardOperatorTest extends AbstractNamingTestCase {
+
+   @BeforeClass
+   public static void setupMcServer() throws Exception {
+      AbstractNamingTestCase.setupServer(SwitchBoardOperatorTest.class);
+   }
 
    @Test
    public void testEncPopulator() throws Exception {
       Injector<Context> injectorOne = InjectorFactory.create(
-         new EncInjectionPoint<String>("java:testOne"),
+         new ContextInjectionPoint<String>("java:testOne"),
          new SimpleValueRetriever("Test Value One"));
       Injector<Context> injectorTwo = InjectorFactory.create(
-         new EncInjectionPoint<String>("java:testTwo"),
+         new ContextInjectionPoint<String>("java:testTwo"),
          new SimpleValueRetriever("Test Value Two"));
       Injector<Context> injectorThree = InjectorFactory.create(
-         new EncInjectionPoint<String>("java:testThree"),
+         new ContextInjectionPoint<String>("java:testThree"),
          new SimpleValueRetriever("Test Value Three"));
 
-      EncPopulator encPopulator = new EncPopulator(Arrays.asList(injectorOne, injectorTwo, injectorThree));
+      SwitchBoardOperator encPopulator = new SwitchBoardOperator(Arrays.asList(injectorOne, injectorTwo, injectorThree));
 
       assertNameNotFound("java:testOne");
       assertNameNotFound("java:testTwo");

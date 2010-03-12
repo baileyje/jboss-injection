@@ -19,35 +19,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.enc.unit;
+package org.jboss.injection.inject.test.naming.unit;
 
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.test.unit.AbstractInjectionTestCase;
-import org.jboss.injection.inject.enc.EncInjectionPoint;
-import org.jboss.injection.inject.enc.EncPopulator;
-import org.jboss.injection.inject.enc.LinkRefValueRetriever;
+import org.jboss.injection.inject.naming.ContextInjectionPoint;
+import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.test.support.SimpleValueRetriever;
-import org.junit.Assert;
-import org.junit.Before;
+import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.LinkRef;
-import javax.naming.NamingException;
-import java.util.Arrays;
 
 /**
  * Basic test to verify EncInjection function as expected.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EncInjectionTest extends AbstractEncTestCase {
+public class ContextInjectionTest extends AbstractNamingTestCase {
+
+   @BeforeClass
+   public static void setupMcServer() throws Exception {
+      AbstractNamingTestCase.setupServer(ContextInjectionTest.class);
+   }
 
    @Test
    public void testEncInjection() throws Exception {
-      Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint<String>("java:test"), new SimpleValueRetriever("Test Value"));
+      Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<String>("java:test"), new SimpleValueRetriever("Test Value"));
 
       injector.inject(context);
 
@@ -58,7 +57,7 @@ public class EncInjectionTest extends AbstractEncTestCase {
    public void testEncLinkInjection() throws Exception {
       context.rebind("java:test", "Test Value");
 
-      Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint<LinkRef>("java:comp/test"), new LinkRefValueRetriever("java:test"));
+      Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<LinkRef>("java:comp/test"), new LinkRefValueRetriever("java:test"));
 
       assertNameNotFound("java:comp/test");
       injector.inject(context);

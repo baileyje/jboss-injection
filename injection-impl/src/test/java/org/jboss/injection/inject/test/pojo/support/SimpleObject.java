@@ -19,33 +19,21 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.enc;
-
-import org.jboss.injection.inject.spi.ValueRetriever;
-
-import javax.naming.LinkRef;
+package org.jboss.injection.inject.test.pojo.support;
 
 /**
- * ValueRetriever implementation which creates a LinkRef instances for a JNDI name.
+ * SimpleObject -
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class LinkRefValueRetriever implements ValueRetriever<LinkRef>{
+public class SimpleObject {
+    private String simpleProperty;
 
-   private final String jndiName;
+    public String getSimpleProperty() {
+        return simpleProperty;
+    }
 
-   /**
-    * Construct a new LinkRefValueRetriever with a specific JNDI name.
-    * 
-    * @param jndiName The JNDI name to link to
-    */
-   public LinkRefValueRetriever(final String jndiName) {
-      this.jndiName = jndiName;
-   }
-
-   /** {@inheritDoc} */
-   public LinkRef getValue() {
-      // TODO: Look into ways to verify the jndi name points to a valid location.
-      return new LinkRef(jndiName);
-   }
+    public void setSimpleProperty(final String simpleProperty) {
+        this.simpleProperty = simpleProperty;
+    }
 }

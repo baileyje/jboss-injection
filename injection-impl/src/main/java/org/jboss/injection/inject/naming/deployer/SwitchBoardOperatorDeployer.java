@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.enc.deployer;
+package org.jboss.injection.inject.naming.deployer;
 
 import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;
@@ -29,10 +29,10 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.enc.LinkRefValueRetriever;
+import org.jboss.injection.inject.naming.ContextInjectionPoint;
+import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.enc.EncInjectionPoint;
-import org.jboss.injection.inject.enc.EncPopulator;
+import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.resolve.enc.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.javaee.spec.Environment;
@@ -47,11 +47,11 @@ import java.util.List;
  *
  * @author <a href=mailto:"jbailey@redhat.com">John Bailey</a>
  */
-public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment> {
+public class SwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<Environment> {
 
    private EnvironmentProcessor environmentProcessor;
 
-   public EncPopulatorDeployer() {
+   public SwitchBoardOperatorDeployer() {
       super(Environment.class);
       //setComponentsOnly(true);
       setOutput(BeanMetaData.class);
@@ -70,8 +70,8 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
    }
 
    private BeanMetaData createBeanMetaData(final String name, final List<ResolverResult> resolverResults) {
-      final BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, EncPopulator.class.getName());
-      builder.setConstructorValue(createEncPopulator(resolverResults));
+      final BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, SwitchBoardOperator.class.getName());
+      builder.setConstructorValue(createSwitchBoardOperator(resolverResults));
 
       for(ResolverResult resolverResult : resolverResults) {
          builder.addDependency(resolverResult.getBeanName());
@@ -84,13 +84,13 @@ public class EncPopulatorDeployer extends AbstractSimpleRealDeployer<Environment
       return environmentProcessor.process(environment);
    }
 
-   private EncPopulator createEncPopulator(final List<ResolverResult> resolverResults) {
+   private SwitchBoardOperator createSwitchBoardOperator(final List<ResolverResult> resolverResults) {
       final List<Injector<Context>> injectors = new ArrayList<Injector<Context>>(resolverResults.size());
       for(ResolverResult resolverResult : resolverResults) {
-         final Injector<Context> injector = InjectorFactory.create(new EncInjectionPoint(resolverResult.getRefName()), new LinkRefValueRetriever(resolverResult.getJndiName()));
+         final Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint(resolverResult.getRefName()), new LinkRefValueRetriever(resolverResult.getJndiName()));
          injectors.add(injector);
       }
-      return new EncPopulator(injectors);
+      return new SwitchBoardOperator(injectors);
    }
 
    public EnvironmentProcessor getEnvironmentProcessor() {

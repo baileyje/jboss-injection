@@ -19,21 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.support;
+package org.jboss.injection.inject.test.pojo.support;
+
+import org.jboss.injection.inject.spi.ValueRetriever;
 
 /**
- * SimpleObject -
+ * SimpleValueRetriever -
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class SimpleObject {
-    private String simpleProperty;
+public class SimpleValueRetriever<V> implements ValueRetriever<V> {
+   private final V value;
 
-    public String getSimpleProperty() {
-        return simpleProperty;
-    }
+   public SimpleValueRetriever(final V value) {
+      this.value = value;
+   }
 
-    public void setSimpleProperty(final String simpleProperty) {
-        this.simpleProperty = simpleProperty;
-    }
+   public V getValue() {
+      return value;
+   }
 }

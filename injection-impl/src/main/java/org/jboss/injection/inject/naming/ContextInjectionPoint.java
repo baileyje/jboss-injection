@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.enc;
+package org.jboss.injection.inject.naming;
 
 import org.jboss.injection.inject.spi.InjectionPoint;
 
@@ -32,16 +32,16 @@ import javax.naming.NamingException;
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <V> The type of the object being injected
  */
-public class EncInjectionPoint<V> implements InjectionPoint<Context, V> {
+public class ContextInjectionPoint<V> implements InjectionPoint<Context, V> {
 
    private final String jndiName;
 
    /**
-    * Construct a new EncInjectionPoint with a target jndi name.
+    * Construct a new ContextInjectionPoint with a target jndi name.
     *
     * @param jndiName The jndi name to use when injecting into the context
     */
-   public EncInjectionPoint(final String jndiName) {
+   public ContextInjectionPoint(final String jndiName) {
       if(jndiName == null) throw new IllegalArgumentException("JNDI name can not be null");
       this.jndiName = jndiName;
    }
