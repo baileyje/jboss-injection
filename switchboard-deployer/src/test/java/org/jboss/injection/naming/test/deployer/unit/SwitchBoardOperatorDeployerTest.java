@@ -19,13 +19,17 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.naming.deployer.unit;
+package org.jboss.injection.naming.test.deployer.unit;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.ConstructorMetaData;
 import org.jboss.beans.metadata.spi.DependencyMetaData;
 import org.jboss.beans.metadata.spi.ValueMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
+import org.jboss.bootstrap.api.descriptor.BootstrapDescriptor;
+import org.jboss.bootstrap.api.descriptor.UrlBootstrapDescriptor;
+import org.jboss.bootstrap.api.mc.server.MCServer;
+import org.jboss.bootstrap.api.mc.server.MCServerFactory;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.client.spi.main.MainDeployer;
@@ -40,10 +44,8 @@ import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.injection.inject.naming.ContextInjectionPoint;
 import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.inject.naming.SwitchBoardOperator;
-import org.jboss.injection.inject.naming.deployer.SwitchBoardOperatorDeployer;
+import org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer;
 import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.inject.test.naming.unit.AbstractNamingTestCase;
-import org.jboss.injection.inject.test.naming.unit.SwitchBoardOperatorTest;
 import org.jboss.injection.resolve.enc.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
@@ -72,6 +74,7 @@ import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
+import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
 import org.junit.After;
@@ -80,6 +83,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
@@ -89,14 +95,40 @@ import java.util.Set;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class SwitchBoardOperatorDeployerTest extends AbstractNamingTestCase {
+public class SwitchBoardOperatorDeployerTest {
 
+   protected static MCServer server;
    private static MainDeployer mainDeployer;
 
    @BeforeClass
-   public static void setupMcServer() throws Exception {
-      AbstractNamingTestCase.setupServer(SwitchBoardOperatorTest.class, "/conf/bootstrap/classloader.xml", "/conf/bootstrap/deployers.xml", "/conf/bootstrap/pojo.xml", "/conf/bootstrap/switchboard-operator-deployer.xml");
-      mainDeployer = getBean("MainDeployer", ControllerState.INSTALLED, MainDeployer.class);
+   public static void setupServer() throws Exception {
+      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+      server = MCServerFactory.createServer(classLoader);
+      List<BootstrapDescriptor> descriptors = server.getConfiguration().getBootstrapDescriptors();
+
+      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(SwitchBoardOperatorDeployerTest.class, "/conf/bootstrap/naming.xml")));
+      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(SwitchBoardOperatorDeployerTest.class, "/conf/bootstrap/classloader.xml")));
+      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(SwitchBoardOperatorDeployerTest.class, "/conf/bootstrap/deployers.xml")));
+      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(SwitchBoardOperatorDeployerTest.class, "/conf/bootstrap/pojo.xml")));
+      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(SwitchBoardOperatorDeployerTest.class, "/conf/bootstrap/switchboard-operator-deployer.xml")));
+
+      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+      Thread.currentThread().setContextClassLoader(classLoader);
+      try {
+         server.start();
+         mainDeployer = getBean("MainDeployer", ControllerState.INSTALLED, MainDeployer.class);
+      }
+      finally {
+         Thread.currentThread().setContextClassLoader(oldClassLoader);
+      }
+   }
+
+   private Context context;
+
+   @Before
+   public void initializeContext() throws Exception {
+      context = new InitialContext();
    }
 
    @Before
@@ -240,7 +272,7 @@ public class SwitchBoardOperatorDeployerTest extends AbstractNamingTestCase {
       return (T) field.get(object);
    }
 
-    protected static void deploy(Deployment... deployments) throws DeploymentException {
+   protected static void deploy(Deployment... deployments) throws DeploymentException {
       mainDeployer.deploy(deployments);
    }
 
@@ -316,6 +348,19 @@ public class SwitchBoardOperatorDeployerTest extends AbstractNamingTestCase {
    protected void undeployBean(String beanName) throws Throwable {
       KernelController controller = server.getKernel().getController();
       controller.uninstall(beanName);
+   }
+
+   protected void assertContextValue(String jndiName, Object value) throws Exception {
+      String actual = (String) context.lookup(jndiName);
+      Assert.assertEquals(value, actual);
+   }
+
+   protected void assertNameNotFound(String name) {
+      try {
+         context.lookup(name);
+         Assert.fail("The name should not be found in the context: " + name);
+      } catch(NamingException expected) {
+      }
    }
 
    private static class MockEnvironment implements Environment {

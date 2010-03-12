@@ -39,11 +39,6 @@ import java.util.Arrays;
  */
 public class SwitchBoardOperatorTest extends AbstractNamingTestCase {
 
-   @BeforeClass
-   public static void setupMcServer() throws Exception {
-      AbstractNamingTestCase.setupServer(SwitchBoardOperatorTest.class);
-   }
-
    @Test
    public void testEncPopulator() throws Exception {
       Injector<Context> injectorOne = InjectorFactory.create(

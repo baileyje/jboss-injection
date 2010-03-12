@@ -39,11 +39,6 @@ import javax.naming.LinkRef;
  */
 public class ContextInjectionTest extends AbstractNamingTestCase {
 
-   @BeforeClass
-   public static void setupMcServer() throws Exception {
-      AbstractNamingTestCase.setupServer(ContextInjectionTest.class);
-   }
-
    @Test
    public void testEncInjection() throws Exception {
       Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<String>("java:test"), new SimpleValueRetriever("Test Value"));

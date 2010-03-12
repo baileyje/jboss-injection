@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.naming.deployer;
+package org.jboss.injection.naming.deployer;
 
 import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;

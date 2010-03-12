@@ -37,11 +37,6 @@ import org.junit.Test;
  */
 public class ContextValueRetrieverTest extends AbstractNamingTestCase {
 
-   @BeforeClass
-   public static void setupMcServer() throws Exception {
-      AbstractNamingTestCase.setupServer(ContextValueRetrieverTest.class);
-   }
-
    private SimpleObject simpleObject = new SimpleObject();
 
    @Test

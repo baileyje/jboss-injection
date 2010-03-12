@@ -25,13 +25,15 @@
 
     <modules>
         <module>injection-spi</module>
-        <module>injection-impl</module>
         <module>resolver-spi</module>
+        <module>injection-impl</module>
         <module>resolver-impl</module>
+        <module>switchboard-deployer</module>
     </modules>
         
     <!-- Dependency Versions -->
     <properties>
+        <version.jboss.classloading>2.2.0.Alpha3</version.jboss.classloading>
         <version.jboss.deployers>2.2.0.Alpha3</version.jboss.deployers>
         <version.jboss.kernel>2.2.0.Alpha3</version.jboss.kernel>
         <version.jboss.metadata.common>2.0.0.Alpha12</version.jboss.metadata.common>

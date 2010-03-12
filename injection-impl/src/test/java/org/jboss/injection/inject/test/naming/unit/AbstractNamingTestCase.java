@@ -28,6 +28,7 @@ import org.jboss.bootstrap.api.mc.server.MCServerFactory;
 import org.jboss.test.BaseTestCase;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -45,19 +46,15 @@ public abstract class AbstractNamingTestCase {
 
    protected static MCServer server;
 
-   // Should  be called by a @BeforeClass in the child
-   public static <T extends AbstractNamingTestCase> void setupServer(Class<T> testClass, String... descriptorPaths) throws Exception {
+   @BeforeClass
+   public static void setupServer() throws Exception {
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
       server = MCServerFactory.createServer(classLoader);
       List<BootstrapDescriptor> descriptors = server.getConfiguration().getBootstrapDescriptors();
 
       // Always setup naming.
-      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(testClass, "/conf/bootstrap/naming.xml")));
-      // Now setup other bootstraps
-      for(String descriptorPath : descriptorPaths) {
-         descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(testClass, descriptorPath)));
-      }
+      descriptors.add(new UrlBootstrapDescriptor(BaseTestCase.findResource(AbstractNamingTestCase.class, "/conf/bootstrap/naming.xml")));
 
       ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
       Thread.currentThread().setContextClassLoader(classLoader);
