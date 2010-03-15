@@ -40,6 +40,7 @@ import org.jboss.metadata.javaee.spec.Environment;
 import javax.naming.Context;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
@@ -60,21 +61,24 @@ public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealD
    @Override
    public void deploy(final DeploymentUnit unit, final M deployment) throws DeploymentException
    {
-      final Environment environment = getEnvironment(deployment);
-      deploy(unit, deployment, environment);
+      final List<NamedEnvironment> nameEnvironments = getEnvironments(deployment);
+      for(NamedEnvironment nameEnvironment : nameEnvironments)
+      {
+         deploy(unit, deployment, nameEnvironment);
+      }
    }
 
-   protected abstract Environment getEnvironment(M deployment);
+   protected abstract List<NamedEnvironment> getEnvironments(M deployment);
 
-   protected void deploy(final DeploymentUnit unit, final M metaData, final Environment environment) throws DeploymentException
+   protected void deploy(final DeploymentUnit unit, final M metaData, final NamedEnvironment namedEnvironment) throws DeploymentException
    {
-      final String name = "jboss:service=SwitchBoardOperator,name=" + unit.getName();
+      final String name = "jboss:service=SwitchBoardOperator,name=" + namedEnvironment.name + ",deployment=" + unit.getName();
 
       final EnvironmentProcessor<DeploymentUnit> environmentProcessor = getEnvironmentProcessor();
       if(environmentProcessor == null)
          throw new IllegalStateException("SwitchBoardOperator deployers require an EnvironmentPorcessor, which has not been set.");
 
-      final List<ResolverResult> resolverResults = environmentProcessor.process(unit, environment);
+      final List<ResolverResult> resolverResults = environmentProcessor.process(unit, namedEnvironment.environment);
 
       if(resolverResults != null && !resolverResults.isEmpty())
       {
@@ -116,4 +120,16 @@ public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealD
    {
       this.environmentProcessor = environmentProcessor;
    }
+
+   protected class NamedEnvironment {
+      private final String name;
+      private final Environment environment;
+
+      public NamedEnvironment(final String name, final Environment environment)
+      {
+         this.name = name;
+         this.environment = environment;
+      }
+   }
+
 }

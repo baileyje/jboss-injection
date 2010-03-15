@@ -52,8 +52,6 @@ import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
-import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
@@ -70,13 +68,11 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Environment>
+public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
 {
 
    protected static MCServer server;
@@ -145,9 +141,9 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Envi
 
       DeploymentUnit deploymentUnit = createMockDeploymentUnit();
 
-      deployer.deploy(deploymentUnit, createMockEnvironment());
+      deployer.deploy(deploymentUnit, createMetaData("test"));
 
-      BeanMetaData beanMetaData = deploymentUnit.getAttachment(BeanMetaData.class.getName() + "." + "jboss:service=SwitchBoardOperator,name=" + deploymentUnit.getName(), BeanMetaData.class);
+      BeanMetaData beanMetaData = deploymentUnit.getAttachment(BeanMetaData.class.getName() + "." + "jboss:service=SwitchBoardOperator,name=test,deployment=" + deploymentUnit.getName(), BeanMetaData.class);
       Assert.assertNotNull(beanMetaData);
 
       ConstructorMetaData constructorMetaData = beanMetaData.getConstructor();
@@ -182,7 +178,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Envi
    {
       context.rebind("java:test", "Test Value");
 
-      Deployment deployment = deployment("test1", getMetaDataType(), createMockEnvironment());
+      Deployment deployment = deployment("test1", getMetaDataType(), createMetaData("test"));
       try
       {
          deploy(deployment);
@@ -197,7 +193,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Envi
    public void testDeployWithMcDependencyAlreadyMet() throws Throwable
    {
       context.rebind("java:test", "Test Value");
-      Deployment deployment = deployment("test1", getMetaDataType(), createMockEnvironment());
+      Deployment deployment = deployment("test1", getMetaDataType(), createMetaData("test"));
       deployBean(BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:otherTest");
       deploy(deployment);
@@ -211,7 +207,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Envi
    public void testDeployWithMcDependencyInBatchOrdered() throws Throwable
    {
       context.rebind("java:test", "Test Value");
-      Deployment envDeployment = deployment("test1", getMetaDataType(), createMockEnvironment());
+      Deployment envDeployment = deployment("test1", getMetaDataType(), createMetaData("test"));
       Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:otherTest");
       deploy(envDeployment, dependencyDeployment);
@@ -224,7 +220,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Envi
    public void testDeployWithMcDependencyInBatchUnOrdered() throws Throwable
    {
       context.rebind("java:test", "Test Value");
-      Deployment envDeployment = deployment("test1", getMetaDataType(), createMockEnvironment());
+      Deployment envDeployment = deployment("test1", getMetaDataType(), createMetaData("test"));
       Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:otherTest");
       deploy(envDeployment, dependencyDeployment);
@@ -263,17 +259,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M extends Envi
       return deploymentUnit;
    }
 
-   private M createMockEnvironment()
-   {
-      M environment = mock(getMetaDataType());
-
-      EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
-      EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testRef");
-      referencesMetaData.add(referenceMetaData);
-      when(environment.getEjbReferences()).thenReturn(referencesMetaData);
-      return environment;
-   }
+   protected abstract M createMetaData(String metaDatName);
 
    private <T> T getPrivateField(Object object, String fieldName, Class<T> type) throws Exception
    {

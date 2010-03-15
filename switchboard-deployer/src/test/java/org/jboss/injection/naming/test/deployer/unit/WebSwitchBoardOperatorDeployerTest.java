@@ -23,11 +23,15 @@ package org.jboss.injection.naming.test.deployer.unit;
 
 import org.jboss.injection.naming.deployer.EJBSwitchBoardOperatorDeployer;
 import org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer;
+import org.jboss.injection.naming.deployer.WebSwitchBoardOperatorDeployer;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
+import org.jboss.metadata.javaee.spec.DescriptionGroupMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
+import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.metadata.web.jboss.JBossWebMetaData;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,39 +39,39 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOperatorDeployerTestCase<JBossMetaData>
+public class WebSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOperatorDeployerTestCase<JBossWebMetaData>
 {
    @Override
-   protected Class<JBossMetaData> getMetaDataType()
+   protected Class<JBossWebMetaData> getMetaDataType()
    {
-      return JBossMetaData.class;
+      return JBossWebMetaData.class;
    }
 
    @Override
-   protected SwitchBoardOperatorDeployer<JBossMetaData> getDeployer()
+   protected SwitchBoardOperatorDeployer<JBossWebMetaData> getDeployer()
    {
-      return new EJBSwitchBoardOperatorDeployer();
+      return new WebSwitchBoardOperatorDeployer();
    }
 
    @Override
-   protected JBossMetaData createMetaData(final String name)
+   protected JBossWebMetaData createMetaData(final String name)
    {
-      JBossMetaData jBossMetaData = mock(JBossMetaData.class);
-      JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData = mock(JBossEnterpriseBeanMetaData.class);
-      when(jBossEnterpriseBeanMetaData.getKey()).thenReturn(name);
-      when(jBossEnterpriseBeanMetaData.getName()).thenReturn(name);
-
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
       referenceMetaData.setEjbRefName("testRef");
       referencesMetaData.add(referenceMetaData);
 
-      when(jBossEnterpriseBeanMetaData.getEjbReferences()).thenReturn(referencesMetaData);
+      Environment environment = mock(Environment.class);
+      when(environment.getEjbReferences()).thenReturn(referencesMetaData);
 
-      JBossEnterpriseBeansMetaData jBossEnterpriseBeansMetaData = new JBossEnterpriseBeansMetaData();
-      jBossEnterpriseBeansMetaData.add(jBossEnterpriseBeanMetaData);
+      JBossWebMetaData jBossWebMetaData = mock(JBossWebMetaData.class);
+      when(jBossWebMetaData.getJndiEnvironmentRefsGroup()).thenReturn(environment);
 
-      when(jBossMetaData.getEnterpriseBeans()).thenReturn(jBossEnterpriseBeansMetaData);
-      return jBossMetaData;
+      DescriptionGroupMetaData descriptionGroupMetaData = mock(DescriptionGroupMetaData.class);
+      when(descriptionGroupMetaData.getDisplayName()).thenReturn(name);
+
+      when(jBossWebMetaData.getDescriptionGroup()).thenReturn(descriptionGroupMetaData);
+
+      return jBossWebMetaData;
    }
 }

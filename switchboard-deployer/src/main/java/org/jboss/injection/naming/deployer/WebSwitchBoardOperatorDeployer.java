@@ -25,34 +25,32 @@ import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.metadata.web.jboss.JBossWebMetaData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * SwitchBoardOperatorDeployer implementation based on JBossMetaData.
+ * SwitchBoardOperatorDeployer implementation based on JBossWebMetaData.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployer extends SwitchBoardOperatorDeployer<JBossMetaData>
+public class WebSwitchBoardOperatorDeployer extends SwitchBoardOperatorDeployer<JBossWebMetaData>
 {
 
-   public EJBSwitchBoardOperatorDeployer()
+   public WebSwitchBoardOperatorDeployer()
    {
-      super(JBossMetaData.class);
+      super(JBossWebMetaData.class);
    }
 
    @Override
-   protected List<NamedEnvironment> getEnvironments(final JBossMetaData deployment)
+   protected List<NamedEnvironment> getEnvironments(final JBossWebMetaData deployment)
    {
-      final JBossEnterpriseBeansMetaData jBossEnterpriseBeansMetaData = deployment.getEnterpriseBeans();
-      final List<NamedEnvironment> namedEnvironments = new ArrayList<NamedEnvironment>(jBossEnterpriseBeansMetaData.size());
-      for(JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData : jBossEnterpriseBeansMetaData)
-      {
-         final String name = jBossEnterpriseBeanMetaData.getName();
-         final NamedEnvironment namedEnvironment = new NamedEnvironment(name, jBossEnterpriseBeanMetaData);
-         namedEnvironments.add(namedEnvironment);
-      }
-      return namedEnvironments;
+      // TODO: What is the correct name to use?
+      final String name = deployment.getDescriptionGroup().getDisplayName();
+      final Environment environment = deployment.getJndiEnvironmentRefsGroup();
+      final NamedEnvironment namedEnvironment = new NamedEnvironment(name, environment);
+      return Collections.singletonList(namedEnvironment);
    }
 }
