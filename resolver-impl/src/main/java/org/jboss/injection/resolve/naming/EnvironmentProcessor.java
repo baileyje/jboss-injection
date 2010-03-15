@@ -128,13 +128,12 @@ public class EnvironmentProcessor<C>
       final Resolver<M, C> resolver = getResolver(referenceType);
 
       if(resolver == null)
-         throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + reference + "]");
+         throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
 
       final ResolverResult result = resolver.resolve(context, reference);
-      if(result != null)
-      {
-         results.add(result);
-      }
+      if(result == null)
+         throw new RuntimeException("Found reference [" + reference + "] but resolution failed to produce a result");
+      results.add(result);
    }
 
    @SuppressWarnings("unchecked")

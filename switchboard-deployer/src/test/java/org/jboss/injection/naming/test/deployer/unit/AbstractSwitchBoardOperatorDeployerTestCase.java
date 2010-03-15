@@ -22,9 +22,6 @@
 package org.jboss.injection.naming.test.deployer.unit;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
-import org.jboss.beans.metadata.spi.ConstructorMetaData;
-import org.jboss.beans.metadata.spi.DependencyMetaData;
-import org.jboss.beans.metadata.spi.ValueMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.bootstrap.api.descriptor.BootstrapDescriptor;
 import org.jboss.bootstrap.api.descriptor.UrlBootstrapDescriptor;
@@ -35,17 +32,9 @@ import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.client.spi.main.MainDeployer;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
-import org.jboss.deployers.structure.spi.DeploymentContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.deployers.structure.spi.helpers.AbstractDeploymentContext;
-import org.jboss.deployers.structure.spi.helpers.AbstractDeploymentUnit;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
-import org.jboss.injection.inject.naming.ContextInjectionPoint;
-import org.jboss.injection.inject.naming.LinkRefValueRetriever;
-import org.jboss.injection.inject.naming.SwitchBoardOperator;
-import org.jboss.injection.inject.spi.Injector;
-import org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.spi.Resolver;
@@ -60,24 +49,21 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Set;
 
 
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
+public abstract class AbstractSwitchBoardOperatorDeployerTestCase
 {
 
    protected static MCServer server;
-   private static MainDeployer mainDeployer;
+   protected static MainDeployer mainDeployer;
 
    @BeforeClass
    public static void setupServer() throws Exception
@@ -106,7 +92,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
       }
    }
 
-   private Context context;
+   protected Context context;
 
    @Before
    public void initializeContext() throws Exception
@@ -118,7 +104,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
    public void deployMockResolver() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("MockResolver", Resolver.class.getName());
-      Resolver<EJBReferenceMetaData, DeploymentUnit> resolver = createMockResolver(EJBReferenceMetaData.class, new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test"));
+      Resolver<EJBReferenceMetaData, DeploymentUnit> resolver = createMockResolver(EJBReferenceMetaData.class);
       builder.setConstructorValue(resolver);
       deployBean(builder.getBeanMetaData());
    }
@@ -129,115 +115,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
       undeployBean("MockResolver");
    }
 
-   protected abstract Class<M> getMetaDataType();
-
-   protected abstract SwitchBoardOperatorDeployer<M> getDeployer();
-
-   @Test
-   public void testDeployNoMc() throws Exception
-   {
-      SwitchBoardOperatorDeployer<M> deployer = getDeployer();
-
-      deployer.setEnvironmentProcessor(getEnvironmentProcessor());
-
-      DeploymentUnit deploymentUnit = createMockDeploymentUnit();
-
-      deployer.deploy(deploymentUnit, createMetaData("test"));
-
-      BeanMetaData beanMetaData = deploymentUnit.getAttachment(BeanMetaData.class.getName() + "." + "jboss:service=SwitchBoardOperator,name=test,deployment=" + deploymentUnit.getName(), BeanMetaData.class);
-      Assert.assertNotNull(beanMetaData);
-
-      ConstructorMetaData constructorMetaData = beanMetaData.getConstructor();
-
-      ValueMetaData constructorValueMetaData = constructorMetaData.getValue();
-      Object constructorValue = constructorValueMetaData.getUnderlyingValue();
-
-      Assert.assertTrue(constructorValue instanceof SwitchBoardOperator);
-
-      SwitchBoardOperator switchBoardOperator = SwitchBoardOperator.class.cast(constructorValue);
-
-      List<Injector<?>> injectors = getPrivateField(switchBoardOperator, "injectors", List.class);
-      Assert.assertNotNull(injectors);
-      Assert.assertEquals(1, injectors.size());
-      Injector<?> injector = injectors.get(0);
-      ContextInjectionPoint<LinkRefValueRetriever> injectionPoint = (ContextInjectionPoint<LinkRefValueRetriever>) getPrivateField(injector, "injectionPoint", ContextInjectionPoint.class);
-      String encJndiName = getPrivateField(injectionPoint, "jndiName", String.class);
-      Assert.assertEquals("java:otherTest", encJndiName);
-      LinkRefValueRetriever valueRetriever = getPrivateField(injector, "valueRetriever", LinkRefValueRetriever.class);
-      String globalJndiName = getPrivateField(valueRetriever, "jndiName", String.class);
-      Assert.assertEquals("java:test", globalJndiName);
-
-      Set<DependencyMetaData> dependencyMetaDatas = beanMetaData.getDepends();
-      Assert.assertEquals(1, dependencyMetaDatas.size());
-      DependencyMetaData dependencyMetaData = dependencyMetaDatas.iterator().next();
-
-      Assert.assertEquals("mc-bean-test", dependencyMetaData.getDependency());
-   }
-
-   @Test
-   public void testDeployWithMcNoDependency() throws Throwable
-   {
-      context.rebind("java:test", "Test Value");
-
-      Deployment deployment = deployment("test1", getMetaDataType(), createMetaData("test"));
-      try
-      {
-         deploy(deployment);
-         Assert.fail("Should have thrown an exception because of a missing dependency");
-      } catch(DeploymentException expected)
-      {
-         // TODO: Make sure this is due to the missing dep
-      }
-   }
-
-   @Test
-   public void testDeployWithMcDependencyAlreadyMet() throws Throwable
-   {
-      context.rebind("java:test", "Test Value");
-      Deployment deployment = deployment("test1", getMetaDataType(), createMetaData("test"));
-      Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      deploy(dependencyDeployment);
-      assertNameNotFound("java:otherTest");
-      deploy(deployment);
-      assertContextValue("java:otherTest", "Test Value");
-      context.unbind("java:otherTest");
-      undeploy(dependencyDeployment, deployment);
-   }
-
-   @Test
-   public void testDeployWithMcDependencyInBatchOrdered() throws Throwable
-   {
-      context.rebind("java:test", "Test Value");
-      Deployment envDeployment = deployment("test1", getMetaDataType(), createMetaData("test"));
-      Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:otherTest");
-      deploy(dependencyDeployment, envDeployment);
-      assertContextValue("java:otherTest", "Test Value");
-      context.unbind("java:otherTest");
-      undeploy(dependencyDeployment, envDeployment);
-   }
-
-   @Test
-   public void testDeployWithMcDependencyInBatchUnOrdered() throws Throwable
-   {
-      context.rebind("java:test", "Test Value");
-      Deployment envDeployment = deployment("test1", getMetaDataType(), createMetaData("test"));
-      Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:otherTest");
-      deploy(envDeployment, dependencyDeployment);
-      assertContextValue("java:otherTest", "Test Value");
-      context.unbind("java:otherTest");
-      undeploy(envDeployment, dependencyDeployment);
-   }
-
-   private EnvironmentProcessor<DeploymentUnit> getEnvironmentProcessor()
-   {
-      EnvironmentProcessor<DeploymentUnit> environmentProcessor = new EnvironmentProcessor<DeploymentUnit>();
-      environmentProcessor.addResolver(createMockResolver(EJBReferenceMetaData.class, new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test")));
-      return environmentProcessor;
-   }
-
-   private <M> Resolver<M, DeploymentUnit> createMockResolver(final Class<M> type, final ResolverResult defaultResult)
+   public <M> Resolver<M, DeploymentUnit> createMockResolver(final Class<M> type)
    {
       return new Resolver<M, DeploymentUnit>()
       {
@@ -248,25 +126,9 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
 
          public ResolverResult resolve(final DeploymentUnit deploymentUnit, final M metaData)
          {
-            return defaultResult;
+            return new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test");
          }
       };
-   }
-
-   private DeploymentUnit createMockDeploymentUnit()
-   {
-      DeploymentContext deploymentContext = new AbstractDeploymentContext("deploymentUnit", "");
-      DeploymentUnit deploymentUnit = new AbstractDeploymentUnit(deploymentContext);
-      return deploymentUnit;
-   }
-
-   protected abstract M createMetaData(String metaDatName);
-
-   private <T> T getPrivateField(Object object, String fieldName, Class<T> type) throws Exception
-   {
-      Field field = object.getClass().getDeclaredField(fieldName);
-      field.setAccessible(true);
-      return (T) field.get(object);
    }
 
    protected static void deploy(Deployment... deployments) throws DeploymentException
@@ -279,20 +141,26 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
       mainDeployer.undeploy(deployments);
    }
 
-   protected static <T> Deployment deployment(String name, Class<T> attachmentType, T attachment)
+   protected static Deployment createDeployment(String name)
    {
       try
       {
          VirtualFile root = VFS.getChild(name);
          VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(root);
-         MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
-         attachments.addAttachment(attachmentType, attachment);
          return deployment;
       }
       catch(Exception e)
       {
          throw new RuntimeException(e);
       }
+   }
+
+   protected Deployment createDeployment(final String name, final Class<BeanMetaData> beanMetaDataClass, final BeanMetaData beanMetaData)
+   {
+      final Deployment deployment = createDeployment(name);
+      MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
+      attachments.addAttachment(beanMetaDataClass, beanMetaData);
+      return deployment;
    }
 
    /**
@@ -372,5 +240,11 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
       } catch(NamingException expected)
       {
       }
+   }
+
+   protected void unbind(String... names) throws NamingException
+   {
+      for(String name : names)
+         context.unbind(name);
    }
 }

@@ -21,8 +21,8 @@
  */
 package org.jboss.injection.naming.test.deployer.unit;
 
-import org.jboss.injection.naming.deployer.EJBSwitchBoardOperatorDeployer;
-import org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer;
+import org.jboss.deployers.client.spi.Deployment;
+import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
@@ -35,27 +35,16 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOperatorDeployerTestCase<JBossMetaData>
+public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperatorDeployerTestCase
 {
    @Override
-   protected Class<JBossMetaData> getMetaDataType()
+   protected void attachMetaData(Deployment deployment)
    {
-      return JBossMetaData.class;
-   }
-
-   @Override
-   protected SwitchBoardOperatorDeployer<JBossMetaData> getDeployer()
-   {
-      return new EJBSwitchBoardOperatorDeployer();
-   }
-
-   @Override
-   protected JBossMetaData createMetaData(final String name)
-   {
+      MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
       JBossMetaData jBossMetaData = mock(JBossMetaData.class);
       JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData = mock(JBossEnterpriseBeanMetaData.class);
-      when(jBossEnterpriseBeanMetaData.getKey()).thenReturn(name);
-      when(jBossEnterpriseBeanMetaData.getName()).thenReturn(name);
+      when(jBossEnterpriseBeanMetaData.getKey()).thenReturn("testBean");
+      when(jBossEnterpriseBeanMetaData.getName()).thenReturn("testBean");
 
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
@@ -68,6 +57,7 @@ public class EJBSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOpera
       jBossEnterpriseBeansMetaData.add(jBossEnterpriseBeanMetaData);
 
       when(jBossMetaData.getEnterpriseBeans()).thenReturn(jBossEnterpriseBeansMetaData);
-      return jBossMetaData;
+
+      attachments.addAttachment(JBossMetaData.class, jBossMetaData);
    }
 }

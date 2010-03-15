@@ -26,6 +26,7 @@ import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.inject.InjectorFactory;
@@ -35,10 +36,15 @@ import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.spi.ValueRetriever;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.ResolverResult;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
+import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.metadata.web.jboss.JBossWebMetaData;
 
 import javax.naming.Context;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,42 +52,87 @@ import java.util.List;
  *
  * @author <a href=mailto:"jbailey@redhat.com">John Bailey</a>
  */
-public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
+public class SwitchBoardOperatorDeployer extends AbstractRealDeployer
 {
-
    private EnvironmentProcessor<DeploymentUnit> environmentProcessor;
 
-   public SwitchBoardOperatorDeployer(Class<M> metadataClass)
+   public SwitchBoardOperatorDeployer()
    {
-      super(metadataClass);
+      // We need to look for both EJB and WEB Metadata
+      addInput(JBossMetaData.class);
+      addInput(JBossWebMetaData.class);
       setOutput(BeanMetaData.class);
    }
 
    @Override
-   public void deploy(final DeploymentUnit unit, final M deployment) throws DeploymentException
+   protected void internalDeploy(final DeploymentUnit unit) throws DeploymentException
    {
-      final List<NamedEnvironment> nameEnvironments = getEnvironments(deployment);
-      for(NamedEnvironment nameEnvironment : nameEnvironments)
+      if(unit.isAttachmentPresent(JBossWebMetaData.class))
       {
-         deploy(unit, deployment, nameEnvironment);
+         final JBossWebMetaData jBossWebMetaData = unit.getAttachment(JBossWebMetaData.class);
+         deploy(unit, jBossWebMetaData);
+      }
+      else if(unit.isAttachmentPresent(JBossMetaData.class))
+      {
+         final JBossMetaData jBossMetaData = unit.getAttachment(JBossMetaData.class);
+         deploy(unit, jBossMetaData);
       }
    }
 
-   protected abstract List<NamedEnvironment> getEnvironments(M deployment);
-
-   protected void deploy(final DeploymentUnit unit, final M metaData, final NamedEnvironment namedEnvironment) throws DeploymentException
+   /**
+    * Deploy with EJB metadata only.  Will create a separate switchboard for each component.
+    *
+    * @param unit       Deployment
+    * @param deployment
+    * @throws DeploymentException
+    */
+   protected void deploy(final DeploymentUnit unit, final JBossMetaData deployment) throws DeploymentException
    {
-      final String name = "jboss:service=SwitchBoardOperator,name=" + namedEnvironment.name + ",deployment=" + unit.getName();
+      final JBossEnterpriseBeansMetaData jBossEnterpriseBeansMetaData = deployment.getEnterpriseBeans();
+      for(JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData : jBossEnterpriseBeansMetaData)
+      {
+         deploy(unit, jBossEnterpriseBeanMetaData.getName(), Collections.singletonList((Environment)jBossEnterpriseBeanMetaData));
+      }
+   }
+
+    /**
+    * Deploy with WEB (and maybe EJB) metadata.  Will create a single switchboard for all components.
+    *
+    * @param unit       Deployment
+    * @param deployment
+    * @throws DeploymentException
+    */
+   protected void deploy(final DeploymentUnit unit, final JBossWebMetaData deployment) throws DeploymentException
+   {
+      final List<Environment> environments = new ArrayList<Environment>();
+      environments.add(deployment.getJndiEnvironmentRefsGroup());
+
+      if(unit.isAttachmentPresent(JBossMetaData.class))
+      {
+         final JBossMetaData jBossMetaData = unit.getAttachment(JBossMetaData.class);
+         environments.addAll(jBossMetaData.getEnterpriseBeans());
+      }
+      deploy(unit, deployment.getDescriptionGroup().getDisplayName(), environments);
+   }
+
+   protected void deploy(final DeploymentUnit unit, String componentName, final List<Environment> environments) throws DeploymentException
+   {
+      final String name = "jboss:service=SwitchBoardOperator,component=" + componentName + ",deployment=" + unit.getName();
 
       final EnvironmentProcessor<DeploymentUnit> environmentProcessor = getEnvironmentProcessor();
       if(environmentProcessor == null)
          throw new IllegalStateException("SwitchBoardOperator deployers require an EnvironmentPorcessor, which has not been set.");
 
-      final List<ResolverResult> resolverResults = environmentProcessor.process(unit, namedEnvironment.environment);
-
-      if(resolverResults != null && !resolverResults.isEmpty())
+      final List<ResolverResult> allResults = new ArrayList<ResolverResult>();
+      for(Environment environment : environments)
       {
-         final BeanMetaData beanMetaData = createBeanMetaData(name, resolverResults);
+         final List<ResolverResult> resolverResults = environmentProcessor.process(unit, environment);
+         allResults.addAll(resolverResults);
+      }
+
+      if(!allResults.isEmpty())
+      {
+         final BeanMetaData beanMetaData = createBeanMetaData(name, allResults);
          unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + name, beanMetaData, BeanMetaData.class);
       }
    }
@@ -120,14 +171,15 @@ public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealD
    {
       return environmentProcessor;
    }
-
+   
    @Inject
    public void setEnvironmentProcessor(final EnvironmentProcessor<DeploymentUnit> environmentProcessor)
    {
       this.environmentProcessor = environmentProcessor;
    }
 
-   protected class NamedEnvironment {
+   protected class NamedEnvironment
+   {
       private final String name;
       private final Environment environment;
 

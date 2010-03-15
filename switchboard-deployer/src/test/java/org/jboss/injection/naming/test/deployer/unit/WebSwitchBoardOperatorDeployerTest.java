@@ -21,12 +21,8 @@
  */
 package org.jboss.injection.naming.test.deployer.unit;
 
-import org.jboss.injection.naming.deployer.EJBSwitchBoardOperatorDeployer;
-import org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer;
-import org.jboss.injection.naming.deployer.WebSwitchBoardOperatorDeployer;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
-import org.jboss.metadata.ejb.jboss.JBossMetaData;
+import org.jboss.deployers.client.spi.Deployment;
+import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.metadata.javaee.spec.DescriptionGroupMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
@@ -39,23 +35,12 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class WebSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOperatorDeployerTestCase<JBossWebMetaData>
+public class WebSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperatorDeployerTestCase
 {
    @Override
-   protected Class<JBossWebMetaData> getMetaDataType()
+   protected void attachMetaData(Deployment deployment)
    {
-      return JBossWebMetaData.class;
-   }
-
-   @Override
-   protected SwitchBoardOperatorDeployer<JBossWebMetaData> getDeployer()
-   {
-      return new WebSwitchBoardOperatorDeployer();
-   }
-
-   @Override
-   protected JBossWebMetaData createMetaData(final String name)
-   {
+      MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
       referenceMetaData.setEjbRefName("testRef");
@@ -68,10 +53,10 @@ public class WebSwitchBoardOperatorDeployerTest extends AbstractSwitchBoardOpera
       when(jBossWebMetaData.getJndiEnvironmentRefsGroup()).thenReturn(environment);
 
       DescriptionGroupMetaData descriptionGroupMetaData = mock(DescriptionGroupMetaData.class);
-      when(descriptionGroupMetaData.getDisplayName()).thenReturn(name);
+      when(descriptionGroupMetaData.getDisplayName()).thenReturn("Test War");
 
       when(jBossWebMetaData.getDescriptionGroup()).thenReturn(descriptionGroupMetaData);
 
-      return jBossWebMetaData;
+      attachments.addAttachment(JBossWebMetaData.class, jBossWebMetaData);
    }
 }
