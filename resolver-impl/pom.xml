@@ -38,6 +38,12 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.jboss.injection</groupId>
+            <artifactId>jboss-injection-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${version.junit}</version>

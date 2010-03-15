@@ -20,4 +20,14 @@
     <name>JBoss Resolver SPI</name>
     <url>http://www.jboss.org</url>
     <description>Resolver SPI</description>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.injection</groupId>
+            <artifactId>jboss-injection-spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>

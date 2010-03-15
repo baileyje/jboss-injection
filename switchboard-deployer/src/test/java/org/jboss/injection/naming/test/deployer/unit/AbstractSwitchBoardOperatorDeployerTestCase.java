@@ -46,7 +46,8 @@ import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer;
-import org.jboss.injection.resolve.enc.EnvironmentProcessor;
+import org.jboss.injection.resolve.naming.EnvironmentProcessor;
+import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.kernel.spi.dependency.KernelController;
@@ -117,7 +118,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
    public void deployMockResolver() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("MockResolver", Resolver.class.getName());
-      Resolver<EJBReferenceMetaData, DeploymentUnit> resolver = createMockResolver(EJBReferenceMetaData.class, new ResolverResult("java:test", "java:otherTest", "mc-bean-test"));
+      Resolver<EJBReferenceMetaData, DeploymentUnit> resolver = createMockResolver(EJBReferenceMetaData.class, new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test"));
       builder.setConstructorValue(resolver);
       deployBean(builder.getBeanMetaData());
    }
@@ -194,13 +195,13 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
    {
       context.rebind("java:test", "Test Value");
       Deployment deployment = deployment("test1", getMetaDataType(), createMetaData("test"));
-      deployBean(BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      deploy(dependencyDeployment);
       assertNameNotFound("java:otherTest");
       deploy(deployment);
       assertContextValue("java:otherTest", "Test Value");
-      undeployBean("mc-bean-test");
       context.unbind("java:otherTest");
-      undeploy(deployment);
+      undeploy(dependencyDeployment, deployment);
    }
 
    @Test
@@ -210,7 +211,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
       Deployment envDeployment = deployment("test1", getMetaDataType(), createMetaData("test"));
       Deployment dependencyDeployment = deployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:otherTest");
-      deploy(envDeployment, dependencyDeployment);
+      deploy(dependencyDeployment, envDeployment);
       assertContextValue("java:otherTest", "Test Value");
       context.unbind("java:otherTest");
       undeploy(dependencyDeployment, envDeployment);
@@ -232,7 +233,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase<M>
    private EnvironmentProcessor<DeploymentUnit> getEnvironmentProcessor()
    {
       EnvironmentProcessor<DeploymentUnit> environmentProcessor = new EnvironmentProcessor<DeploymentUnit>();
-      environmentProcessor.addResolver(createMockResolver(EJBReferenceMetaData.class, new ResolverResult("java:test", "java:otherTest", "mc-bean-test")));
+      environmentProcessor.addResolver(createMockResolver(EJBReferenceMetaData.class, new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test")));
       return environmentProcessor;
    }
 

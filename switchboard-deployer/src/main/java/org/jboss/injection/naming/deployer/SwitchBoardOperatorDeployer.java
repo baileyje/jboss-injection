@@ -30,17 +30,16 @@ import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.inject.InjectorFactory;
 import org.jboss.injection.inject.naming.ContextInjectionPoint;
-import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.naming.SwitchBoardOperator;
-import org.jboss.injection.resolve.enc.EnvironmentProcessor;
+import org.jboss.injection.inject.spi.ValueRetriever;
+import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.javaee.spec.Environment;
 
 import javax.naming.Context;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
@@ -94,7 +93,12 @@ public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealD
 
       for(ResolverResult resolverResult : resolverResults)
       {
-         builder.addDependency(resolverResult.getBeanName());
+         final String beanName = resolverResult.getBeanName();
+         if(beanName != null)
+         {
+            builder.addDependency(beanName);
+         }
+
       }
       return builder.getBeanMetaData();
    }
@@ -104,7 +108,9 @@ public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealD
       final List<Injector<Context>> injectors = new ArrayList<Injector<Context>>(resolverResults.size());
       for(ResolverResult resolverResult : resolverResults)
       {
-         final Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint(resolverResult.getRefName()), new LinkRefValueRetriever(resolverResult.getJndiName()));
+         final ContextInjectionPoint injectionPoint = new ContextInjectionPoint(resolverResult.getRefName());
+         final ValueRetriever valueRetriever = resolverResult.getValueRetriever();
+         final Injector<Context> injector = InjectorFactory.create(injectionPoint, valueRetriever);
          injectors.add(injector);
       }
       return new SwitchBoardOperator(injectors);

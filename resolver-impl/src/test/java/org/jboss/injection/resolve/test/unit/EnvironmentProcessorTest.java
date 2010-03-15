@@ -22,9 +22,11 @@
 package org.jboss.injection.resolve.test.unit;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.resolve.enc.EnvironmentProcessor;
+import org.jboss.injection.inject.naming.ContextValueRetriever;
+import org.jboss.injection.resolve.naming.EnvironmentProcessor;
+import org.jboss.injection.resolve.naming.ReferenceResolverResult;
+import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
-import org.jboss.injection.resolve.test.support.PassThroughResolver;
 import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.DataSourceMetaData;
 import org.jboss.metadata.javaee.spec.DataSourcesMetaData;
@@ -60,7 +62,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EnvironmentProcessorTest
+public class EnvironmentProcessorTest extends AbstractResolverTestCase
 {
 
    @Test
@@ -86,15 +88,27 @@ public class EnvironmentProcessorTest
       {
       }
 
-      processor.addResolver(new PassThroughResolver<EJBReferenceMetaData>(EJBReferenceMetaData.class, "testBean", "java:testBean", "java:comp/testBean"));
+      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit>() {
+         public Class<EJBReferenceMetaData> getMetaDataType()
+         {
+            return EJBReferenceMetaData.class;
+         }
+
+         public ResolverResult resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
+         {
+            return new ReferenceResolverResult("java:comp/testBean", "testBean", "java:testBean");
+         }
+      });
 
       DeploymentUnit unit = mock(DeploymentUnit.class);
 
       List<ResolverResult> results = processor.process(unit, environment);
       Assert.assertNotNull(results);
       Assert.assertEquals(1, results.size());
-      Assert.assertEquals("testBean", results.get(0).getBeanName());
-      Assert.assertEquals("java:testBean", results.get(0).getJndiName());
+      ResolverResult result = results.get(0);
+      Assert.assertEquals("java:comp/testBean", result.getRefName());
+      Assert.assertEquals("testBean", result.getBeanName());
+      Assert.assertEquals("java:testBean", getPrivateField(result.getValueRetriever(), "jndiName"));
    }
 
    private static class MockEnvironment implements Environment

@@ -22,10 +22,13 @@
 package org.jboss.injection.resolve.test.ejb.unit;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.resolve.enc.EnvironmentProcessor;
+import org.jboss.injection.inject.naming.ContextValueRetriever;
+import org.jboss.injection.resolve.naming.EnvironmentProcessor;
+import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.injection.resolve.test.ejb.YASessionBean;
+import org.jboss.injection.resolve.test.unit.AbstractResolverTestCase;
 import org.jboss.metadata.annotation.creator.ejb.jboss.JBoss50Creator;
 import org.jboss.metadata.annotation.finder.AnnotationFinder;
 import org.jboss.metadata.annotation.finder.DefaultAnnotationFinder;
@@ -48,7 +51,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class EJBContextTestCase
+public class EJBContextTestCase extends AbstractResolverTestCase
 {
    private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit>
    {
@@ -65,7 +68,7 @@ public class EJBContextTestCase
             Class<?> type = unit.getClassLoader().loadClass(metaData.getType());
             if(EJBContext.class.isAssignableFrom(type))
             {
-               return new ResolverResult("java:comp/EJBContext", metaData.getResourceEnvRefName(), null);
+               return new ReferenceResolverResult(metaData.getResourceEnvRefName(), null, "java:comp/EJBContext");
             }
             throw new RuntimeException("NYI");
          }
@@ -77,7 +80,7 @@ public class EJBContextTestCase
    }
 
    @Test
-   public void test1()
+   public void test1() throws Exception
    {
       // I'm too lazy to setup some metadata myself
       AnnotationFinder<AnnotatedElement> finder = new DefaultAnnotationFinder<AnnotatedElement>();
@@ -94,6 +97,7 @@ public class EJBContextTestCase
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
       processor.addResolver(new ResourceEnvRefResolver());
       List<ResolverResult> result = processor.process(unit, environment);
-      assertEquals("java:comp/EJBContext", result.get(0).getJndiName());
+      assertEquals("org.jboss.injection.resolve.test.ejb.YASessionBean/ctx", result.get(0).getRefName());
+      assertEquals("java:comp/EJBContext", getPrivateField(result.get(0).getValueRetriever(), "jndiName"));
    }
 }

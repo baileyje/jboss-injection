@@ -5,7 +5,7 @@
     <bean name="WebSwitchBoardOperatorDeployer"
           class="org.jboss.injection.naming.deployer.WebSwitchBoardOperatorDeployer"/>
 
-    <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.enc.EnvironmentProcessor">
+    <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.naming.EnvironmentProcessor">
         <incallback method="addResolver"/>
     </bean>
 </deployment>

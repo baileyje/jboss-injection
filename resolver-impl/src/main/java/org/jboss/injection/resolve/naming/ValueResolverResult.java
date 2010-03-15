@@ -19,42 +19,33 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.test.support;
+package org.jboss.injection.resolve.naming;
 
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.resolve.spi.Resolver;
+import org.jboss.injection.inject.spi.ValueRetriever;
 import org.jboss.injection.resolve.spi.ResolverResult;
 
 /**
- * PassThroughResolver -
+ * ResolverResult implementation that support simple value references.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
- * @version $Revision$
  */
-public class PassThroughResolver<M> implements Resolver<M, DeploymentUnit>
+public class ValueResolverResult<V> extends ResolverResult
 {
-   private final Class<M> metaDataType;
-   private final String beanName;
-   private final String globalJndiName;
-   private final String encJndiName;
-
-   public PassThroughResolver(Class<M> metaDataType, final String beanName, final String globalJndiName, final String encJndiName)
+   /**
+    * Creates a new instance
+    *
+    * @param refName The reference JNDI NAME
+    * @param beanName The MC bean name to this depends on
+    * @param value The value of the reference
+    */
+   public ValueResolverResult(final String refName, final String beanName, final V value)
    {
-      this.metaDataType = metaDataType;
-      this.beanName = beanName;
-      this.globalJndiName = globalJndiName;
-      this.encJndiName = encJndiName;
-   }
-
-   public Class<M> getMetaDataType()
-   {
-      return metaDataType;
-   }
-
-   public ResolverResult resolve(DeploymentUnit unit, final Object metaData)
-   {
-      if(unit == null)
-         throw new IllegalArgumentException("unit is null");
-      return new ResolverResult(globalJndiName, encJndiName, beanName);
+      super(refName, beanName, new ValueRetriever<V>()
+      {
+         public V getValue()
+         {
+            return value;
+         }
+      });
    }
 }

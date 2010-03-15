@@ -19,54 +19,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.resolve.spi;
+package org.jboss.injection.resolve.naming;
 
-import org.jboss.injection.inject.spi.ValueRetriever;
+import org.jboss.injection.inject.naming.LinkRefValueRetriever;
+import org.jboss.injection.resolve.spi.ResolverResult;
 
 /**
- * The results of executing a Resolver.
+ * ResolverResult implementation that supports JNDI based references.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ResolverResult
+public class ReferenceResolverResult extends ResolverResult
 {
-   private ValueRetriever<?> valueRetriever;
-   private String refName;
-   private String beanName;
-
-   public ResolverResult(String refName, String beanName, ValueRetriever<?> valueRetriever)
-   {
-      this.valueRetriever = valueRetriever;
-      this.refName = refName;
-      this.beanName = beanName;
-   }
-
    /**
-    * Get the value retriever to use when injecting the reference.
+    * Creates a new instance
     *
-    * @return The value retriever to use a injection time
+    * @param refName The reference JNDI NAME
+    * @param beanName The MC bean name to this depends on
+    * @param targetJndiName The JNDI name to target
     */
-   public ValueRetriever<?> getValueRetriever()
+   public ReferenceResolverResult(final String refName, final String beanName, String targetJndiName)
    {
-      return valueRetriever;
-   }
-
-   /**
-    * Get the resolved MC bean name that is required before injecting the resolved reference.
-    *
-    * @return The MC bean name
-    */
-   public String getBeanName()
-   {
-      return beanName;
-   }
-
-   /**
-    * Get the reference name.
-    * Since a resolver knows the reference name, this allows polymorphic access.
-    */
-   public String getRefName()
-   {
-      return refName;
+      super(refName, beanName, new LinkRefValueRetriever(targetJndiName));
    }
 }

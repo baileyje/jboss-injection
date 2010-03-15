@@ -37,12 +37,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jboss.injection</groupId>
-            <artifactId>jboss-resolver-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.jboss.deployers</groupId>
             <artifactId>jboss-deployers-structure-spi</artifactId>
             <version>${version.jboss.deployers}</version>
