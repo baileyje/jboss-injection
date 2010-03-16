@@ -59,5 +59,7 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       when(jBossMetaData.getEnterpriseBeans()).thenReturn(jBossEnterpriseBeansMetaData);
 
       attachments.addAttachment(JBossMetaData.class, jBossMetaData);
+
+      defaultMockEnvironment = jBossEnterpriseBeanMetaData;
    }
 }

@@ -58,5 +58,7 @@ public class WebSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       when(jBossWebMetaData.getDescriptionGroup()).thenReturn(descriptionGroupMetaData);
 
       attachments.addAttachment(JBossWebMetaData.class, jBossWebMetaData);
+
+      defaultMockEnvironment = environment;
    }
 }

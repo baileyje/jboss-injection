@@ -25,8 +25,18 @@ import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.injection.resolve.naming.ValueResolverResult;
+import org.jboss.injection.resolve.spi.Resolver;
+import org.jboss.injection.resolve.spi.ResolverResult;
+import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
+import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * BasicSwitchBoardOperatorDeployerTestCase -
@@ -35,6 +45,8 @@ import org.junit.Test;
  */
 public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractSwitchBoardOperatorDeployerTestCase
 {
+   protected Environment defaultMockEnvironment;
+
    @Test
    public void testDeployWithMcNoDependency() throws Throwable
    {
@@ -95,6 +107,46 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       assertContextValue("java:otherTest", "Test Value");
       unbind("java:otherTest", "java:test");
       undeploy(envDeployment, dependencyDeployment);
+   }
+
+   @Test
+   public void testNonLinkInjection() throws Throwable
+   {
+      Deployment deployment = createDeployment("test1");
+      attachMetaData(deployment);
+
+      EnvironmentEntriesMetaData environmentEntriesMetaData = new EnvironmentEntriesMetaData();
+
+      EnvironmentEntryMetaData environmentEntryMetaData = new EnvironmentEntryMetaData();
+      environmentEntryMetaData.setEnvEntryName("java:test");
+      environmentEntryMetaData.setType("java.lang.String");
+      environmentEntryMetaData.setValue("Test Value");
+
+      environmentEntriesMetaData.add(environmentEntryMetaData);
+      assertNotNull("defaultMockEnvironment must be set", defaultMockEnvironment);
+      when(defaultMockEnvironment.getEnvironmentEntries()).thenReturn(environmentEntriesMetaData);
+
+      Resolver<EnvironmentEntryMetaData, DeploymentUnit> resolver = new Resolver<EnvironmentEntryMetaData, DeploymentUnit>()
+      {
+         public Class<EnvironmentEntryMetaData> getMetaDataType()
+         {
+            return EnvironmentEntryMetaData.class;
+         }
+
+         public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
+         {
+            return new ValueResolverResult<String>(metaData.getEnvEntryName(), "mc-bean-test", metaData.getValue());
+         }
+      };
+
+      deployBean(BeanMetaDataBuilder.createBuilder("envEntryMetaDataResolver", Resolver.class.getName()).setConstructorValue(resolver).getBeanMetaData());
+
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+
+      assertNameNotFound("java:test");
+      deploy(dependencyDeployment, deployment);
+      assertContextValue("java:test", "Test Value");
+      undeploy(deployment, dependencyDeployment);
    }
 
    protected abstract void attachMetaData(Deployment deployment);
