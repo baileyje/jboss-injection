@@ -26,6 +26,7 @@
     <properties>
         <version.jboss.metadata.ejb>2.0.0-alpha-7</version.jboss.metadata.ejb>
         <version.jboss.metadata.war>2.0.0.Alpha13</version.jboss.metadata.war>
+        <version.jboss.reloaded.naming>0.1.0-alpha-2</version.jboss.reloaded.naming>
         <version.mockito>1.8.1</version.mockito>
     </properties>
 
@@ -101,6 +102,18 @@
             <groupId>org.jboss.metadata</groupId>
             <artifactId>jboss-metadata-war</artifactId>
             <version>${version.jboss.metadata.war}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.reloaded</groupId>
+            <artifactId>jboss-reloaded-naming</artifactId>
+            <version>${version.jboss.reloaded.naming}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.reloaded</groupId>
+            <artifactId>jboss-reloaded-naming-deployers</artifactId>
+            <version>${version.jboss.reloaded.naming}</version>
         </dependency>
 
         <!-- Test Dependencies -->
