@@ -35,7 +35,6 @@ import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
-import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
@@ -155,11 +154,11 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       }
    }
 
-   protected Deployment createDeployment(final String name, final Class<BeanMetaData> beanMetaDataClass, final BeanMetaData beanMetaData)
+   protected Deployment createDeployment(final String name, final BeanMetaData beanMetaData)
    {
       final Deployment deployment = createDeployment(name);
       MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
-      attachments.addAttachment(beanMetaDataClass, beanMetaData);
+      attachments.addAttachment(BeanMetaData.class, beanMetaData);
       return deployment;
    }
 

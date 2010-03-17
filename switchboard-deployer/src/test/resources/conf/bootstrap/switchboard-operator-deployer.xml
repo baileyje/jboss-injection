@@ -6,4 +6,6 @@
     <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.naming.EnvironmentProcessor">
         <incallback method="addResolver"/>
     </bean>
+
+    <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
 </deployment>

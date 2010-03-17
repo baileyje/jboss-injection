@@ -39,7 +39,8 @@ import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.naming.ThreadLocalStack;
-import org.junit.After;
+import org.jboss.reloaded.naming.spi.JavaEEComponent;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -86,8 +87,8 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       deploy(dependencyDeployment, dependencyDeploymentTwo);
 
       assertNoContextValues();
@@ -108,8 +109,8 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
 
       assertNoContextValues();
       deploy(dependencyDeployment, dependencyDeploymentTwo, envDeployment);
@@ -129,8 +130,8 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
 
       assertNoContextValues();
       deploy(envDeployment, dependencyDeployment, dependencyDeploymentTwo);
@@ -191,6 +192,15 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       when(jBossMetaData.getEnterpriseBeans()).thenReturn(jBossEnterpriseBeansMetaData);
 
       attachments.addAttachment(JBossMetaData.class, jBossMetaData);
+
+      JavaEEModule module = mock(JavaEEModule.class);
+      when(module.getContext()).thenReturn(context);
+
+      BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("JavaEEModule", JavaEEModule.class.getName())
+         .setConstructorValue(module)
+         .addAlias("java:module")
+         .getBeanMetaData();
+      attachments.addAttachment(BeanMetaData.class.getName() + ".JavaEEModule", beanMetaData);
    }
 
    private void bindContextValues() throws NamingException

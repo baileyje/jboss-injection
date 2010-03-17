@@ -21,7 +21,6 @@
  */
 package org.jboss.injection.naming.test.deployer.unit;
 
-import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.DeploymentException;
@@ -35,8 +34,8 @@ import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 /**
  * BasicSwitchBoardOperatorDeployerTestCase -
@@ -58,10 +57,12 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       {
          deploy(deployment);
          Assert.fail("Should have thrown an exception because of a missing dependency");
-      } catch(DeploymentException expected)
+      }
+      catch(DeploymentException expected)
       {
          // TODO: Make sure this is due to the missing dep
       }
+      undeploy(deployment);
    }
 
    @Test
@@ -71,7 +72,7 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       deploy(dependencyDeployment);
       assertNameNotFound("java:otherTest");
       deploy(deployment);
@@ -87,7 +88,7 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:otherTest");
       deploy(dependencyDeployment, envDeployment);
       assertContextValue("java:otherTest", "Test Value");
@@ -101,7 +102,7 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       context.rebind("java:test", "Test Value");
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:otherTest");
       deploy(envDeployment, dependencyDeployment);
       assertContextValue("java:otherTest", "Test Value");
@@ -141,7 +142,7 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
 
       deployBean(BeanMetaDataBuilder.createBuilder("envEntryMetaDataResolver", Resolver.class.getName()).setConstructorValue(resolver).getBeanMetaData());
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaData.class, BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
 
       assertNameNotFound("java:test");
       deploy(dependencyDeployment, deployment);

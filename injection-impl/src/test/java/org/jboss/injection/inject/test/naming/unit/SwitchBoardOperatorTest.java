@@ -26,7 +26,6 @@ import org.jboss.injection.inject.naming.ContextInjectionPoint;
 import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.naming.Context;
@@ -39,9 +38,8 @@ import java.util.Arrays;
  */
 public class SwitchBoardOperatorTest extends AbstractNamingTestCase
 {
-
    @Test
-   public void testEncPopulator() throws Exception
+   public void testSwitchBoardOperator() throws Exception
    {
       Injector<Context> injectorOne = InjectorFactory.create(
          new ContextInjectionPoint<String>("java:testOne"),
@@ -53,13 +51,13 @@ public class SwitchBoardOperatorTest extends AbstractNamingTestCase
          new ContextInjectionPoint<String>("java:testThree"),
          new SimpleValueRetriever("Test Value Three"));
 
-      SwitchBoardOperator encPopulator = new SwitchBoardOperator(Arrays.asList(injectorOne, injectorTwo, injectorThree));
+      SwitchBoardOperator switchBoardOperator = new SwitchBoardOperator(context, Arrays.asList(injectorOne, injectorTwo, injectorThree));
 
       assertNameNotFound("java:testOne");
       assertNameNotFound("java:testTwo");
       assertNameNotFound("java:testThree");
 
-      encPopulator.start();
+      switchBoardOperator.start();
 
       assertContextValue("java:testOne", "Test Value One");
       assertContextValue("java:testTwo", "Test Value Two");

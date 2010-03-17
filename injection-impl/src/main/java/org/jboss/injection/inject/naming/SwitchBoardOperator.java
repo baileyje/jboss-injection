@@ -3,27 +3,30 @@ package org.jboss.injection.inject.naming;
 import org.jboss.injection.inject.spi.Injector;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.List;
 
 /**
- * Populates an ENC context based on a set of Injectors
+ * Populates a Context based on a set of Injectors
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public class SwitchBoardOperator
 {
-
+   private final Context context;
    private final List<Injector<Context>> injectors;
 
    /**
-    * Create with the set of injectors
+    * Create with a context and set of injectors
     *
+    * @param context The context to populate
     * @param injectors Injectors used to populate the context
     */
-   public SwitchBoardOperator(final List<Injector<Context>> injectors)
+   public SwitchBoardOperator(final Context context, final List<Injector<Context>> injectors)
    {
+      if(context == null) throw new IllegalArgumentException("Context can not be null");
+      if(injectors == null) throw new IllegalArgumentException("Injectors must not be null");
+
+      this.context = context;
       this.injectors = injectors;
    }
 
@@ -34,29 +37,9 @@ public class SwitchBoardOperator
     */
    public void start() throws RuntimeException
    {
-      if(injectors == null)
-         return;
-      try
+      for(Injector<Context> injection : injectors)
       {
-         final Context enc = getEnc();
-         for(Injector<Context> injection : injectors)
-         {
-            injection.inject(enc);
-         }
-      } catch(NamingException exception)
-      {
-         throw new RuntimeException("Failed to populate ENC", exception);
+         injection.inject(context);
       }
-   }
-
-   /**
-    * Get the correct ENC.
-    *
-    * @return The ENC
-    * @throws NamingException if any problems occur obtaining the ENC
-    */
-   private Context getEnc() throws NamingException
-   {
-      return new InitialContext(); // TODO: Use ENCFactory or something
    }
 }

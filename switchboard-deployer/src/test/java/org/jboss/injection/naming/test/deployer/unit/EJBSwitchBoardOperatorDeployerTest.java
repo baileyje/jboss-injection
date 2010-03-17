@@ -21,6 +21,8 @@
  */
 package org.jboss.injection.naming.test.deployer.unit;
 
+import org.jboss.beans.metadata.spi.BeanMetaData;
+import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
@@ -28,6 +30,7 @@ import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
+import org.jboss.reloaded.naming.spi.JavaEEComponent;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,5 +64,14 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       attachments.addAttachment(JBossMetaData.class, jBossMetaData);
 
       defaultMockEnvironment = jBossEnterpriseBeanMetaData;
+
+      JavaEEComponent component = mock(JavaEEComponent.class);
+      when(component.getContext()).thenReturn(context);
+
+      BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("JavaEEComponent", JavaEEComponent.class.getName())
+         .setConstructorValue(component)
+         .addAlias("java:comp")
+         .getBeanMetaData();
+      attachments.addAttachment(BeanMetaData.class.getName() + ".JavaEEComponent", beanMetaData);
    }
 }

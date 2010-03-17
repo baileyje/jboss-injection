@@ -116,6 +116,12 @@
             <version>${version.jboss.reloaded.naming}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-common-core</artifactId>
+            <version>${version.jboss.common.core}</version>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -155,13 +161,6 @@
             <groupId>org.jboss.deployers</groupId>
             <artifactId>jboss-deployers-vfs</artifactId>
             <version>${version.jboss.deployers}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-common-core</artifactId>
-            <version>${version.jboss.common.core}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>

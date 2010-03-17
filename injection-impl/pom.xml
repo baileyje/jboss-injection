@@ -22,6 +22,10 @@
     <url>http://www.jboss.org</url>
     <description>JBoss Injection Implementation</description>
 
+    <properties>
+        <version.jboss.reloaded.naming>0.1.0-alpha-2</version.jboss.reloaded.naming>
+    </properties>
+
     <dependencies>
         <!-- Compile Dependencies -->
         <dependency>
@@ -70,6 +74,12 @@
             <groupId>org.jboss.metadata</groupId>
             <artifactId>jboss-metadata-common</artifactId>
             <version>${version.jboss.metadata.common}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.reloaded</groupId>
+            <artifactId>jboss-reloaded-naming</artifactId>
+            <version>${version.jboss.reloaded.naming}</version>
         </dependency>
 
         <!-- Test Dependencies -->
