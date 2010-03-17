@@ -22,41 +22,24 @@
 package org.jboss.injection.resolve.test.unit;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.inject.naming.ContextValueRetriever;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
+import org.jboss.injection.resolve.naming.ResolutionException;
+import org.jboss.injection.resolve.naming.ValueResolverResult;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
-import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
-import org.jboss.metadata.javaee.spec.DataSourceMetaData;
-import org.jboss.metadata.javaee.spec.DataSourcesMetaData;
-import org.jboss.metadata.javaee.spec.EJBLocalReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBLocalReferencesMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
-import org.jboss.metadata.javaee.spec.LifecycleCallbacksMetaData;
-import org.jboss.metadata.javaee.spec.MessageDestinationReferenceMetaData;
-import org.jboss.metadata.javaee.spec.MessageDestinationReferencesMetaData;
-import org.jboss.metadata.javaee.spec.PersistenceContextReferenceMetaData;
-import org.jboss.metadata.javaee.spec.PersistenceContextReferencesMetaData;
-import org.jboss.metadata.javaee.spec.PersistenceUnitReferenceMetaData;
-import org.jboss.metadata.javaee.spec.PersistenceUnitReferencesMetaData;
-import org.jboss.metadata.javaee.spec.ResourceEnvironmentReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ResourceEnvironmentReferencesMetaData;
-import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
-import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
-
+import static org.mockito.Mockito.when;
 /**
  * Test to ensure the functionality of the EnvironmentProcessor
  *
@@ -75,16 +58,18 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
 
       referencesMetaData.add(referenceMetaData);
 
-      Environment environment = new MockEnvironment(referencesMetaData);
-
+      Environment environment = mock(Environment.class);
+      when(environment.getEjbReferences()).thenReturn(referencesMetaData);
 
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
+      DeploymentUnit unit = mock(DeploymentUnit.class);
 
       try
       {
-         processor.process(environment);
+         processor.process(unit, environment);
          Assert.fail("Should throw exception if no Resolver can be found");
-      } catch(IllegalStateException expected)
+      }
+      catch(IllegalStateException expected)
       {
       }
 
@@ -96,144 +81,102 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
 
          public ResolverResult resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
          {
-            return new ReferenceResolverResult("java:comp/testBean", "testBean", "java:testBean");
+            return new ReferenceResolverResult("org.jboss.test.Bean.test", "testBean", "java:testBean");
          }
       });
-
-      DeploymentUnit unit = mock(DeploymentUnit.class);
 
       List<ResolverResult> results = processor.process(unit, environment);
       Assert.assertNotNull(results);
       Assert.assertEquals(1, results.size());
       ResolverResult result = results.get(0);
-      Assert.assertEquals("java:comp/testBean", result.getRefName());
+      Assert.assertEquals("org.jboss.test.Bean.test", result.getRefName());
       Assert.assertEquals("testBean", result.getBeanName());
       Assert.assertEquals("java:testBean", getPrivateField(result.getValueRetriever(), "jndiName"));
    }
 
-   private static class MockEnvironment implements Environment
+
+   @Test
+   public void testResolverWithNonConflictingEnvironmentEntries() throws Exception
    {
+      EnvironmentEntriesMetaData entriesMetaData = new EnvironmentEntriesMetaData();
+      EnvironmentEntryMetaData entryMetaData = new EnvironmentEntryMetaData();
+      entryMetaData.setType(String.class.getName());
+      entryMetaData.setValue("value");
+      entryMetaData.setEnvEntryName("test");
+      entriesMetaData.add(entryMetaData);
 
-      private final EJBReferencesMetaData ejbReferencesMetaData;
+      Environment environmentOne = mock(Environment.class);
+      when(environmentOne.getEnvironmentEntries()).thenReturn(entriesMetaData);
 
-      private MockEnvironment(final EJBReferencesMetaData ejbReferencesMetaData)
+      Environment environmentTwo = mock(Environment.class);
+      when(environmentTwo.getEnvironmentEntries()).thenReturn(entriesMetaData);
+
+      EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
+      DeploymentUnit unit = mock(DeploymentUnit.class);
+
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>() {
+         public Class<EnvironmentEntryMetaData> getMetaDataType()
+         {
+            return EnvironmentEntryMetaData.class;
+         }
+
+         public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
+         {
+            return new ValueResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
+         }
+      });
+
+
+      List<ResolverResult> result = processor.process(unit, environmentOne, environmentTwo);
+      Assert.assertEquals(1, result.size());
+   }
+
+ @Test
+   public void testResolverWithConflictingEnvironmentEntries() throws Exception
+   {
+      EnvironmentEntriesMetaData entriesMetaData = new EnvironmentEntriesMetaData();
+      EnvironmentEntryMetaData entryMetaData = new EnvironmentEntryMetaData();
+      entryMetaData.setType(String.class.getName());
+      entryMetaData.setValue("value");
+      entryMetaData.setEnvEntryName("test");
+      entriesMetaData.add(entryMetaData);
+
+      Environment environmentOne = mock(Environment.class);
+      when(environmentOne.getEnvironmentEntries()).thenReturn(entriesMetaData);
+
+      entriesMetaData = new EnvironmentEntriesMetaData();
+      entryMetaData = new EnvironmentEntryMetaData();
+      entryMetaData.setType(String.class.getName());
+      entryMetaData.setValue("other value");
+      entryMetaData.setEnvEntryName("test");
+      entriesMetaData.add(entryMetaData);
+
+      Environment environmentTwo = mock(Environment.class);
+      when(environmentTwo.getEnvironmentEntries()).thenReturn(entriesMetaData);
+
+      EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
+      DeploymentUnit unit = mock(DeploymentUnit.class);
+
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>() {
+         public Class<EnvironmentEntryMetaData> getMetaDataType()
+         {
+            return EnvironmentEntryMetaData.class;
+         }
+
+         public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
+         {
+            return new ValueResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
+         }
+      });
+
+
+      try
       {
-         this.ejbReferencesMetaData = ejbReferencesMetaData;
+         processor.process(unit, environmentOne, environmentTwo);
+         Assert.fail("Should have thrown ResolutionException based on conflicting references");
       }
-
-      public DataSourceMetaData getDataSourceByName(final String name)
+      catch(ResolutionException expected)
       {
-         return null;
-      }
-
-      public EJBLocalReferencesMetaData getEjbLocalReferences()
-      {
-         return null;
-      }
-
-      public EJBLocalReferenceMetaData getEjbLocalReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public PersistenceContextReferencesMetaData getPersistenceContextRefs()
-      {
-         return null;
-      }
-
-      public PersistenceContextReferenceMetaData getPersistenceContextReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public DataSourcesMetaData getDataSources()
-      {
-         return null;
-      }
-
-      public EnvironmentEntriesMetaData getEnvironmentEntries()
-      {
-         return null;
-      }
-
-      public EnvironmentEntryMetaData getEnvironmentEntryByName(final String name)
-      {
-         return null;
-      }
-
-      public EJBReferencesMetaData getEjbReferences()
-      {
-         return ejbReferencesMetaData;
-      }
-
-      public AnnotatedEJBReferencesMetaData getAnnotatedEjbReferences()
-      {
-         return null;
-      }
-
-      public EJBReferenceMetaData getEjbReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public ServiceReferencesMetaData getServiceReferences()
-      {
-         return null;
-      }
-
-      public ServiceReferenceMetaData getServiceReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public ResourceReferencesMetaData getResourceReferences()
-      {
-         return null;
-      }
-
-      public ResourceReferenceMetaData getResourceReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public ResourceEnvironmentReferencesMetaData getResourceEnvironmentReferences()
-      {
-         return null;
-      }
-
-      public ResourceEnvironmentReferenceMetaData getResourceEnvironmentReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public MessageDestinationReferencesMetaData getMessageDestinationReferences()
-      {
-         return null;
-      }
-
-      public MessageDestinationReferenceMetaData getMessageDestinationReferenceByName(final String name)
-      {
-         return null;
-      }
-
-      public LifecycleCallbacksMetaData getPostConstructs()
-      {
-         return null;
-      }
-
-      public LifecycleCallbacksMetaData getPreDestroys()
-      {
-         return null;
-      }
-
-      public PersistenceUnitReferencesMetaData getPersistenceUnitRefs()
-      {
-         return null;
-      }
-
-      public PersistenceUnitReferenceMetaData getPersistenceUnitReferenceByName(final String name)
-      {
-         return null;
       }
    }
 }

@@ -35,6 +35,7 @@ import org.jboss.metadata.javaee.spec.ResourceInjectionMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,11 +51,11 @@ import java.util.Map;
  */
 public class EnvironmentProcessor<C>
 {
-   private static final Logger log = Logger.getLogger("org.jboss.injection.resolve"); 
+   private static final Logger log = Logger.getLogger("org.jboss.injection.resolve");
 
    private Map<Class<?>, Resolver<?, C>> resolvers;
 
-   private boolean allowMissingResolver; 
+   private boolean allowMissingResolver;
 
    /**
     * Construct a new processor.  There will be no resolvers available.
@@ -77,54 +78,56 @@ public class EnvironmentProcessor<C>
    /**
     * Processes the Environment and returns the resolver results.
     *
-    * @param environment An Environment to process references for
+    * @param context The context in which to resolve (usually DeploymentUnit)
+    * @param environments Environments to process references for
     * @return The resolver results
-    * @deprecated specifying a context will become mandatory
     */
-   @Deprecated
-   public List<ResolverResult> process(Environment environment)
+   public List<ResolverResult> process(C context, Environment... environments) throws ResolutionException
    {
-      return process(null, environment);
+      return process(context, Arrays.asList(environments));
    }
 
    /**
     * Processes the Environment and returns the resolver results.
     *
-    * @param context     the context in which to resolve (usually DeploymentUnit)
-    * @param environment An Environment to process references for
+    * @param context The context in which to resolve (usually DeploymentUnit)
+    * @param environments Environments to process references for
     * @return The resolver results
     */
-   public List<ResolverResult> process(C context, Environment environment)
-   {
-      final List<ResolverResult> results = new LinkedList<ResolverResult>();
+   public List<ResolverResult> process(C context, Iterable<Environment> environments) throws ResolutionException {
+      final MappedResults mappedresults = new MappedResults();
 
-      // TODO: configurable via visitors
-      // references
-      process(context, environment.getEjbLocalReferences(), EJBLocalReferenceMetaData.class, results);
-      process(context, environment.getEjbReferences(), EJBReferenceMetaData.class, results);
-      process(context, environment.getEnvironmentEntries(), EnvironmentEntryMetaData.class, results);
-      process(context, environment.getMessageDestinationReferences(), MessageDestinationReferenceMetaData.class, results);
-      process(context, environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, results);
-      process(context, environment.getResourceReferences(), ResourceReferenceMetaData.class, results);
-      process(context, environment.getResourceEnvironmentReferences(), ResourceEnvironmentReferenceMetaData.class, results);
-      process(context, environment.getServiceReferences(), ServiceReferenceMetaData.class, results);
+      for(Environment environment : environments)
+      {
+         // TODO: configurable via visitors
+         // references
+         process(context, environment.getEjbLocalReferences(), EJBLocalReferenceMetaData.class, mappedresults);
+         process(context, environment.getEjbReferences(), EJBReferenceMetaData.class, mappedresults);
+         process(context, environment.getEnvironmentEntries(), EnvironmentEntryMetaData.class, mappedresults);
+         process(context, environment.getMessageDestinationReferences(), MessageDestinationReferenceMetaData.class, mappedresults);
+         process(context, environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, mappedresults);
+         process(context, environment.getResourceReferences(), ResourceReferenceMetaData.class, mappedresults);
+         process(context, environment.getResourceEnvironmentReferences(), ResourceEnvironmentReferenceMetaData.class, mappedresults);
+         process(context, environment.getServiceReferences(), ServiceReferenceMetaData.class, mappedresults);
 
-      // TODO: data sources
-      // environment.getDataSources()
-      return results;
+         // TODO: data sources
+         // environment.getDataSources()
+      }
+      return mappedresults.results;
    }
 
-   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(C context, M references, Class<T> childType, List<ResolverResult> results)
+
+   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(C context, M references, Class<T> childType, MappedResults mappedresults) throws ResolutionException
    {
       if(references == null)
          return;
       for(T reference : references)
       {
-         process(context, reference, childType, results);
+         process(context, reference, childType, mappedresults);
       }
    }
 
-   protected <M extends ResourceInjectionMetaData> void process(C context, M reference, Class<M> referenceType, List<ResolverResult> results)
+   protected <M extends ResourceInjectionMetaData> void process(C context, M reference, Class<M> referenceType, MappedResults mappedresults) throws ResolutionException
    {
       if(reference == null)
          return;
@@ -146,8 +149,8 @@ public class EnvironmentProcessor<C>
 
       final ResolverResult result = resolver.resolve(context, reference);
       if(result == null)
-         throw new RuntimeException("Found reference [" + reference + "] but resolution failed to produce a result");
-      results.add(result);
+         throw new ResolutionException("Found reference [" + reference + "] but resolution failed to produce a result");
+      mappedresults.add(resolver, reference, result);
    }
 
    @SuppressWarnings("unchecked")
@@ -165,5 +168,56 @@ public class EnvironmentProcessor<C>
    public void setAllowMissingResolver(final boolean allowMissingResolver)
    {
       this.allowMissingResolver = allowMissingResolver;
+   }
+
+   private static class MappedResults<M, C>
+   {
+      private final Map<String, M> referenceMap = new HashMap<String, M>();
+      private final List<ResolverResult> results = new LinkedList<ResolverResult>();
+
+      public void add(final Resolver<M, ?> resolver, final M newReference, final ResolverResult result) throws ResolutionException
+      {
+         M previousRef = referenceMap.put(result.getRefName(), newReference);
+         if(previousRef == null)
+         {
+            results.add(result);
+         }
+         else
+         {
+            checkForConflict(previousRef, newReference);
+         }
+      }
+
+      /**
+       * This method is used to determine if two environment entries
+       * that resolve to the same JNDI reference point are interchangeable.
+       * This method will be called anytime there are duplicate ResolverResults
+       * created from separate references.
+       *
+       * TODO: Update to check shareable and authentication @see EE.6 5.2.2
+       *
+       * @param previousReference The previous reference
+       * @param newReference The new reference
+       * @Throws ResolutionException if a the reference conflict with one another
+       */
+      private void checkForConflict(M previousReference, M newReference) throws ResolutionException
+      {
+         if(newReference instanceof EnvironmentEntryMetaData)
+         {
+            final EnvironmentEntryMetaData newEnvironmentEntry = EnvironmentEntryMetaData.class.cast(newReference);
+            final EnvironmentEntryMetaData previousEnvironmentEntry = EnvironmentEntryMetaData.class.cast(previousReference);
+
+            boolean conflict = !newEnvironmentEntry.getType().equals(previousEnvironmentEntry.getType());
+            conflict = conflict || !newEnvironmentEntry.getValue().equals(previousEnvironmentEntry.getValue());
+            if(conflict)
+            {
+               throw new ResolutionException("Conflicting environment entries were found during resolution.  The following references resolve to the same JNDI name: [" + previousReference + ", " + newReference + "]");
+            }
+         }
+         else
+         {
+            throw new ResolutionException("Conflicting references found during resolution.  The following references resolve to a single JNDI name: [" + previousReference + ", " + newReference + "]");
+         }
+      }
    }
 }

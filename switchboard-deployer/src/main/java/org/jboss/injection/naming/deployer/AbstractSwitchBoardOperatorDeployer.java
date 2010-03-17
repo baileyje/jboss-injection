@@ -36,12 +36,15 @@ import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
+import org.jboss.injection.resolve.naming.ResolutionException;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.javaee.spec.Environment;
 
 import javax.naming.Context;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -77,16 +80,19 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
       if(environmentProcessor == null)
          throw new IllegalStateException("SwitchBoardOperator deployers require an EnvironmentPorcessor, which has not been set.");
 
-      final List<ResolverResult> allResults = new ArrayList<ResolverResult>();
-      for(Environment environment : environments)
+      List<ResolverResult> results = null;
+      try
       {
-         final List<ResolverResult> resolverResults = environmentProcessor.process(unit, environment);
-         allResults.addAll(resolverResults);
+         results = environmentProcessor.process(unit, environments);
+      }
+      catch(ResolutionException e)
+      {
+         DeploymentException.rethrowAsDeploymentException("Failed to resolve Environment references", e);
       }
 
-      if(!allResults.isEmpty())
+      if(results != null && !results.isEmpty())
       {
-         final BeanMetaData beanMetaData = createBeanMetaData(unit, allResults);
+         final BeanMetaData beanMetaData = createBeanMetaData(unit, results);
          unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + beanMetaData.getName(), beanMetaData, BeanMetaData.class);
          log.debugf("Deploying SwitchBoardOperator [%s] for deployment [%s]", beanMetaData.getName(), unit);
       }
