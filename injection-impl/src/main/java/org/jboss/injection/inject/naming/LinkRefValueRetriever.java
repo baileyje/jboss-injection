@@ -32,7 +32,6 @@ import javax.naming.LinkRef;
  */
 public class LinkRefValueRetriever implements ValueRetriever<LinkRef>
 {
-
    private final String jndiName;
 
    /**
@@ -52,5 +51,11 @@ public class LinkRefValueRetriever implements ValueRetriever<LinkRef>
    {
       // TODO: Look into ways to verify the jndi name points to a valid location.
       return new LinkRef(jndiName);
+   }
+
+   @Override
+   public String toString()
+   {
+      return "LinkRefValueRetriever{" + "jndiName='" + jndiName + '\'' + '}';
    }
 }

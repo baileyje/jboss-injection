@@ -34,18 +34,19 @@ import org.jboss.injection.inject.spi.ValueRetriever;
  */
 public class DefaultInjector<T, V> implements Injector<T>
 {
-
-   private InjectionPoint<T, V> injectionPoint;
-   private ValueRetriever<V> valueRetriever;
+   private final InjectionPoint<T, V> injectionPoint;
+   private final ValueRetriever<V> valueRetriever;
 
    /**
     * Create a new Injector with an injection point and value retriever
     *
-    * @param injectionPoint
-    * @param valueRetriever
+    * @param injectionPoint The injection point to inject into
+    * @param valueRetriever The value retriever used to obtain the injected value
     */
    public DefaultInjector(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
    {
+      if(injectionPoint == null) throw new IllegalArgumentException("Injection point can not be null");
+      if(valueRetriever == null) throw new IllegalArgumentException("Value retriever can not be null");
       this.injectionPoint = injectionPoint;
       this.valueRetriever = valueRetriever;
    }
@@ -62,5 +63,11 @@ public class DefaultInjector<T, V> implements Injector<T>
    protected V getValue()
    {
       return valueRetriever.getValue();
+   }
+
+   @Override
+   public String toString()
+   {
+      return "DefaultInjector{" + "injectionPoint=" + injectionPoint + ", valueRetriever=" + valueRetriever +  '}';
    }
 }

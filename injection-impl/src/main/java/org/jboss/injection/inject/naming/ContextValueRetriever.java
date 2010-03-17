@@ -34,26 +34,45 @@ import javax.naming.NamingException;
  */
 public class ContextValueRetriever<M> implements ValueRetriever<Object>
 {
-
    private Context context;
    private final String jndiName;
 
+   /**
+    * Creates a new instance with no Context.  Will default to an InitialContext.
+    *
+    * @param jndiName To retrieve the value at
+    */
    public ContextValueRetriever(String jndiName)
    {
       this(null, jndiName);
    }
 
+   /**
+    * Creates a new instance with a context.
+    *
+    * @param context  The context to retrieve the value from
+    * @param jndiName The location to retrieve the value from
+    */
    public ContextValueRetriever(final Context context, String jndiName)
    {
       this.context = context;
       this.jndiName = jndiName;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Object getValue()
    {
       return lookup(jndiName);
    }
 
+   /**
+    * Look up the value at a specific jndi location
+    *
+    * @param jndiName
+    * @return The value at the jndi location
+    */
    protected Object lookup(final String jndiName)
    {
       Object dependency = null;
@@ -72,10 +91,16 @@ public class ContextValueRetriever<M> implements ValueRetriever<Object>
       return dependency;
    }
 
-   private Context getContext() throws NamingException
+   protected Context getContext() throws NamingException
    {
       if(context == null)
          context = new InitialContext();
       return context;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "ContextValueRetriever{" + "context=" + context + ", jndiName='" + jndiName + '\'' + '}';
    }
 }

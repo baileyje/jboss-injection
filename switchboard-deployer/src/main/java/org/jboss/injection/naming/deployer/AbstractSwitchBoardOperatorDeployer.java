@@ -37,6 +37,7 @@ import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.spi.ResolverResult;
+import org.jboss.logging.Logger;
 import org.jboss.metadata.javaee.spec.Environment;
 
 import javax.naming.Context;
@@ -50,6 +51,8 @@ import java.util.List;
  */
 public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
 {
+   private static final Logger log = Logger.getLogger("org.jboss.injection.inject.naming");
+   
    private EnvironmentProcessor<DeploymentUnit> environmentProcessor;
 
    /**
@@ -85,6 +88,7 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
       {
          final BeanMetaData beanMetaData = createBeanMetaData(unit, allResults);
          unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + beanMetaData.getName(), beanMetaData, BeanMetaData.class);
+         log.debugf("Deploying SwitchBoardOperator [%s] for deployment [%s]", beanMetaData.getName(), unit);
       }
    }
 

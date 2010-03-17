@@ -1,6 +1,7 @@
 package org.jboss.injection.inject.naming;
 
 import org.jboss.injection.inject.spi.Injector;
+import org.jboss.logging.Logger;
 
 import javax.naming.Context;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.List;
  */
 public class SwitchBoardOperator
 {
+   private static final Logger log = Logger.getLogger("org.jboss.injection.inject.naming");
+   
    private final Context context;
    private final List<Injector<Context>> injectors;
 
@@ -32,14 +35,19 @@ public class SwitchBoardOperator
 
    /**
     * Called when this bean's dependencies are met.
-    *
-    * @throws RuntimeException If any problems occur population the context.
     */
    public void start() throws RuntimeException
    {
+      log.debugf("Executing %s", this);
       for(Injector<Context> injection : injectors)
       {
          injection.inject(context);
       }
+   }
+
+   @Override
+   public String toString()
+   {
+      return "SwitchBoardOperator{" + "context=" + context + ", injectors=" + injectors + '}';
    }
 }
