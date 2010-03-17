@@ -23,6 +23,7 @@ package org.jboss.injection.resolve.naming;
 
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
+import org.jboss.logging.Logger;
 import org.jboss.metadata.javaee.spec.EJBLocalReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
@@ -49,8 +50,11 @@ import java.util.Map;
  */
 public class EnvironmentProcessor<C>
 {
+   private static final Logger log = Logger.getLogger("org.jboss.injection.resolve"); 
 
-   public Map<Class<?>, Resolver<?, C>> resolvers;
+   private Map<Class<?>, Resolver<?, C>> resolvers;
+
+   private boolean allowMissingResolver; 
 
    /**
     * Construct a new processor.  There will be no resolvers available.
@@ -128,7 +132,17 @@ public class EnvironmentProcessor<C>
       final Resolver<M, C> resolver = getResolver(referenceType);
 
       if(resolver == null)
-         throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
+      {
+         if(allowMissingResolver)
+         {
+            log.warnf("Found reference [%s] but no Resolver could be found for type [%s]", reference, referenceType);
+            return;
+         }
+         else
+         {
+            throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
+         }
+      }
 
       final ResolverResult result = resolver.resolve(context, reference);
       if(result == null)
@@ -142,9 +156,14 @@ public class EnvironmentProcessor<C>
       return (Resolver<M, C>) resolvers.get(metaDataType);
    }
 
-   public void addResolver(Resolver<?, C> resolver)
+   public void addResolver(final Resolver<?, C> resolver)
    {
       Class<?> metaDataType = resolver.getMetaDataType();
       resolvers.put(metaDataType, resolver);
+   }
+
+   public void setAllowMissingResolver(final boolean allowMissingResolver)
+   {
+      this.allowMissingResolver = allowMissingResolver;
    }
 }
