@@ -35,12 +35,12 @@ import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 import java.util.Collections;
 
 /**
- * SwitchBoardOperatorDeployer that handles EJB only deployments.
+ * AbstractSwitchBoardOperatorDeployer that handles EJB only deployments.
  * Will skip any deployment units that also have JBossWebMetaData.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployer extends SwitchBoardOperatorDeployer<JBossMetaData>
+public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorDeployer<JBossMetaData>
 {
    private JavaEEComponentInformer componentInformer;
 

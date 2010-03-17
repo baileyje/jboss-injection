@@ -34,11 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SwitchBoardOperatorDeployer that handles WEB/WEB+EJB deployments.
+ * AbstractSwitchBoardOperatorDeployer that handles WEB/WEB+EJB deployments.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class WebSwitchBoardOperatorDeployer extends SwitchBoardOperatorDeployer<JBossWebMetaData>
+public class WebSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorDeployer<JBossWebMetaData>
 {
    private JavaEEModuleInformer moduleInformer;
 

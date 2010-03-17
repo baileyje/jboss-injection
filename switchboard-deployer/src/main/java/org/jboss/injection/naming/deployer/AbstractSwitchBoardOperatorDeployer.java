@@ -49,14 +49,14 @@ import java.util.List;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public abstract class SwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
+public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
 {
    private EnvironmentProcessor<DeploymentUnit> environmentProcessor;
 
    /**
     * Create the deployer and setup the inputs
     */
-   public SwitchBoardOperatorDeployer(Class<M> metaDataType)
+   public AbstractSwitchBoardOperatorDeployer(Class<M> metaDataType)
    {
       super(metaDataType);
       setOutput(BeanMetaData.class);
