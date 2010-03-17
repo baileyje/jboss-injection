@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
-    <bean name="SwitchBoardOperatorDeployer"
-          class="org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer"/>
+    <bean name="EJBSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.deployer.EJBSwitchBoardOperatorDeployer"/>
+    <bean name="WebSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.deployer.WebSwitchBoardOperatorDeployer"/>    
 
     <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.naming.EnvironmentProcessor">
         <incallback method="addResolver"/>
     </bean>
 
     <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
+
 </deployment>
