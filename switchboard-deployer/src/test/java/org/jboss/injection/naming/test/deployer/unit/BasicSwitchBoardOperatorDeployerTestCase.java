@@ -62,7 +62,10 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       {
          // TODO: Make sure this is due to the missing dep
       }
-      undeploy(deployment);
+      finally
+      {
+         undeploy(deployment);
+      }
    }
 
    @Test

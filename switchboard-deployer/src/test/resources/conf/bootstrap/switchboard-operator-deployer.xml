@@ -7,6 +7,9 @@
         <incallback method="addResolver"/>
     </bean>
 
+
+    <!-- Mocks -->
     <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
+    <bean name="MockEjbComponentDeployer" class="org.jboss.injection.naming.test.deployer.support.MockEjbComponentDeployer"/>
 
 </deployment>

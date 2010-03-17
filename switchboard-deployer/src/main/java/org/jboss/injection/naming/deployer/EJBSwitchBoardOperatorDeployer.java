@@ -39,33 +39,30 @@ import java.util.Collections;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorDeployer<JBossMetaData>
+public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorDeployer<JBossEnterpriseBeanMetaData>
 {
    private JavaEEComponentInformer componentInformer;
 
    public EJBSwitchBoardOperatorDeployer()
    {
-      super(JBossMetaData.class);
+      super(JBossEnterpriseBeanMetaData.class);
+      setComponentsOnly(true);
    }
 
    /**
-    * Deploy with EJB metadata only.  Will create a separate switchboard for each component.
+    * Deploy a SwitchBoardOperator for a single EJB component.  Will skip any EJB components found within a WAR.
     *
     * @param unit The deployment unit
     * @param metaData The metadata to process
     * @throws org.jboss.deployers.spi.DeploymentException if any deployment issues occur
     */
-   public void deploy(final DeploymentUnit unit, final JBossMetaData metaData) throws DeploymentException
+   public void deploy(final DeploymentUnit unit, final JBossEnterpriseBeanMetaData metaData) throws DeploymentException
    {
       // Make sure this is not a war deployment with ejbs
       if(unit.isAttachmentPresent(JBossWebMetaData.class))
          return;
 
-      final JBossEnterpriseBeansMetaData jBossEnterpriseBeansMetaData = metaData.getEnterpriseBeans();
-      for(JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData : jBossEnterpriseBeansMetaData)
-      {
-         deploy(unit, Collections.singletonList((Environment) jBossEnterpriseBeanMetaData));
-      }
+      deploy(unit, Collections.singletonList((Environment) metaData));
    }
 
    /** {@inheritDoc} */
