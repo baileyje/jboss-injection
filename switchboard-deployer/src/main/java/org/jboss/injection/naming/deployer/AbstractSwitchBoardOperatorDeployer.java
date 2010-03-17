@@ -25,8 +25,8 @@ import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.beans.metadata.plugins.AbstractInjectionValueMetaData;
 import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;
 import org.jboss.beans.metadata.spi.BeanMetaData;
+import org.jboss.beans.metadata.spi.ValueMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
-import org.jboss.dependency.plugins.graph.Search;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
@@ -45,7 +45,6 @@ import java.util.List;
 
 /**
  * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
- * TODO:  This thing is becoming a mess.  This should be split between web+ejb and ejb only
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
@@ -98,17 +97,15 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
     */
    protected BeanMetaData createBeanMetaData(final DeploymentUnit unit, final List<ResolverResult> resolverResults)
    {
-      final String name = createBeanName(unit);
+      final String name = getBeanName(unit);
 
       final BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, SwitchBoardOperator.class.getName());
 
-      /* TODO: Find out why adding Scope annotations causes problems undeploying beans */
+      final ValueMetaData contextValueMetaData = createContextValueMetaData(unit);
+      builder.addConstructorParameter(Context.class.getName(), contextValueMetaData);
 
-      AbstractInjectionValueMetaData contextInjectionValueMetaData = createContextInjectionValueMetaData();
-      contextInjectionValueMetaData.setSearch(Search.LOCAL);
-
-      builder.addConstructorParameter(Context.class.getName(), contextInjectionValueMetaData);
-      builder.addConstructorParameter(List.class.getName(), createInjectors(resolverResults));
+      final List<Injector<Context>> injectors = createInjectors(resolverResults);
+      builder.addConstructorParameter(List.class.getName(), injectors);
 
       for(ResolverResult resolverResult : resolverResults)
       {
@@ -123,19 +120,16 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
    }
 
    /**
-    * Create the bean name
-    * 
-    * @param deploymentUnit The deployment unit
-    * @return The bean name to use
-    */
-   protected abstract String createBeanName(final DeploymentUnit deploymentUnit);
-
-   /**
-    * Create the injection metdata required to access the correct Context for this deployment.
+    * Create the metdata required to access the correct Context for this deployment.
     *
+    * @param unit The deploymentUnit
     * @return The injection value metadata
     */
-   protected abstract AbstractInjectionValueMetaData createContextInjectionValueMetaData();
+   protected ValueMetaData createContextValueMetaData(final DeploymentUnit unit)
+   {
+      final String contextBeanName = "jboss.naming:" + getBeanNameQualifier(unit);
+      return new AbstractInjectionValueMetaData(contextBeanName, "context");
+   }
 
    /**
     * Create a list of injectors based on a list of resolver results.
@@ -155,6 +149,26 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
       }
       return injectors;
    }
+
+   /**
+    * Create the bean name
+    *
+    * @param deploymentUnit The deployment unit
+    * @return The bean name to use
+    */
+   protected String getBeanName(final DeploymentUnit deploymentUnit)
+   {
+      return "jboss.naming:service=SwitchBoardOperator," + getBeanNameQualifier(deploymentUnit);
+   }
+
+   /**
+    * Create the qualifier used in the bean name.
+    *
+    * @param deploymentUnit The deployment unit
+    * @return The bean name to use
+    */
+   protected abstract String getBeanNameQualifier(final DeploymentUnit deploymentUnit);
+
 
    /**
     * Get the environment processor

@@ -68,9 +68,8 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       JavaEEComponent component = mock(JavaEEComponent.class);
       when(component.getContext()).thenReturn(context);
 
-      BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("JavaEEComponent", JavaEEComponent.class.getName())
+      BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("jboss.naming:module=Module,component=Component", JavaEEComponent.class.getName())
          .setConstructorValue(component)
-         .addAlias("java:comp")
          .getBeanMetaData();
       attachments.addAttachment(BeanMetaData.class.getName() + ".JavaEEComponent", beanMetaData);
    }

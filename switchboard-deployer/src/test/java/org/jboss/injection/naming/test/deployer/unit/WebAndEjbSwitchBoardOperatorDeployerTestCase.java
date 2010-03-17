@@ -196,9 +196,8 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       JavaEEModule module = mock(JavaEEModule.class);
       when(module.getContext()).thenReturn(context);
 
-      BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("JavaEEModule", JavaEEModule.class.getName())
+      BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("jboss.naming:module=Module", JavaEEModule.class.getName())
          .setConstructorValue(module)
-         .addAlias("java:module")
          .getBeanMetaData();
       attachments.addAttachment(BeanMetaData.class.getName() + ".JavaEEModule", beanMetaData);
    }

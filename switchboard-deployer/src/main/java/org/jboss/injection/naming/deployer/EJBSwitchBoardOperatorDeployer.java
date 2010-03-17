@@ -22,7 +22,6 @@
 package org.jboss.injection.naming.deployer;
 
 import org.jboss.beans.metadata.api.annotations.Inject;
-import org.jboss.beans.metadata.plugins.AbstractInjectionValueMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
@@ -70,25 +69,19 @@ public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorD
    }
 
    /** {@inheritDoc} */
-   protected String createBeanName(final DeploymentUnit deploymentUnit)
+   protected String getBeanNameQualifier(final DeploymentUnit deploymentUnit)
    {
       final String applicationName = componentInformer.getApplicationName(deploymentUnit);
       final String moduleName = componentInformer.getModulePath(deploymentUnit);
       final String componentName = componentInformer.getComponentName(deploymentUnit);
-      final StringBuilder builder = new StringBuilder("jboss.naming:service=SwitchBoardOperator");
+      final StringBuilder builder = new StringBuilder();
       if(applicationName != null)
       {
-         builder.append(",application=").append(applicationName);
+         builder.append("application=").append(applicationName).append(",");
       }
-      builder.append(",module=").append(moduleName);
+      builder.append("module=").append(moduleName);
       builder.append(",component=").append(componentName);
       return builder.toString();
-   }
-
-   /** {@inheritDoc} */
-   protected AbstractInjectionValueMetaData createContextInjectionValueMetaData()
-   {
-      return new AbstractInjectionValueMetaData("java:comp", "context");
    }
 
    /**
