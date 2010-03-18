@@ -44,12 +44,8 @@ import java.util.Map;
  */
 public class EnvironmentProcessor<C>
 {
-   private static final Logger log = Logger.getLogger("org.jboss.injection.resolve");
-
    private Map<Class<?>, Resolver<?, C>> resolvers;
    private List<EnvironmentMetaDataVisitor<?>> visitors;
-
-   private boolean allowMissingResolver;
 
    /**
     * Construct a new processor.  There will be no visitors or resolvers available.
@@ -126,15 +122,7 @@ public class EnvironmentProcessor<C>
 
       if(resolver == null)
       {
-         if(allowMissingResolver)
-         {
-            log.warnf("Found reference [%s] but no Resolver could be found for type [%s]", reference, referenceType);
-            return;
-         }
-         else
-         {
-            throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
-         }
+         throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
       }
 
       final ResolverResult result = resolver.resolve(context, reference);
@@ -158,11 +146,6 @@ public class EnvironmentProcessor<C>
    {
       Class<M> metaDataType = resolver.getMetaDataType();
       resolvers.put(metaDataType, resolver);
-   }
-
-   public void setAllowMissingResolver(final boolean allowMissingResolver)
-   {
-      this.allowMissingResolver = allowMissingResolver;
    }
 
    private static class MappedResults
