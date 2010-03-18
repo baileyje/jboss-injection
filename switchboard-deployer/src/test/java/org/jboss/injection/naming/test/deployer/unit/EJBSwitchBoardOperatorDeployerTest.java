@@ -66,7 +66,7 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       defaultMockEnvironment = jBossEnterpriseBeanMetaData;
 
       JavaEEComponent component = mock(JavaEEComponent.class);
-      when(component.getContext()).thenReturn(context);
+      when(component.getContext()).thenReturn(compContext);
 
       BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("jboss.naming:module=Module,component=Component", JavaEEComponent.class.getName())
          .setConstructorValue(component)

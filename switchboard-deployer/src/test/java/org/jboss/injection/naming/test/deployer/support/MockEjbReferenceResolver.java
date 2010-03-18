@@ -46,6 +46,6 @@ public class MockEjbReferenceResolver implements Resolver<EJBReferenceMetaData, 
 
    public ResolverResult resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
    {
-      return new ReferenceResolverResult("java:comp/" + metaData.getEjbRefName(), "bean-" + metaData.getName(), "java:" + metaData.getName());
+      return new ReferenceResolverResult("env/" + metaData.getEjbRefName(), "bean-" + metaData.getName(), "java:" + metaData.getName());
    }
 }

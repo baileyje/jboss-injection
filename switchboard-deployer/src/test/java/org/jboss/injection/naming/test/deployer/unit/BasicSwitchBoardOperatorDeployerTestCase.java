@@ -73,10 +73,10 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
 
       Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       deploy(dependencyDeployment);
-      assertNameNotFound("java:comp/testBean");
+      assertNameNotFound("java:comp/env/testBean");
       deploy(deployment);
-      assertContextValue("java:comp/testBean", "Test Value");
-      unbind("java:comp/testBean", "java:testBean");
+      assertContextValue("java:comp/env/testBean", "Test Value");
+      unbind("java:comp/env/testBean", "java:testBean");
       undeploy(dependencyDeployment, deployment);
    }
 
@@ -88,10 +88,10 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       attachMetaData(envDeployment);
 
       Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:other-testBean");
+      assertNameNotFound("java:comp/env/testBean");
       deploy(dependencyDeployment, envDeployment);
-      assertContextValue("java:comp/testBean", "Test Value");
-      unbind("java:comp/testBean", "java:testBean");
+      assertContextValue("java:comp/env/testBean", "Test Value");
+      unbind("java:comp/env/testBean", "java:testBean");
       undeploy(dependencyDeployment, envDeployment);
    }
 
@@ -102,17 +102,16 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
       Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:other-testBean");
+      assertNameNotFound("java:comp/env/testBean");
       deploy(envDeployment, dependencyDeployment);
-      assertContextValue("java:comp/testBean", "Test Value");
-      unbind("java:comp/testBean", "java:testBean");
+      assertContextValue("java:comp/env/testBean", "Test Value");
+      unbind("java:comp/env/testBean", "java:testBean");
       undeploy(envDeployment, dependencyDeployment);
    }
 
    @Test
    public void testNonLinkInjection() throws Throwable
    {
-      context.createSubcontext("java:comp/env");
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 

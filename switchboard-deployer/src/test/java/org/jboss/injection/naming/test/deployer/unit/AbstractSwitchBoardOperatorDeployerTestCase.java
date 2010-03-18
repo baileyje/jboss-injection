@@ -59,6 +59,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
    protected static MCServer server;
    protected static MainDeployer mainDeployer;
    protected static Context context;
+   protected static Context compContext;
 
    @BeforeClass
    public static void setupServer() throws Exception
@@ -86,7 +87,8 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
          Thread.currentThread().setContextClassLoader(oldClassLoader);
       }
       context = new InitialContext();
-      context.createSubcontext("java:comp");
+      compContext = context.createSubcontext("java:comp");
+      compContext.createSubcontext("env");
    }
 
    @AfterClass

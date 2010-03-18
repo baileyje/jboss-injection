@@ -46,6 +46,6 @@ public class MockEnvironmentEntryResolver implements Resolver<EnvironmentEntryMe
 
    public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
    {
-      return new ValueResolverResult<String>("java:comp/env/" + metaData.getEnvEntryName(), null, metaData.getValue());
+      return new ValueResolverResult<String>("env/" + metaData.getEnvEntryName(), null, metaData.getValue());
    }
 }

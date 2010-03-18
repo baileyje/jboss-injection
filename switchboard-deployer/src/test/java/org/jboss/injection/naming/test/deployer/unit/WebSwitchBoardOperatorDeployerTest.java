@@ -66,7 +66,7 @@ public class WebSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       defaultMockEnvironment = environment;
 
       JavaEEModule module = mock(JavaEEModule.class);
-      when(module.getContext()).thenReturn(context);
+      when(module.getContext()).thenReturn(compContext);
 
       BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("jboss.naming:module=Module", JavaEEModule.class.getName())
          .setConstructorValue(module)

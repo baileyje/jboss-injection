@@ -123,14 +123,14 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
 
    private void assertContextValues() throws Exception
    {
-      assertContextValue("java:comp/testBean", "Test Value");
-      assertContextValue("java:comp/testBeanFromEjb", "Test Value Two");
+      assertContextValue("java:comp/env/testBean", "Test Value");
+      assertContextValue("java:comp/env/testBeanFromEjb", "Test Value Two");
    }
 
    private void assertNoContextValues()
    {
-      assertNameNotFound("java:comp/testBean");
-      assertNameNotFound("java:comp/testBeanFromEjb");
+      assertNameNotFound("java:comp/env/testBean");
+      assertNameNotFound("java:comp/env/testBeanFromEjb");
    }
 
    protected void attachMetaData(Deployment deployment)
@@ -174,7 +174,7 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
       attachments.addAttachment(JBossMetaData.class, jBossMetaData);
 
       JavaEEModule module = mock(JavaEEModule.class);
-      when(module.getContext()).thenReturn(context);
+      when(module.getContext()).thenReturn(compContext);
 
       BeanMetaData beanMetaData = BeanMetaDataBuilder.createBuilder("jboss.naming:module=Module", JavaEEModule.class.getName())
          .setConstructorValue(module)
@@ -190,6 +190,6 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
 
    private void cleanContextValues() throws NamingException
    {
-      unbind("java:comp/testBean", "java:comp/testBeanFromEjb", "java:testBean", "java:testBeanFromEjb");
+      unbind("java:comp/env/testBean", "java:comp/env/testBeanFromEjb", "java:testBean", "java:testBeanFromEjb");
    }
 }
