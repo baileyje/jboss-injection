@@ -21,35 +21,31 @@
  */
 package org.jboss.injection.resolve.spi;
 
-import org.jboss.metadata.javaee.spec.ResourceInjectionMetaData;
+import org.jboss.metadata.javaee.spec.Environment;
 
 /**
- * Resolves a JNDI name and MC Bean name from the provided dependency metadata.
- * <p/>
- * M the meta data class
- * C the context in which to resolve (usually DeploymentUnit)
+ * Extracts specific metadata from an Environment instance.
+ * This will likely be paired with (or implemented by) a Resolver of
+ * the same metadata type.
+ *
+ * @param <M> The metadata type to getMetaData
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
- * @param <M> The required metadata type
  */
-public interface Resolver<M, C>
+public interface EnvironmentMetaDataVisitor<M>
 {
    /**
-    * Return the type of metaData that can be resolved.
+    * Return the type of metaData being extracted
     *
-    * @return The class object for this resolver type.
+    * @return The class object for the metadata type
     */
    Class<M> getMetaDataType();
 
    /**
-    * This method takes the provided metadata and determines the
-    * global JNDI name being referenced as well as the MC bean name
-    * that is responsible for ensuring the dependency is bound into
-    * JNDI.
+    * Extracts the metadata references from an Environment
     *
-    * @param context  The resolving context (usually DeploymentUnit)
-    * @param metaData The metadata referencing a dependency
-    * @return The ResolverResult
+    * @param environment The environemnt to getMetaData references from
+    * @return The reference metadata
     */
-   ResolverResult resolve(C context, M metaData);
+   Iterable<M> getMetaData(Environment environment);
 }

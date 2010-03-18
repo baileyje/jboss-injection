@@ -22,9 +22,9 @@
 package org.jboss.injection.resolve.test.ejb.unit;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.inject.naming.ContextValueRetriever;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
+import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.injection.resolve.test.ejb.YASessionBean;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
  */
 public class EJBContextTestCase extends AbstractResolverTestCase
 {
-   private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit>
+   private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit>, EnvironmentMetaDataVisitor<ResourceEnvironmentReferenceMetaData>
    {
       public Class<ResourceEnvironmentReferenceMetaData> getMetaDataType()
       {
@@ -77,6 +77,11 @@ public class EJBContextTestCase extends AbstractResolverTestCase
             throw new RuntimeException("Unknown resource environment reference type " + metaData.getType() + " found in " + metaData + " of " + unit, e);
          }
       }
+
+      public Iterable<ResourceEnvironmentReferenceMetaData> getMetaData(final Environment environment)
+      {
+         return environment.getResourceEnvironmentReferences();
+      }
    }
 
    @Test
@@ -95,7 +100,9 @@ public class EJBContextTestCase extends AbstractResolverTestCase
 
       // go
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
-      processor.addResolver(new ResourceEnvRefResolver());
+      ResourceEnvRefResolver resolver = new ResourceEnvRefResolver();
+      processor.addResolver(resolver);
+      processor.addMetaDataVisitor(resolver);
       List<ResolverResult> result = processor.process(unit, environment);
       assertEquals("org.jboss.injection.resolve.test.ejb.YASessionBean/ctx", result.get(0).getRefName());
       assertEquals("java:comp/EJBContext", getPrivateField(result.get(0).getValueRetriever(), "jndiName"));

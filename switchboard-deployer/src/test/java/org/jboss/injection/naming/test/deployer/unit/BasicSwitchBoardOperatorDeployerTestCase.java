@@ -24,15 +24,13 @@ package org.jboss.injection.naming.test.deployer.unit;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.resolve.naming.ValueResolverResult;
-import org.jboss.injection.resolve.spi.Resolver;
-import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.naming.LinkRef;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -49,8 +47,6 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
    @Test
    public void testDeployWithMcNoDependency() throws Throwable
    {
-      context.rebind("java:test", "Test Value");
-
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
       try
@@ -71,58 +67,59 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
    @Test
    public void testDeployWithMcDependencyAlreadyMet() throws Throwable
    {
-      context.rebind("java:test", "Test Value");
+      context.rebind("java:testBean", "Test Value");
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       deploy(dependencyDeployment);
-      assertNameNotFound("java:otherTest");
+      assertNameNotFound("java:comp/testBean");
       deploy(deployment);
-      assertContextValue("java:otherTest", "Test Value");
-      unbind("java:otherTest", "java:test");
+      assertContextValue("java:comp/testBean", "Test Value");
+      unbind("java:comp/testBean", "java:testBean");
       undeploy(dependencyDeployment, deployment);
    }
 
    @Test
    public void testDeployWithMcDependencyInBatchOrdered() throws Throwable
    {
-      context.rebind("java:test", "Test Value");
+      context.rebind("java:testBean", "Test Value");
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:otherTest");
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      assertNameNotFound("java:other-testBean");
       deploy(dependencyDeployment, envDeployment);
-      assertContextValue("java:otherTest", "Test Value");
-      unbind("java:otherTest", "java:test");
+      assertContextValue("java:comp/testBean", "Test Value");
+      unbind("java:comp/testBean", "java:testBean");
       undeploy(dependencyDeployment, envDeployment);
    }
 
    @Test
    public void testDeployWithMcDependencyInBatchUnOrdered() throws Throwable
    {
-      context.rebind("java:test", "Test Value");
+      context.rebind("java:testBean", "Test Value");
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:otherTest");
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      assertNameNotFound("java:other-testBean");
       deploy(envDeployment, dependencyDeployment);
-      assertContextValue("java:otherTest", "Test Value");
-      unbind("java:otherTest", "java:test");
+      assertContextValue("java:comp/testBean", "Test Value");
+      unbind("java:comp/testBean", "java:testBean");
       undeploy(envDeployment, dependencyDeployment);
    }
 
    @Test
    public void testNonLinkInjection() throws Throwable
    {
+      context.createSubcontext("java:comp/env");
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
       EnvironmentEntriesMetaData environmentEntriesMetaData = new EnvironmentEntriesMetaData();
 
       EnvironmentEntryMetaData environmentEntryMetaData = new EnvironmentEntryMetaData();
-      environmentEntryMetaData.setEnvEntryName("java:test");
+      environmentEntryMetaData.setEnvEntryName("test");
       environmentEntryMetaData.setType("java.lang.String");
       environmentEntryMetaData.setValue("Test Value");
 
@@ -130,26 +127,11 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       assertNotNull("defaultMockEnvironment must be set", defaultMockEnvironment);
       when(defaultMockEnvironment.getEnvironmentEntries()).thenReturn(environmentEntriesMetaData);
 
-      Resolver<EnvironmentEntryMetaData, DeploymentUnit> resolver = new Resolver<EnvironmentEntryMetaData, DeploymentUnit>()
-      {
-         public Class<EnvironmentEntryMetaData> getMetaDataType()
-         {
-            return EnvironmentEntryMetaData.class;
-         }
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
 
-         public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
-         {
-            return new ValueResolverResult<String>(metaData.getEnvEntryName(), "mc-bean-test", metaData.getValue());
-         }
-      };
-
-      deployBean(BeanMetaDataBuilder.createBuilder("envEntryMetaDataResolver", Resolver.class.getName()).setConstructorValue(resolver).getBeanMetaData());
-
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-
-      assertNameNotFound("java:test");
+      assertNameNotFound("java:comp/env/test");
       deploy(dependencyDeployment, deployment);
-      assertContextValue("java:test", "Test Value");
+      assertContextValue("java:comp/env/test", "Test Value");
       undeploy(deployment, dependencyDeployment);
    }
 

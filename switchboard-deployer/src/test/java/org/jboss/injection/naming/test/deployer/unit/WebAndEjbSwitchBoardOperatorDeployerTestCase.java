@@ -26,10 +26,7 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
-import org.jboss.injection.resolve.spi.Resolver;
-import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
@@ -38,8 +35,6 @@ import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.naming.ThreadLocalStack;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.junit.Assert;
 import org.junit.Test;
@@ -54,15 +49,9 @@ import static org.mockito.Mockito.when;
  */
 public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitchBoardOperatorDeployerTestCase
 {
-   private static ThreadLocalStack<ResolverResult> expectedResults = new ThreadLocalStack<ResolverResult>();
-
    @Test
    public void testDeployWithMcNoDependency() throws Throwable
    {
-      bindContextValues();
-
-      pushResolverResults();
-
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
       try
@@ -73,7 +62,6 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       {
          // TODO: Make sure this is due to the missing dep
       }
-      unbind("java:test", "java:testTwo");
       undeploy(deployment);
    }
 
@@ -82,13 +70,11 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
    {
       bindContextValues();
 
-      pushResolverResults();
-
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("bean-testBeanFromEjb", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       deploy(dependencyDeployment, dependencyDeploymentTwo);
 
       assertNoContextValues();
@@ -104,14 +90,11 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
    {
       bindContextValues();
 
-      pushResolverResults();
-
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-
+Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("bean-testBeanFromEjb", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNoContextValues();
       deploy(dependencyDeployment, dependencyDeploymentTwo, envDeployment);
       assertContextValues();
@@ -125,14 +108,11 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
    {
       bindContextValues();
 
-      pushResolverResults();
-
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("mc-bean-test", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("mc-bean-test-two", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("bean-testBeanFromEjb", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNoContextValues();
       deploy(envDeployment, dependencyDeployment, dependencyDeploymentTwo);
       assertContextValues();
@@ -143,14 +123,14 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
 
    private void assertContextValues() throws Exception
    {
-      assertContextValue("java:otherTest", "Test Value");
-      assertContextValue("java:otherTestTwo", "Test Value Two");
+      assertContextValue("java:comp/testBean", "Test Value");
+      assertContextValue("java:comp/testBeanFromEjb", "Test Value Two");
    }
 
    private void assertNoContextValues()
    {
-      assertNameNotFound("java:otherTest");
-      assertNameNotFound("java:otherTestTwo");
+      assertNameNotFound("java:comp/testBean");
+      assertNameNotFound("java:comp/testBeanFromEjb");
    }
 
    protected void attachMetaData(Deployment deployment)
@@ -158,7 +138,7 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testRef");
+      referenceMetaData.setEjbRefName("testBean");
       referencesMetaData.add(referenceMetaData);
 
       Environment environment = mock(Environment.class);
@@ -181,7 +161,7 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
 
       referencesMetaData = new EJBReferencesMetaData();
       referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testRefFromEjb");
+      referenceMetaData.setEjbRefName("testBeanFromEjb");
       referencesMetaData.add(referenceMetaData);
 
       when(jBossEnterpriseBeanMetaData.getEjbReferences()).thenReturn(referencesMetaData);
@@ -204,40 +184,12 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
 
    private void bindContextValues() throws NamingException
    {
-      context.rebind("java:test", "Test Value");
-      context.rebind("java:testTwo", "Test Value Two");
+      context.rebind("java:testBean", "Test Value");
+      context.rebind("java:testBeanFromEjb", "Test Value Two");
    }
 
    private void cleanContextValues() throws NamingException
    {
-      unbind("java:otherTest", "java:otherTestTwo", "java:test", "java:testTwo");
-   }
-
-   @Override
-   public <M> Resolver<M, DeploymentUnit> createMockResolver(final Class<M> type)
-   {
-      return new Resolver<M, DeploymentUnit>()
-      {
-         public Class<M> getMetaDataType()
-         {
-            return type;
-         }
-
-         public ResolverResult resolve(final DeploymentUnit context, final M metaData)
-         {
-            return expectedResults.pop();
-         }
-      };
-   }
-
-   private void pushResolverResult(ResolverResult result)
-   {
-      expectedResults.push(result);
-   }
-
-   private void pushResolverResults()
-   {
-      pushResolverResult(new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test"));
-      pushResolverResult(new ReferenceResolverResult("java:otherTestTwo", "mc-bean-test", "java:testTwo"));
+      unbind("java:comp/testBean", "java:comp/testBeanFromEjb", "java:testBean", "java:testBeanFromEjb");
    }
 }

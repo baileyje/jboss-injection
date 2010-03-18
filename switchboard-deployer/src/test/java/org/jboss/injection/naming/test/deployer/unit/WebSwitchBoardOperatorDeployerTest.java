@@ -47,7 +47,7 @@ public class WebSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
       MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testRef");
+      referenceMetaData.setEjbRefName("testBean");
       referencesMetaData.add(referenceMetaData);
 
       Environment environment = mock(Environment.class);

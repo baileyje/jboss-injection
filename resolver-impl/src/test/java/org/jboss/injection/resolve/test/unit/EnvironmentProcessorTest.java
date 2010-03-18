@@ -26,6 +26,7 @@ import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.naming.ResolutionException;
 import org.jboss.injection.resolve.naming.ValueResolverResult;
+import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
@@ -40,6 +41,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 /**
  * Test to ensure the functionality of the EnvironmentProcessor
  *
@@ -64,6 +66,19 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
       DeploymentUnit unit = mock(DeploymentUnit.class);
 
+      processor.addMetaDataVisitor(new EnvironmentMetaDataVisitor<EJBReferenceMetaData>()
+      {
+         public Iterable<EJBReferenceMetaData> getMetaData(final Environment environment)
+         {
+            return environment.getEjbReferences();
+         }
+
+         public Class<EJBReferenceMetaData> getMetaDataType()
+         {
+            return EJBReferenceMetaData.class;
+         }
+      });
+
       try
       {
          processor.process(unit, environment);
@@ -73,7 +88,8 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
       {
       }
 
-      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit>() {
+      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit>()
+      {
          public Class<EJBReferenceMetaData> getMetaDataType()
          {
             return EJBReferenceMetaData.class;
@@ -107,14 +123,27 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
 
       Environment environmentOne = mock(Environment.class);
       when(environmentOne.getEnvironmentEntries()).thenReturn(entriesMetaData);
-
       Environment environmentTwo = mock(Environment.class);
       when(environmentTwo.getEnvironmentEntries()).thenReturn(entriesMetaData);
 
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
       DeploymentUnit unit = mock(DeploymentUnit.class);
 
-      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>() {
+      processor.addMetaDataVisitor(new EnvironmentMetaDataVisitor<EnvironmentEntryMetaData>()
+      {
+         public Iterable<EnvironmentEntryMetaData> getMetaData(final Environment environment)
+         {
+            return environment.getEnvironmentEntries();
+         }
+
+         public Class<EnvironmentEntryMetaData> getMetaDataType()
+         {
+            return EnvironmentEntryMetaData.class;
+         }
+      });
+
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>()
+      {
          public Class<EnvironmentEntryMetaData> getMetaDataType()
          {
             return EnvironmentEntryMetaData.class;
@@ -131,7 +160,7 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
       Assert.assertEquals(1, result.size());
    }
 
- @Test
+   @Test
    public void testResolverWithConflictingEnvironmentEntries() throws Exception
    {
       EnvironmentEntriesMetaData entriesMetaData = new EnvironmentEntriesMetaData();
@@ -157,7 +186,21 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
       EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
       DeploymentUnit unit = mock(DeploymentUnit.class);
 
-      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>() {
+      processor.addMetaDataVisitor(new EnvironmentMetaDataVisitor<EnvironmentEntryMetaData>()
+      {
+         public Iterable<EnvironmentEntryMetaData> getMetaData(final Environment environment)
+         {
+            return environment.getEnvironmentEntries();
+         }
+
+         public Class<EnvironmentEntryMetaData> getMetaDataType()
+         {
+            return EnvironmentEntryMetaData.class;
+         }
+      });
+
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>()
+      {
          public Class<EnvironmentEntryMetaData> getMetaDataType()
          {
             return EnvironmentEntryMetaData.class;
@@ -168,7 +211,6 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
             return new ValueResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
          }
       });
-
 
       try
       {

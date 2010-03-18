@@ -22,7 +22,6 @@
 package org.jboss.injection.naming.test.deployer.unit;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
-import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.bootstrap.api.descriptor.BootstrapDescriptor;
 import org.jboss.bootstrap.api.descriptor.UrlBootstrapDescriptor;
 import org.jboss.bootstrap.api.mc.server.MCServer;
@@ -32,27 +31,23 @@ import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.client.spi.main.MainDeployer;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
-import org.jboss.injection.resolve.naming.ReferenceResolverResult;
-import org.jboss.injection.resolve.spi.Resolver;
-import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
-import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
 
 
 /**
@@ -63,6 +58,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
 
    protected static MCServer server;
    protected static MainDeployer mainDeployer;
+   protected static Context context;
 
    @BeforeClass
    public static void setupServer() throws Exception
@@ -89,45 +85,14 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       {
          Thread.currentThread().setContextClassLoader(oldClassLoader);
       }
-   }
-
-   protected Context context;
-
-   @Before
-   public void initializeContext() throws Exception
-   {
       context = new InitialContext();
+      context.createSubcontext("java:comp");
    }
 
-   @Before
-   public void deployMockResolver() throws Throwable
+   @AfterClass
+   public static void tearDownServer() throws Exception
    {
-      BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("MockResolver", Resolver.class.getName());
-      Resolver<EJBReferenceMetaData, DeploymentUnit> resolver = createMockResolver(EJBReferenceMetaData.class);
-      builder.setConstructorValue(resolver);
-      deployBean(builder.getBeanMetaData());
-   }
-
-   @After
-   public void undeployMockResolver() throws Throwable
-   {
-      undeployBean("MockResolver");
-   }
-
-   public <M> Resolver<M, DeploymentUnit> createMockResolver(final Class<M> type)
-   {
-      return new Resolver<M, DeploymentUnit>()
-      {
-         public Class<M> getMetaDataType()
-         {
-            return type;
-         }
-
-         public ResolverResult resolve(final DeploymentUnit deploymentUnit, final M metaData)
-         {
-            return new ReferenceResolverResult("java:otherTest", "mc-bean-test", "java:test");
-         }
-      };
+      server.shutdown();
    }
 
    protected static void deploy(Deployment... deployments) throws DeploymentException
@@ -236,7 +201,8 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       {
          context.lookup(name);
          Assert.fail("The name should not be found in the context: " + name);
-      } catch(NamingException expected)
+      }
+      catch(NamingException expected)
       {
       }
    }

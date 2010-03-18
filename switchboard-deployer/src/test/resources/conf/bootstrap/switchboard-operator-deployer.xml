@@ -5,11 +5,13 @@
 
     <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.naming.EnvironmentProcessor">
         <incallback method="addResolver"/>
+        <incallback method="addMetaDataVisitor"/>
     </bean>
 
 
     <!-- Mocks -->
     <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
     <bean name="MockEjbComponentDeployer" class="org.jboss.injection.naming.test.deployer.support.MockEjbComponentDeployer"/>
-
+    <bean name="MockEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockEjbReferenceResolver"/>
+    <bean name="MockEnvironmentEntryResolver" class="org.jboss.injection.naming.test.deployer.support.MockEnvironmentEntryResolver"/>
 </deployment>

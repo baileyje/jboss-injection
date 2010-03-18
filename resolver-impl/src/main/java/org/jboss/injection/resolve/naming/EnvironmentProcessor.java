@@ -21,19 +21,12 @@
  */
 package org.jboss.injection.resolve.naming;
 
+import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.logging.Logger;
-import org.jboss.metadata.javaee.spec.EJBLocalReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
-import org.jboss.metadata.javaee.spec.MessageDestinationReferenceMetaData;
-import org.jboss.metadata.javaee.spec.PersistenceUnitReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ResourceEnvironmentReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ResourceInjectionMetaData;
-import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,24 +47,27 @@ public class EnvironmentProcessor<C>
    private static final Logger log = Logger.getLogger("org.jboss.injection.resolve");
 
    private Map<Class<?>, Resolver<?, C>> resolvers;
+   private List<EnvironmentMetaDataVisitor<?>> visitors;
 
    private boolean allowMissingResolver;
 
    /**
-    * Construct a new processor.  There will be no resolvers available.
+    * Construct a new processor.  There will be no visitors or resolvers available.
     */
    public EnvironmentProcessor()
    {
-      this(new HashMap<Class<?>, Resolver<?, C>>());
+      this(new LinkedList<EnvironmentMetaDataVisitor<?>>(), new HashMap<Class<?>, Resolver<?, C>>());
    }
 
    /**
     * Construct a new processor with a Map of resolvers.
     *
+    * @param visitors A list of visitors
     * @param resolvers A map from class to Resolver
     */
-   public EnvironmentProcessor(final Map<Class<?>, Resolver<?, C>> resolvers)
+   public EnvironmentProcessor(final List<EnvironmentMetaDataVisitor<?>> visitors, final Map<Class<?>, Resolver<?, C>> resolvers)
    {
+      this.visitors = visitors;
       this.resolvers = resolvers;
    }
 
@@ -81,6 +77,7 @@ public class EnvironmentProcessor<C>
     * @param context The context in which to resolve (usually DeploymentUnit)
     * @param environments Environments to process references for
     * @return The resolver results
+    * @throws ResolutionException if any resolution problems occur
     */
    public List<ResolverResult> process(C context, Environment... environments) throws ResolutionException
    {
@@ -93,41 +90,34 @@ public class EnvironmentProcessor<C>
     * @param context The context in which to resolve (usually DeploymentUnit)
     * @param environments Environments to process references for
     * @return The resolver results
+    * @throws ResolutionException if any resolution problems occur
     */
    public List<ResolverResult> process(C context, Iterable<Environment> environments) throws ResolutionException {
       final MappedResults mappedresults = new MappedResults();
 
       for(Environment environment : environments)
       {
-         // TODO: configurable via visitors
-         // references
-         process(context, environment.getEjbLocalReferences(), EJBLocalReferenceMetaData.class, mappedresults);
-         process(context, environment.getEjbReferences(), EJBReferenceMetaData.class, mappedresults);
-         process(context, environment.getEnvironmentEntries(), EnvironmentEntryMetaData.class, mappedresults);
-         process(context, environment.getMessageDestinationReferences(), MessageDestinationReferenceMetaData.class, mappedresults);
-         process(context, environment.getPersistenceUnitRefs(), PersistenceUnitReferenceMetaData.class, mappedresults);
-         process(context, environment.getResourceReferences(), ResourceReferenceMetaData.class, mappedresults);
-         process(context, environment.getResourceEnvironmentReferences(), ResourceEnvironmentReferenceMetaData.class, mappedresults);
-         process(context, environment.getServiceReferences(), ServiceReferenceMetaData.class, mappedresults);
-
-         // TODO: data sources
-         // environment.getDataSources()
+         for(EnvironmentMetaDataVisitor<?> visitor : visitors)
+         {
+            process(context, environment, visitor, mappedresults);
+         }
       }
       return mappedresults.results;
    }
 
 
-   protected <M extends Iterable<T>, T extends ResourceInjectionMetaData> void process(C context, M references, Class<T> childType, MappedResults mappedresults) throws ResolutionException
+   protected <M> void process(C context, Environment environment, EnvironmentMetaDataVisitor<M> visitor, MappedResults mappedresults) throws ResolutionException
    {
+      final Iterable<M> references = visitor.getMetaData(environment);
       if(references == null)
          return;
-      for(T reference : references)
+      for(M reference : references)
       {
-         process(context, reference, childType, mappedresults);
+         process(context, reference, visitor.getMetaDataType(), mappedresults);
       }
    }
 
-   protected <M extends ResourceInjectionMetaData> void process(C context, M reference, Class<M> referenceType, MappedResults mappedresults) throws ResolutionException
+   protected <M> void process(C context, M reference, Class<M> referenceType, MappedResults mappedresults) throws ResolutionException
    {
       if(reference == null)
          return;
@@ -150,18 +140,23 @@ public class EnvironmentProcessor<C>
       final ResolverResult result = resolver.resolve(context, reference);
       if(result == null)
          throw new ResolutionException("Found reference [" + reference + "] but resolution failed to produce a result");
-      mappedresults.add(resolver, reference, result);
+      mappedresults.add(reference, result);
    }
 
    @SuppressWarnings("unchecked")
-   protected <M> Resolver<M, C> getResolver(Class<M> metaDataType)
+   protected <M, C> Resolver<M, C> getResolver(Class<M> metaDataType)
    {
       return (Resolver<M, C>) resolvers.get(metaDataType);
    }
 
-   public void addResolver(final Resolver<?, C> resolver)
+   public void addMetaDataVisitor(final EnvironmentMetaDataVisitor<?> visitor)
    {
-      Class<?> metaDataType = resolver.getMetaDataType();
+      visitors.add(visitor);
+   }
+
+   public <M> void addResolver(final Resolver<M, C> resolver)
+   {
+      Class<M> metaDataType = resolver.getMetaDataType();
       resolvers.put(metaDataType, resolver);
    }
 
@@ -170,14 +165,14 @@ public class EnvironmentProcessor<C>
       this.allowMissingResolver = allowMissingResolver;
    }
 
-   private static class MappedResults<M, C>
+   private static class MappedResults
    {
-      private final Map<String, M> referenceMap = new HashMap<String, M>();
+      private final Map<String, Object> referenceMap = new HashMap<String, Object>();
       private final List<ResolverResult> results = new LinkedList<ResolverResult>();
 
-      public void add(final Resolver<M, ?> resolver, final M newReference, final ResolverResult result) throws ResolutionException
+      public <M> void add(final M newReference, final ResolverResult result) throws ResolutionException
       {
-         M previousRef = referenceMap.put(result.getRefName(), newReference);
+         Object previousRef = referenceMap.put(result.getRefName(), newReference);
          if(previousRef == null)
          {
             results.add(result);
@@ -198,9 +193,9 @@ public class EnvironmentProcessor<C>
        *
        * @param previousReference The previous reference
        * @param newReference The new reference
-       * @Throws ResolutionException if a the reference conflict with one another
+       * @throws ResolutionException if a the reference conflict with one another
        */
-      private void checkForConflict(M previousReference, M newReference) throws ResolutionException
+      private <M> void checkForConflict(M previousReference, M newReference) throws ResolutionException
       {
          if(newReference instanceof EnvironmentEntryMetaData)
          {

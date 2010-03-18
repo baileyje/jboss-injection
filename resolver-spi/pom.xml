@@ -28,6 +28,12 @@
             <artifactId>jboss-injection-spi</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.metadata</groupId>
+            <artifactId>jboss-metadata-common</artifactId>
+            <version>2.0.0.Alpha14</version>
+        </dependency>
     </dependencies>
 
 </project>

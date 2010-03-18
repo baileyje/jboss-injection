@@ -51,7 +51,7 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
 
       EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
       EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testRef");
+      referenceMetaData.setEjbRefName("testBean");
       referencesMetaData.add(referenceMetaData);
 
       when(jBossEnterpriseBeanMetaData.getEjbReferences()).thenReturn(referencesMetaData);
