@@ -122,7 +122,7 @@ public class EnvironmentProcessor<C>
 
       if(resolver == null)
       {
-         throw new IllegalStateException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
+         throw new ResolutionException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
       }
 
       final ResolverResult result = resolver.resolve(context, reference);

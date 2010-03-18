@@ -84,7 +84,7 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
          processor.process(unit, environment);
          Assert.fail("Should throw exception if no Resolver can be found");
       }
-      catch(IllegalStateException expected)
+      catch(ResolutionException expected)
       {
       }
 
