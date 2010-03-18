@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class SwitchBoardOperator
 {
-   private static final Logger log = Logger.getLogger("org.jboss.injection.inject.naming");
+   private static final Logger log = Logger.getLogger(SwitchBoardOperator.class);
    
    private final Context context;
    private final List<Injector<Context>> injectors;

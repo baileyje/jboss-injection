@@ -23,6 +23,7 @@ package org.jboss.injection.inject.naming;
 
 import org.jboss.injection.inject.spi.InjectionPoint;
 import org.jboss.logging.Logger;
+import org.jboss.util.naming.Util;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -35,7 +36,7 @@ import javax.naming.NamingException;
  */
 public class ContextInjectionPoint<V> implements InjectionPoint<Context, V>
 {
-   private static final Logger log = Logger.getLogger("org.jboss.injection.inject.naming");
+   private static final Logger log = Logger.getLogger(ContextInjectionPoint.class);
    private final String jndiName;
 
    /**
@@ -57,11 +58,11 @@ public class ContextInjectionPoint<V> implements InjectionPoint<Context, V>
       try
       {
          log.debugf("Binding [%s] at [%s] in context [%s]", value.toString().replace('\n', ' '), jndiName, context);
-         context.bind(jndiName, value);
+         Util.rebind(context, jndiName, value);
       }
       catch(NamingException e)
       {
-         throw new RuntimeException("Failed to bind value [" + value + "] into context [" + context + "] with jndi name [" + jndiName + "]");
+         throw new RuntimeException("Failed to bind value [" + value + "] into context [" + context + "] with jndi name [" + jndiName + "]", e);
       }
    }
 

@@ -36,6 +36,7 @@ import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
+import org.jboss.util.naming.Util;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -184,12 +185,14 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
 
    private void bindContextValues() throws NamingException
    {
-      context.rebind("java:testBean", "Test Value");
-      context.rebind("java:testBeanFromEjb", "Test Value Two");
+      Util.rebind(context, "java:testBean", "Test Value");
+      Util.rebind(context, "java:testBeanFromEjb", "Test Value Two");
    }
 
    private void cleanContextValues() throws NamingException
    {
-      unbind("java:comp/env/testBean", "java:comp/env/testBeanFromEjb", "java:testBean", "java:testBeanFromEjb");
+
+      unbind(compContext, "env/testBean", "env/testBeanFromEjb");
+      unbind(context, "java:testBean", "java:testBeanFromEjb");
    }
 }

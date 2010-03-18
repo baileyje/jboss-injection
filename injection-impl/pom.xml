@@ -77,6 +77,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-common-core</artifactId>
+            <version>${version.jboss.common.core}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jboss.reloaded</groupId>
             <artifactId>jboss-reloaded-naming</artifactId>
             <version>${version.jboss.reloaded.naming}</version>
@@ -121,13 +127,6 @@
             <groupId>org.jboss.deployers</groupId>
             <artifactId>jboss-deployers-vfs</artifactId>
             <version>${version.jboss.deployers}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-common-core</artifactId>
-            <version>${version.jboss.common.core}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>

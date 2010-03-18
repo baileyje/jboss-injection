@@ -54,7 +54,7 @@ import java.util.List;
  */
 public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
 {
-   private static final Logger log = Logger.getLogger("org.jboss.injection.inject.naming");
+   private static final Logger log = Logger.getLogger(AbstractSwitchBoardOperatorDeployer.class);
    
    private EnvironmentProcessor<DeploymentUnit> environmentProcessor;
 

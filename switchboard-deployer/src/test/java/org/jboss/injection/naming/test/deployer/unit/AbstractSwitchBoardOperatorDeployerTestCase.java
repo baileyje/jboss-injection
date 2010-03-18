@@ -35,6 +35,7 @@ import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
+import org.jboss.naming.Util;
 import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
@@ -87,8 +88,8 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
          Thread.currentThread().setContextClassLoader(oldClassLoader);
       }
       context = new InitialContext();
-      compContext = context.createSubcontext("java:comp");
-      compContext.createSubcontext("env");
+      Context javaContext = (Context)context.lookup("java:");
+      compContext = javaContext.createSubcontext("java:comp");
    }
 
    @AfterClass
@@ -209,9 +210,9 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       }
    }
 
-   protected void unbind(String... names) throws NamingException
+   protected void unbind(Context context, String... names) throws NamingException
    {
       for(String name : names)
-         context.unbind(name);
+         Util.unbind(context, name);
    }
 }

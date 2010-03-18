@@ -27,6 +27,7 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
+import org.jboss.util.naming.Util;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -67,7 +68,7 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
    @Test
    public void testDeployWithMcDependencyAlreadyMet() throws Throwable
    {
-      context.rebind("java:testBean", "Test Value");
+      Util.rebind(context, "java:testBean", "Test Value");
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
@@ -76,14 +77,15 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       assertNameNotFound("java:comp/env/testBean");
       deploy(deployment);
       assertContextValue("java:comp/env/testBean", "Test Value");
-      unbind("java:comp/env/testBean", "java:testBean");
+      unbind(compContext, "env/testBean");
+      unbind(context, "java:testBean");
       undeploy(dependencyDeployment, deployment);
    }
 
    @Test
    public void testDeployWithMcDependencyInBatchOrdered() throws Throwable
    {
-      context.rebind("java:testBean", "Test Value");
+      Util.rebind(context, "java:testBean", "Test Value");
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
@@ -91,21 +93,23 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
       assertNameNotFound("java:comp/env/testBean");
       deploy(dependencyDeployment, envDeployment);
       assertContextValue("java:comp/env/testBean", "Test Value");
-      unbind("java:comp/env/testBean", "java:testBean");
+      unbind(compContext, "env/testBean");
+      unbind(context, "java:testBean");
       undeploy(dependencyDeployment, envDeployment);
    }
 
    @Test
    public void testDeployWithMcDependencyInBatchUnOrdered() throws Throwable
    {
-      context.rebind("java:testBean", "Test Value");
+      Util.rebind(context, "java:testBean", "Test Value");
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
       Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
       assertNameNotFound("java:comp/env/testBean");
       deploy(envDeployment, dependencyDeployment);
       assertContextValue("java:comp/env/testBean", "Test Value");
-      unbind("java:comp/env/testBean", "java:testBean");
+      unbind(compContext, "env/testBean");
+      unbind(context, "java:testBean");
       undeploy(envDeployment, dependencyDeployment);
    }
 
