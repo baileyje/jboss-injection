@@ -24,16 +24,17 @@ package org.jboss.injection.naming.deployer;
 import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEModuleInformer;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
- * AbstractSwitchBoardOperatorDeployer that handles WEB/WEB+EJB deployments.
+ * SwitchBoardOperatorDeployer that handles WEB/WEB+EJB deployments.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
@@ -55,13 +56,17 @@ public class WebSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorD
     */
    public void deploy(final DeploymentUnit unit, final JBossWebMetaData metaData) throws DeploymentException
    {
-      final List<Environment> environments = new ArrayList<Environment>();
+      final List<Environment> environments = new LinkedList<Environment>();
       environments.add(metaData.getJndiEnvironmentRefsGroup());
 
       if(unit.isAttachmentPresent(JBossMetaData.class))
       {
          final JBossMetaData jBossMetaData = unit.getAttachment(JBossMetaData.class);
-         environments.addAll(jBossMetaData.getEnterpriseBeans());
+         for(JBossEnterpriseBeanMetaData beanMetaData : jBossMetaData.getEnterpriseBeans())
+         {
+            environments.add(beanMetaData);
+            environments.addAll(collectInterceptors(beanMetaData));
+         }
       }
       deploy(unit, environments);
    }

@@ -12,6 +12,6 @@
     <!-- Mocks -->
     <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
     <bean name="MockEjbComponentDeployer" class="org.jboss.injection.naming.test.deployer.support.MockEjbComponentDeployer"/>
-    <bean name="MockEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockEjbReferenceResolver"/>
+    <bean name="MockEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockAnnotatedEjbReferenceResolver"/>
     <bean name="MockEnvironmentEntryResolver" class="org.jboss.injection.naming.test.deployer.support.MockEnvironmentEntryResolver"/>
 </deployment>

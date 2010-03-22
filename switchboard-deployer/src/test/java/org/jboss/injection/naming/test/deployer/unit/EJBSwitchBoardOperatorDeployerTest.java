@@ -25,12 +25,27 @@ import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
+import org.jboss.injection.naming.test.deployer.support.MockInterceptor;
+import org.jboss.injection.naming.test.deployer.support.OtherMockBean;
+import org.jboss.injection.naming.test.deployer.support.MockBean;
+import org.jboss.metadata.annotation.creator.ejb.jboss.JBoss50Creator;
+import org.jboss.metadata.annotation.finder.AnnotationFinder;
+import org.jboss.metadata.annotation.finder.DefaultAnnotationFinder;
+import org.jboss.metadata.ejb.jboss.JBossAssemblyDescriptorMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorBindingsMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorsMetaData;
+import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
+import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
+import org.junit.Test;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,27 +59,20 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
    protected void attachMetaData(Deployment deployment)
    {
       MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
-      JBossMetaData jBossMetaData = mock(JBossMetaData.class);
-      JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData = mock(JBossEnterpriseBeanMetaData.class);
-      when(jBossEnterpriseBeanMetaData.getKey()).thenReturn("testBean");
-      when(jBossEnterpriseBeanMetaData.getName()).thenReturn("testBean");
 
-      EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
-      EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testBean");
-      referencesMetaData.add(referenceMetaData);
+      AnnotationFinder<AnnotatedElement> finder = new DefaultAnnotationFinder<AnnotatedElement>();
+      JBoss50Creator creator = new JBoss50Creator(finder);
+      JBossMetaData jBossMetaData = creator.create(Arrays.<Class<?>>asList(MockBean.class, OtherMockBean.class));
 
-      when(jBossEnterpriseBeanMetaData.getEjbReferences()).thenReturn(referencesMetaData);
-
-      JBossEnterpriseBeansMetaData jBossEnterpriseBeansMetaData = new JBossEnterpriseBeansMetaData();
-      jBossEnterpriseBeansMetaData.add(jBossEnterpriseBeanMetaData);
-
-      when(jBossMetaData.getEnterpriseBeans()).thenReturn(jBossEnterpriseBeansMetaData);
+      JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData = jBossMetaData.getEnterpriseBean("MockBean");
 
       attachments.addAttachment(JBossMetaData.class, jBossMetaData);
 
-      defaultMockEnvironment = jBossEnterpriseBeanMetaData;
+      attachJavaEEComponent(attachments);
+   }
 
+   private void attachJavaEEComponent(final MutableAttachments attachments)
+   {
       JavaEEComponent component = mock(JavaEEComponent.class);
       when(component.getContext()).thenReturn(compContext);
 
@@ -72,5 +80,94 @@ public class EJBSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
          .setConstructorValue(component)
          .getBeanMetaData();
       attachments.addAttachment(BeanMetaData.class.getName() + ".JavaEEComponent", beanMetaData);
+   }
+
+   @Test
+   public void testNonLinkInjection() throws Throwable
+   {
+      Deployment deployment = createDeployment("test1");
+
+      EnvironmentEntriesMetaData environmentEntriesMetaData = new EnvironmentEntriesMetaData();
+
+      EnvironmentEntryMetaData environmentEntryMetaData = new EnvironmentEntryMetaData();
+      environmentEntryMetaData.setEnvEntryName("test");
+      environmentEntryMetaData.setType("java.lang.String");
+      environmentEntryMetaData.setValue("Test Value");
+
+      environmentEntriesMetaData.add(environmentEntryMetaData);
+
+      JBossEnterpriseBeanMetaData beanMetaData = mock(JBossEnterpriseBeanMetaData.class);
+      when(beanMetaData.getEnvironmentEntries()).thenReturn(environmentEntriesMetaData);
+      when(beanMetaData.getKey()).thenReturn("testBean");
+
+      JBossEnterpriseBeansMetaData beansMetaData = new JBossEnterpriseBeansMetaData();
+      beansMetaData.add(beanMetaData);
+
+      JBossMetaData jBossMetaData = mock(JBossMetaData.class);
+      when(jBossMetaData.getEnterpriseBeans()).thenReturn(beansMetaData);
+
+      when(beanMetaData.getJBossMetaData()).thenReturn(jBossMetaData);
+
+      JBossAssemblyDescriptorMetaData assemblyDescriptors = new JBossAssemblyDescriptorMetaData();
+      assemblyDescriptors.setInterceptorBindings(new InterceptorBindingsMetaData());
+      when(jBossMetaData.getAssemblyDescriptor()).thenReturn(assemblyDescriptors);
+
+      MutableAttachments attachments = ((MutableAttachments) deployment.getPredeterminedManagedObjects());
+      attachments.addAttachment(JBossMetaData.class, jBossMetaData);
+      attachJavaEEComponent(attachments);
+
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+
+      assertNameNotFound("java:comp/env/test");
+      deploy(dependencyDeployment, deployment);
+      assertContextValue("java:comp/env/test", "Test Value");
+      undeploy(deployment, dependencyDeployment);
+      unbind(context, "java:comp/env/test");
+   }
+
+   @Test
+   public void testDeployWithInterceptors() throws Exception
+   {
+      bindOtherBean();
+      Deployment deployment = createDeployment("test1");
+      attachMetaData(deployment);
+
+      MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
+
+      InterceptorsMetaData interceptorsMetaData = new InterceptorsMetaData();
+      InterceptorMetaData interceptorMetaData = mock(InterceptorMetaData.class);
+
+      when(interceptorMetaData.getKey()).thenReturn(MockInterceptor.class.getName());
+      when(interceptorMetaData.getInterceptorClass()).thenReturn(MockInterceptor.class.getName());
+      interceptorsMetaData.add(interceptorMetaData);
+
+      EnvironmentEntriesMetaData environmentEntriesMetaData = new EnvironmentEntriesMetaData();
+
+      EnvironmentEntryMetaData environmentEntryMetaData = new EnvironmentEntryMetaData();
+      environmentEntryMetaData.setEnvEntryName("test");
+      environmentEntryMetaData.setType("java.lang.String");
+      environmentEntryMetaData.setValue("Test Value");
+
+      environmentEntriesMetaData.add(environmentEntryMetaData);
+
+      when(interceptorMetaData.getEnvironmentEntries()).thenReturn(environmentEntriesMetaData);
+
+      JBossMetaData jBossMetaData = attachments.getAttachment(JBossMetaData.class);
+
+      Field interceptors = JBossMetaData.class.getDeclaredField("interceptors");
+      interceptors.setAccessible(true);
+      interceptors.set(jBossMetaData, interceptorsMetaData);
+
+      Deployment dependencyDeployment = createBinderDeployment();
+      deploy(dependencyDeployment);
+
+      assertNameNotFound(TEST_BEAN_PROP_FQ_JNDI_NAME);
+      assertNameNotFound("java:comp/env/test");
+      deploy(deployment);
+      assertContextValue(TEST_BEAN_PROP_FQ_JNDI_NAME, OTHER_BEAN);
+      assertContextValue("java:comp/env/test", "Test Value");
+      undeploy(dependencyDeployment, deployment);
+      unbindJndiEntries();
+      unbind(context, "java:comp/env/test");
    }
 }

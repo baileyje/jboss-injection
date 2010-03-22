@@ -47,7 +47,9 @@ public class MockEjbComponentDeployer extends AbstractComponentDeployer<JBossMet
       @Override
       protected List<JBossEnterpriseBeanMetaData> getComponents(JBossMetaData deployment)
       {
-         final List<JBossEnterpriseBeanMetaData> components = new ArrayList<JBossEnterpriseBeanMetaData>(deployment.getEnterpriseBeans());
+         final List<JBossEnterpriseBeanMetaData> components = new ArrayList<JBossEnterpriseBeanMetaData>();
+         if(deployment.getEnterpriseBeans() != null)
+            components.addAll(deployment.getEnterpriseBeans());
          return components;
       }
 

@@ -25,16 +25,15 @@ import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
-import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 
-import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * AbstractSwitchBoardOperatorDeployer that handles EJB only deployments.
+ * SwitchBoardOperatorDeployer that handles EJB only deployments.
  * Will skip any deployment units that also have JBossWebMetaData.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
@@ -62,7 +61,10 @@ public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorD
       if(unit.isAttachmentPresent(JBossWebMetaData.class))
          return;
 
-      deploy(unit, Collections.singletonList((Environment) metaData));
+      final List<Environment> environments = new LinkedList<Environment>();
+      environments.add(metaData);
+      environments.addAll(collectInterceptors(metaData));
+      deploy(unit, environments);
    }
 
    /** {@inheritDoc} */

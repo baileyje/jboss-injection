@@ -25,12 +25,13 @@ import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
+import org.jboss.injection.naming.test.deployer.support.OtherMockBean;
+import org.jboss.injection.naming.test.deployer.support.MockBean;
+import org.jboss.metadata.javaee.spec.AnnotatedEJBReferenceMetaData;
+import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.DescriptionGroupMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
 
 import static org.mockito.Mockito.mock;
@@ -45,25 +46,23 @@ public class WebSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
    protected void attachMetaData(Deployment deployment)
    {
       MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
-      EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
-      EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testBean");
+      AnnotatedEJBReferencesMetaData referencesMetaData = new AnnotatedEJBReferencesMetaData();
+      AnnotatedEJBReferenceMetaData referenceMetaData = new AnnotatedEJBReferenceMetaData();
+      referenceMetaData.setEjbRefName(MockBean.class.getName() + "/otherBean");
+      referenceMetaData.setBeanInterface(OtherMockBean.class);
       referencesMetaData.add(referenceMetaData);
 
       Environment environment = mock(Environment.class);
-      when(environment.getEjbReferences()).thenReturn(referencesMetaData);
+      when(environment.getAnnotatedEjbReferences()).thenReturn(referencesMetaData);
 
       JBossWebMetaData jBossWebMetaData = mock(JBossWebMetaData.class);
       when(jBossWebMetaData.getJndiEnvironmentRefsGroup()).thenReturn(environment);
 
       DescriptionGroupMetaData descriptionGroupMetaData = mock(DescriptionGroupMetaData.class);
-      when(descriptionGroupMetaData.getDisplayName()).thenReturn("Test War");
 
       when(jBossWebMetaData.getDescriptionGroup()).thenReturn(descriptionGroupMetaData);
 
       attachments.addAttachment(JBossWebMetaData.class, jBossWebMetaData);
-
-      defaultMockEnvironment = environment;
 
       JavaEEModule module = mock(JavaEEModule.class);
       when(module.getContext()).thenReturn(compContext);
@@ -73,4 +72,5 @@ public class WebSwitchBoardOperatorDeployerTest extends BasicSwitchBoardOperator
          .getBeanMetaData();
       attachments.addAttachment(BeanMetaData.class.getName() + ".JavaEEModule", beanMetaData);
    }
+
 }

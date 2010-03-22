@@ -39,13 +39,23 @@ import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ResolutionException;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
+import org.jboss.metadata.ejb.jboss.JBossMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorBindingMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorBindingsMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorClassesMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorMetaData;
+import org.jboss.metadata.ejb.spec.InterceptorsMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 
 import javax.naming.Context;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
@@ -178,6 +188,55 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
     * @return The bean name to use
     */
    protected abstract String getBeanNameQualifier(final DeploymentUnit deploymentUnit);
+
+
+   /**
+    * Collect the interceptors for an enterprise bean.
+    *
+    * @param enterpriseBean The enterprise bean
+    * @return The interceptors used by this enterprise bean
+    */
+   protected Collection<InterceptorMetaData> collectInterceptors(final JBossEnterpriseBeanMetaData enterpriseBean)
+   {
+      final JBossMetaData jBossMetaData = enterpriseBean.getJBossMetaData();
+
+      // Lets get out of here early if there is no interceptor metadata
+      if(jBossMetaData.getInterceptors() == null)
+         return Collections.emptySet();
+
+      final Set<InterceptorMetaData> interceptors = new HashSet<InterceptorMetaData>();
+
+      final InterceptorBindingsMetaData interceptorBindings = enterpriseBean.getJBossMetaData().getAssemblyDescriptor().getInterceptorBindings();
+      for(InterceptorBindingMetaData interceptorBinding : interceptorBindings)
+      {
+         if(interceptorBinding.getEjbName().equals(enterpriseBean.getName()))
+         {
+            final InterceptorClassesMetaData interceptorClasses = interceptorBinding.getInterceptorClasses();
+            collectInterceptors(jBossMetaData, interceptorClasses, interceptors);
+         }
+      }
+      return interceptors;
+   }
+
+   /**
+    * Collect the interceptors based on InterceptorClassesMetaData 
+    *
+    * @param jbossMetaData The JbossMetaData
+    * @param interceptorClasses The interceptor classes to find
+    * @param interceptors The collected interceptors
+    */
+   protected void collectInterceptors(final JBossMetaData jbossMetaData, final InterceptorClassesMetaData interceptorClasses, final Collection<InterceptorMetaData> interceptors)
+   {
+      final InterceptorsMetaData allInterceptors = jbossMetaData.getInterceptors();
+      for(InterceptorMetaData interceptor : allInterceptors)
+      {
+         if(interceptorClasses.contains(interceptor.getInterceptorClass()))
+         {
+            if(interceptor != null)
+               interceptors.add(interceptor);
+         }
+      }
+   }
 
 
    /**

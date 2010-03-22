@@ -24,26 +24,26 @@ package org.jboss.injection.naming.test.deployer.unit;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.metadata.javaee.spec.Environment;
-import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
-import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
+import org.jboss.injection.naming.test.deployer.support.MockBean;
+import org.jboss.injection.naming.test.deployer.support.OtherMockBean;
 import org.jboss.util.naming.Util;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.naming.LinkRef;
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
+import javax.naming.NamingException;
 
 /**
- * BasicSwitchBoardOperatorDeployerTestCase -
- *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
 public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractSwitchBoardOperatorDeployerTestCase
 {
-   protected Environment defaultMockEnvironment;
+   protected static final String OTHER_BEAN_CLASS = OtherMockBean.class.getName();
+   protected static final String TEST_BEAN_CLASS = MockBean.class.getName();
+   protected static final OtherMockBean OTHER_BEAN = new OtherMockBean("test");
+   protected static final String OTHER_BEAN_JNDI_NAME = "java:" + OTHER_BEAN_CLASS;
+   protected static final String TEST_BEAN_PROP_JNDI_NAME = TEST_BEAN_CLASS + "/otherBean";
+   protected static final String TEST_BEAN_PROP_FQ_JNDI_NAME = "java:comp/env/" + TEST_BEAN_PROP_JNDI_NAME;
+   protected static final String BINDER_BEAN_NAME = "binder-" + OTHER_BEAN_CLASS;
 
    @Test
    public void testDeployWithMcNoDependency() throws Throwable
@@ -68,75 +68,77 @@ public abstract class BasicSwitchBoardOperatorDeployerTestCase extends AbstractS
    @Test
    public void testDeployWithMcDependencyAlreadyMet() throws Throwable
    {
-      Util.rebind(context, "java:testBean", "Test Value");
+      bindOtherBean();
+
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createBinderDeployment();
       deploy(dependencyDeployment);
-      assertNameNotFound("java:comp/env/testBean");
+
+      assertNameNotFound(TEST_BEAN_PROP_FQ_JNDI_NAME);
       deploy(deployment);
-      assertContextValue("java:comp/env/testBean", "Test Value");
-      unbind(compContext, "env/testBean");
-      unbind(context, "java:testBean");
+      assertContextValue(TEST_BEAN_PROP_FQ_JNDI_NAME, OTHER_BEAN);
+
       undeploy(dependencyDeployment, deployment);
+
+      unbindJndiEntries();
    }
 
    @Test
    public void testDeployWithMcDependencyInBatchOrdered() throws Throwable
    {
-      Util.rebind(context, "java:testBean", "Test Value");
+      bindOtherBean();
+
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:comp/env/testBean");
+      Deployment dependencyDeployment = createBinderDeployment();
+
+      assertNameNotFound(TEST_BEAN_PROP_FQ_JNDI_NAME);
       deploy(dependencyDeployment, envDeployment);
-      assertContextValue("java:comp/env/testBean", "Test Value");
-      unbind(compContext, "env/testBean");
-      unbind(context, "java:testBean");
+      assertContextValue(TEST_BEAN_PROP_FQ_JNDI_NAME, OTHER_BEAN);
+
       undeploy(dependencyDeployment, envDeployment);
+
+      unbindJndiEntries();
    }
 
    @Test
    public void testDeployWithMcDependencyInBatchUnOrdered() throws Throwable
    {
-      Util.rebind(context, "java:testBean", "Test Value");
+      bindOtherBean();
+
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      assertNameNotFound("java:comp/env/testBean");
+
+      Deployment dependencyDeployment = createBinderDeployment();
+
+      assertNameNotFound(TEST_BEAN_PROP_FQ_JNDI_NAME);
       deploy(envDeployment, dependencyDeployment);
-      assertContextValue("java:comp/env/testBean", "Test Value");
-      unbind(compContext, "env/testBean");
-      unbind(context, "java:testBean");
+      assertContextValue(TEST_BEAN_PROP_FQ_JNDI_NAME, OTHER_BEAN);
+
       undeploy(envDeployment, dependencyDeployment);
-   }
 
-   @Test
-   public void testNonLinkInjection() throws Throwable
-   {
-      Deployment deployment = createDeployment("test1");
-      attachMetaData(deployment);
-
-      EnvironmentEntriesMetaData environmentEntriesMetaData = new EnvironmentEntriesMetaData();
-
-      EnvironmentEntryMetaData environmentEntryMetaData = new EnvironmentEntryMetaData();
-      environmentEntryMetaData.setEnvEntryName("test");
-      environmentEntryMetaData.setType("java.lang.String");
-      environmentEntryMetaData.setValue("Test Value");
-
-      environmentEntriesMetaData.add(environmentEntryMetaData);
-      assertNotNull("defaultMockEnvironment must be set", defaultMockEnvironment);
-      when(defaultMockEnvironment.getEnvironmentEntries()).thenReturn(environmentEntriesMetaData);
-
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-
-      assertNameNotFound("java:comp/env/test");
-      deploy(dependencyDeployment, deployment);
-      assertContextValue("java:comp/env/test", "Test Value");
-      undeploy(deployment, dependencyDeployment);
+      unbindJndiEntries();
    }
 
    protected abstract void attachMetaData(Deployment deployment);
+
+   protected void bindOtherBean() throws Exception
+   {
+      Util.rebind(context, OTHER_BEAN_JNDI_NAME, OTHER_BEAN);
+      assertContextValue("java:org.jboss.injection.naming.test.deployer.support.OtherMockBean", OTHER_BEAN);
+   }
+
+   protected Deployment createBinderDeployment()
+   {
+      return createDeployment("binder", BeanMetaDataBuilder.createBuilder(BINDER_BEAN_NAME, OTHER_BEAN_CLASS).getBeanMetaData());
+   }
+
+   protected void unbindJndiEntries() throws NamingException
+   {
+      unbind(context, TEST_BEAN_PROP_FQ_JNDI_NAME);
+      unbind(context, OTHER_BEAN_JNDI_NAME);
+   }
 }

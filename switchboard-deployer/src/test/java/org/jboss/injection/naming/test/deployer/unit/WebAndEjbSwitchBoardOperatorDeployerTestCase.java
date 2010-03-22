@@ -26,13 +26,16 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
-import org.jboss.injection.resolve.naming.ReferenceResolverResult;
+import org.jboss.injection.naming.test.deployer.support.MockBean;
+import org.jboss.injection.naming.test.deployer.support.OtherMockBean;
+import org.jboss.metadata.annotation.creator.ejb.jboss.JBoss50Creator;
+import org.jboss.metadata.annotation.finder.AnnotationFinder;
+import org.jboss.metadata.annotation.finder.DefaultAnnotationFinder;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
+import org.jboss.metadata.javaee.spec.AnnotatedEJBReferenceMetaData;
+import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.DescriptionGroupMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferenceMetaData;
-import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
@@ -41,6 +44,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.naming.NamingException;
+
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -74,16 +80,15 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       Deployment deployment = createDeployment("test1");
       attachMetaData(deployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("bean-testBeanFromEjb", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      deploy(dependencyDeployment, dependencyDeploymentTwo);
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("binder-" + OtherMockBean.class.getName(), OtherMockBean.class.getName()).getBeanMetaData());
+      deploy(dependencyDeployment);
 
       assertNoContextValues();
       deploy(deployment);
       assertContextValues();
 
       cleanContextValues();
-      undeploy(dependencyDeployment, dependencyDeploymentTwo, deployment);
+      undeploy(dependencyDeployment, deployment);
    }
 
    @Test
@@ -94,14 +99,13 @@ public class WebAndEjbSwitchBoardOperatorDeployerTestCase extends AbstractSwitch
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("bean-testBeanFromEjb", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("binder-" + OtherMockBean.class.getName(), OtherMockBean.class.getName()).getBeanMetaData());
       assertNoContextValues();
-      deploy(dependencyDeployment, dependencyDeploymentTwo, envDeployment);
+      deploy(dependencyDeployment, envDeployment);
       assertContextValues();
 
       cleanContextValues();
-      undeploy(dependencyDeployment,dependencyDeploymentTwo, envDeployment);
+      undeploy(dependencyDeployment, envDeployment);
    }
 
    @Test
@@ -112,20 +116,19 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
       Deployment envDeployment = createDeployment("test1");
       attachMetaData(envDeployment);
 
-      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("bean-testBean", String.class.getName()).setConstructorValue("test").getBeanMetaData());
-      Deployment dependencyDeploymentTwo = createDeployment("dependencyTwo", BeanMetaDataBuilder.createBuilder("bean-testBeanFromEjb", String.class.getName()).setConstructorValue("test").getBeanMetaData());
+      Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBuilder.createBuilder("binder-" + OtherMockBean.class.getName(), OtherMockBean.class.getName()).getBeanMetaData());
       assertNoContextValues();
-      deploy(envDeployment, dependencyDeployment, dependencyDeploymentTwo);
+      deploy(envDeployment, dependencyDeployment);
       assertContextValues();
 
       cleanContextValues();
-      undeploy(dependencyDeployment, dependencyDeploymentTwo, envDeployment);
+      undeploy(dependencyDeployment, envDeployment);
    }
 
    private void assertContextValues() throws Exception
    {
-      assertContextValue("java:comp/env/testBean", "Test Value");
-      assertContextValue("java:comp/env/testBeanFromEjb", "Test Value Two");
+      assertContextValue("java:comp/env/" + MockBean.class.getName() + "/otherBean", "Test Value");
+      assertContextValue("java:comp/env/org.jboss.test.SomeServlet/otherBean", "Test Value");
    }
 
    private void assertNoContextValues()
@@ -137,13 +140,15 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
    protected void attachMetaData(Deployment deployment)
    {
       MutableAttachments attachments = (MutableAttachments) deployment.getPredeterminedManagedObjects();
-      EJBReferencesMetaData referencesMetaData = new EJBReferencesMetaData();
-      EJBReferenceMetaData referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testBean");
+
+      AnnotatedEJBReferencesMetaData referencesMetaData = new AnnotatedEJBReferencesMetaData();
+      AnnotatedEJBReferenceMetaData referenceMetaData = new AnnotatedEJBReferenceMetaData();
+      referenceMetaData.setEjbRefName("org.jboss.test.SomeServlet/otherBean");
+      referenceMetaData.setBeanInterface(OtherMockBean.class);
       referencesMetaData.add(referenceMetaData);
 
       Environment environment = mock(Environment.class);
-      when(environment.getEjbReferences()).thenReturn(referencesMetaData);
+      when(environment.getAnnotatedEjbReferences()).thenReturn(referencesMetaData);
 
       JBossWebMetaData jBossWebMetaData = mock(JBossWebMetaData.class);
       when(jBossWebMetaData.getJndiEnvironmentRefsGroup()).thenReturn(environment);
@@ -155,22 +160,11 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
 
       attachments.addAttachment(JBossWebMetaData.class, jBossWebMetaData);
 
-      JBossMetaData jBossMetaData = mock(JBossMetaData.class);
-      JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData = mock(JBossEnterpriseBeanMetaData.class);
-      when(jBossEnterpriseBeanMetaData.getKey()).thenReturn("testBean");
-      when(jBossEnterpriseBeanMetaData.getName()).thenReturn("testBean");
+      AnnotationFinder<AnnotatedElement> finder = new DefaultAnnotationFinder<AnnotatedElement>();
+      JBoss50Creator creator = new JBoss50Creator(finder);
+      JBossMetaData jBossMetaData = creator.create(Arrays.<Class<?>>asList(MockBean.class, OtherMockBean.class));
 
-      referencesMetaData = new EJBReferencesMetaData();
-      referenceMetaData = new EJBReferenceMetaData();
-      referenceMetaData.setEjbRefName("testBeanFromEjb");
-      referencesMetaData.add(referenceMetaData);
-
-      when(jBossEnterpriseBeanMetaData.getEjbReferences()).thenReturn(referencesMetaData);
-
-      JBossEnterpriseBeansMetaData jBossEnterpriseBeansMetaData = new JBossEnterpriseBeansMetaData();
-      jBossEnterpriseBeansMetaData.add(jBossEnterpriseBeanMetaData);
-
-      when(jBossMetaData.getEnterpriseBeans()).thenReturn(jBossEnterpriseBeansMetaData);
+      JBossEnterpriseBeanMetaData jBossEnterpriseBeanMetaData  = jBossMetaData.getEnterpriseBean("MockBean");
 
       attachments.addAttachment(JBossMetaData.class, jBossMetaData);
 
@@ -185,14 +179,13 @@ Deployment dependencyDeployment = createDeployment("dependency", BeanMetaDataBui
 
    private void bindContextValues() throws NamingException
    {
-      Util.rebind(context, "java:testBean", "Test Value");
-      Util.rebind(context, "java:testBeanFromEjb", "Test Value Two");
+      Util.rebind(context, "java:" + OtherMockBean.class.getName(), "Test Value");
    }
 
    private void cleanContextValues() throws NamingException
    {
 
-      unbind(compContext, "env/testBean", "env/testBeanFromEjb");
-      unbind(context, "java:testBean", "java:testBeanFromEjb");
+      unbind(compContext, "env/" +  MockBean.class.getName() +"/otherBean");
+      unbind(context, "java:" + OtherMockBean.class.getName());
    }
 }

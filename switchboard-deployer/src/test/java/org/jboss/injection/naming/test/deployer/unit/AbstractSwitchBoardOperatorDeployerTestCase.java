@@ -89,7 +89,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       }
       context = new InitialContext();
       Context javaContext = (Context)context.lookup("java:");
-      compContext = javaContext.createSubcontext("java:comp");
+      compContext = javaContext.createSubcontext("comp");
    }
 
    @AfterClass
@@ -194,7 +194,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
 
    protected void assertContextValue(String jndiName, Object value) throws Exception
    {
-      String actual = (String) context.lookup(jndiName);
+      Object actual = context.lookup(jndiName);
       Assert.assertEquals(value, actual);
    }
 
@@ -213,6 +213,6 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
    protected void unbind(Context context, String... names) throws NamingException
    {
       for(String name : names)
-         Util.unbind(context, name);
+         context.unbind(name);
    }
 }
