@@ -24,7 +24,7 @@ package org.jboss.injection.inject.test.naming.unit;
 import org.jboss.injection.inject.naming.ContextInjectionPoint;
 import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.Injector;
-import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
+import org.jboss.injection.inject.pojo.GenericValueRetriever;
 import org.junit.Test;
 
 import javax.naming.Context;
@@ -42,13 +42,13 @@ public class SwitchBoardOperatorTest extends AbstractNamingTestCase
    {
       Injector<Context> injectorOne = new Injector<Context>(
          new ContextInjectionPoint<String>("java:testOne"),
-         new SimpleValueRetriever<String>("Test Value One"));
+         new GenericValueRetriever<String>("Test Value One"));
       Injector<Context> injectorTwo = new Injector<Context>(
          new ContextInjectionPoint<String>("java:testTwo"),
-         new SimpleValueRetriever<String>("Test Value Two"));
+         new GenericValueRetriever<String>("Test Value Two"));
       Injector<Context> injectorThree = new Injector<Context>(
          new ContextInjectionPoint<String>("java:testThree"),
-         new SimpleValueRetriever<String>("Test Value Three"));
+         new GenericValueRetriever<String>("Test Value Three"));
 
       SwitchBoardOperator switchBoardOperator = new SwitchBoardOperator(context, Arrays.asList(injectorOne, injectorTwo, injectorThree));
 

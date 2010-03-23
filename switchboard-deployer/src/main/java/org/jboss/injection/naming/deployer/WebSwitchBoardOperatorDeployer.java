@@ -86,16 +86,6 @@ public class WebSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorD
    }
 
    /**
-    * Get the module informer
-    *
-    * @return the module informer
-    */
-   protected JavaEEModuleInformer getModuleInformer()
-   {
-      return moduleInformer;
-   }
-
-   /**
     * Set the module informer
     *
     * @param moduleInformer The module informer

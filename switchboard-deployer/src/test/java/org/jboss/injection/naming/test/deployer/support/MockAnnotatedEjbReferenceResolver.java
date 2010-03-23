@@ -25,14 +25,13 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
-import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.javaee.spec.AnnotatedEJBReferenceMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class MockAnnotatedEjbReferenceResolver implements Resolver<AnnotatedEJBReferenceMetaData, DeploymentUnit>, EnvironmentMetaDataVisitor<AnnotatedEJBReferenceMetaData>
+public class MockAnnotatedEjbReferenceResolver implements Resolver<AnnotatedEJBReferenceMetaData, DeploymentUnit, ReferenceResolverResult>, EnvironmentMetaDataVisitor<AnnotatedEJBReferenceMetaData>
 {
    public Iterable<AnnotatedEJBReferenceMetaData> getMetaData(final Environment environment)
    {
@@ -44,7 +43,7 @@ public class MockAnnotatedEjbReferenceResolver implements Resolver<AnnotatedEJBR
       return AnnotatedEJBReferenceMetaData.class;
    }
 
-   public ResolverResult resolve(final DeploymentUnit context, final AnnotatedEJBReferenceMetaData metaData)
+   public ReferenceResolverResult resolve(final DeploymentUnit context, final AnnotatedEJBReferenceMetaData metaData)
    {
       return new ReferenceResolverResult("env/" + metaData.getEjbRefName(), "binder-" + metaData.getBeanInterface().getName(), "java:" + metaData.getBeanInterface().getName());
    }

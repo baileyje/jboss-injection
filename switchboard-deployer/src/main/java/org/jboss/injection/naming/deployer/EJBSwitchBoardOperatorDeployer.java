@@ -84,16 +84,6 @@ public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorD
    }
 
    /**
-    * Get the component informer
-    *
-    * @return the component informer
-    */
-   protected JavaEEComponentInformer getComponentInformer()
-   {
-      return componentInformer;
-   }
-
-   /**
     * Set the component informer
     *
     * @param componentInformer The component informer

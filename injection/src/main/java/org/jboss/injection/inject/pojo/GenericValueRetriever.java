@@ -19,20 +19,20 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.inject.test.pojo.support;
+package org.jboss.injection.inject.pojo;
 
 import org.jboss.injection.inject.spi.ValueRetriever;
 
 /**
- * SimpleValueRetriever -
+ * ValueRetriever used to handle generic value types.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class SimpleValueRetriever<V> implements ValueRetriever<V>
+public class GenericValueRetriever<V> implements ValueRetriever<V>
 {
    private final V value;
 
-   public SimpleValueRetriever(final V value)
+   public GenericValueRetriever(final V value)
    {
       this.value = value;
    }
@@ -42,3 +42,4 @@ public class SimpleValueRetriever<V> implements ValueRetriever<V>
       return value;
    }
 }
+

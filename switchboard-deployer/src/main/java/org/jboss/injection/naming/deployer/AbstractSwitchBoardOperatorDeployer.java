@@ -30,10 +30,10 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.inject.InjectorFactory;
 import org.jboss.injection.inject.naming.ContextInjectionPoint;
 import org.jboss.injection.inject.naming.SwitchBoardOperator;
-import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.Injector;
+import org.jboss.injection.inject.pojo.GenericValueRetriever;
 import org.jboss.injection.inject.spi.ValueRetriever;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ResolutionException;
@@ -53,12 +53,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
+ *
+ * @param <M> The metadata attachment type to deploy a SwitchBoardOperator for.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
@@ -70,6 +71,8 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
 
    /**
     * Create the deployer and setup the inputs
+    *
+    * @param metaDataType The metadata attachement type
     */
    public AbstractSwitchBoardOperatorDeployer(Class<M> metaDataType)
    {
@@ -90,14 +93,14 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
       if(environmentProcessor == null)
          throw new IllegalStateException("SwitchBoardOperator deployers require an EnvironmentPorcessor, which has not been set.");
 
-      List<ResolverResult> results = null;
+      List<ResolverResult<?>> results;
       try
       {
          results = environmentProcessor.process(unit, environments);
       }
       catch(ResolutionException e)
       {
-         DeploymentException.rethrowAsDeploymentException("Failed to resolve Environment references", e);
+         throw DeploymentException.rethrowAsDeploymentException("Failed to resolve Environment references", e);
       }
 
       if(results != null && !results.isEmpty())
@@ -115,7 +118,7 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
     * @param resolverResults The list of resolver results
     * @return The BeanMetaData
     */
-   protected BeanMetaData createBeanMetaData(final DeploymentUnit unit, final List<ResolverResult> resolverResults)
+   protected BeanMetaData createBeanMetaData(final DeploymentUnit unit, final List<ResolverResult<?>> resolverResults)
    {
       final String name = getBeanName(unit);
 
@@ -157,17 +160,30 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
     * @param resolverResults The list of resolver results
     * @return A list of injectors
     */
-   protected List<Injector<Context>> createInjectors(final List<ResolverResult> resolverResults)
+   protected List<Injector<Context>> createInjectors(final List<ResolverResult<?>> resolverResults)
    {
       final List<Injector<Context>> injectors = new ArrayList<Injector<Context>>(resolverResults.size());
-      for(ResolverResult resolverResult : resolverResults)
+      for(ResolverResult<?> resolverResult : resolverResults)
       {
-         final ContextInjectionPoint injectionPoint = new ContextInjectionPoint(resolverResult.getRefName());
-         final ValueRetriever valueRetriever = resolverResult.getValueRetriever();
-         final Injector<Context> injector = InjectorFactory.create(injectionPoint, valueRetriever);
+         final Injector<Context> injector = createInjector(resolverResult);
          injectors.add(injector);
       }
       return injectors;
+   }
+
+   /**
+    * Create an injector for a specified resolver result
+    *
+    * @param resolverResult The resolver result to create an injection for
+    * @param <V> The value type for the resolver result
+    * @return An injector
+    */
+   protected <V> Injector<Context> createInjector(ResolverResult<V> resolverResult)
+   {
+      final ContextInjectionPoint<V> injectionPoint = new ContextInjectionPoint<V>(resolverResult.getRefName());
+      final V value = resolverResult.getValue();
+      final ValueRetriever<V> valueRetriever = new GenericValueRetriever<V>(value);
+      return new Injector<Context>(injectionPoint, valueRetriever);
    }
 
    /**

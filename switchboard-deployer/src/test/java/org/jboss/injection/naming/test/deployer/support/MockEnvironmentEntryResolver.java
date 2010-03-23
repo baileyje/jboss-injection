@@ -22,7 +22,6 @@
 package org.jboss.injection.naming.test.deployer.support;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.injection.resolve.naming.ValueResolverResult;
 import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
@@ -32,7 +31,7 @@ import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class MockEnvironmentEntryResolver implements Resolver<EnvironmentEntryMetaData, DeploymentUnit>, EnvironmentMetaDataVisitor<EnvironmentEntryMetaData>
+public class MockEnvironmentEntryResolver implements Resolver<EnvironmentEntryMetaData, DeploymentUnit, ResolverResult<String>>, EnvironmentMetaDataVisitor<EnvironmentEntryMetaData>
 {
    public Iterable<EnvironmentEntryMetaData> getMetaData(final Environment environment)
    {
@@ -44,8 +43,8 @@ public class MockEnvironmentEntryResolver implements Resolver<EnvironmentEntryMe
       return EnvironmentEntryMetaData.class;
    }
 
-   public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
+   public ResolverResult<String> resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
    {
-      return new ValueResolverResult<String>("env/" + metaData.getEnvEntryName(), null, metaData.getValue());
+      return new ResolverResult<String>("env/" + metaData.getEnvEntryName(), null, metaData.getValue());
    }
 }

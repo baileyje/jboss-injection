@@ -24,7 +24,7 @@ package org.jboss.injection.inject.test.naming.unit;
 import org.jboss.injection.inject.naming.ContextInjectionPoint;
 import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.inject.Injector;
-import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
+import org.jboss.injection.inject.pojo.GenericValueRetriever;
 import org.junit.Test;
 
 import javax.naming.Context;
@@ -41,7 +41,7 @@ public class ContextInjectionTest extends AbstractNamingTestCase
    @Test
    public void testEncInjection() throws Exception
    {
-      Injector<Context> injector = new Injector<Context>(new ContextInjectionPoint<String>("java:test"), new SimpleValueRetriever<String>("Test Value"));
+      Injector<Context> injector = new Injector<Context>(new ContextInjectionPoint<String>("java:test"), new GenericValueRetriever<String>("Test Value"));
 
       injector.inject(context);
 
