@@ -21,6 +21,8 @@
  */
 package org.jboss.injection.naming.switchboard;
 
+import org.jboss.metadata.javaee.spec.Environment;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -36,6 +38,15 @@ import javax.xml.bind.annotation.XmlType;
 public class SwitchBoardComponentMetaData extends AbstractSwitchBoardMetaData
 {
    private String componentName;
+
+   public SwitchBoardComponentMetaData()
+   {
+   }
+
+   public SwitchBoardComponentMetaData(final Environment existingEnvironment)
+   {
+      super(existingEnvironment);
+   }
 
    /**
     * Get the name of the component

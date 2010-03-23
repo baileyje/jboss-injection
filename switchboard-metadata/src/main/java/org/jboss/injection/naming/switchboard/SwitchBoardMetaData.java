@@ -21,6 +21,7 @@
  */
 package org.jboss.injection.naming.switchboard;
 
+import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.xb.annotations.JBossXmlSchema;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -44,6 +45,15 @@ import java.util.List;
 public class SwitchBoardMetaData extends AbstractSwitchBoardMetaData
 {
    private List<SwitchBoardComponentMetaData> components;
+
+   public SwitchBoardMetaData()
+   {
+   }
+
+   public SwitchBoardMetaData(final Environment existingEnvironment)
+   {
+      super(existingEnvironment);
+   }
 
    /**
     * Get the component level metadata

@@ -21,9 +21,7 @@
  */
 package org.jboss.injection.naming.switchboard;
 
-import org.jboss.metadata.ejb.jboss.JBossEnvironmentRefsGroupMetaData;
 import org.jboss.metadata.javaee.jboss.JBossServiceReferenceMetaData;
-import org.jboss.metadata.javaee.jboss.JBossServiceReferencesMetaData;
 import org.jboss.metadata.javaee.spec.AnnotatedEJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.DataSourceMetaData;
 import org.jboss.metadata.javaee.spec.DataSourcesMetaData;
@@ -47,7 +45,6 @@ import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferencesMetaData;
-import org.jboss.xb.annotations.JBossXmlCollection;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -62,179 +59,241 @@ public abstract class AbstractSwitchBoardMetaData implements Environment, Serial
 {
    private static final long serialVersionUID = -1;
 
-   private JBossEnvironmentRefsGroupMetaData jndiEnvironmentRefsGroup = new JBossEnvironmentRefsGroupMetaData();
+   private EnvironmentEntriesMetaData environmentEntries;
+   private AnnotatedEJBReferencesMetaData annotatedEjbReferences;
+   private EJBReferencesMetaData ejbReferences;
+   private ResourceReferencesMetaData resourceReferences;
+   private ResourceEnvironmentReferencesMetaData resourceEnvironmentReferences;
+   private MessageDestinationReferencesMetaData messageDestinationReferences;
+   private PersistenceUnitReferencesMetaData persistenceUnitRefs;
+   private EJBLocalReferencesMetaData ejbLocalReferences;
+   private ServiceReferencesMetaData serviceReferences;
+   private PersistenceContextReferencesMetaData persistenceContextRefs;
+   private DataSourcesMetaData dataSources;
+
+
+   public AbstractSwitchBoardMetaData()
+   {
+   }
+
+   public AbstractSwitchBoardMetaData(Environment existingEnvironment)
+   {
+      if(existingEnvironment.getAnnotatedEjbReferences() != null)
+         setAnnotatedEjbReferences(existingEnvironment.getAnnotatedEjbReferences());
+      if(existingEnvironment.getDataSources() != null)
+         setDataSources(existingEnvironment.getDataSources());
+      if(existingEnvironment.getEjbLocalReferences() != null)
+         setEjbLocalReferences(existingEnvironment.getEjbLocalReferences());
+      if(existingEnvironment.getEjbReferences() != null)
+         setEjbReferences(existingEnvironment.getEjbReferences());
+      if(existingEnvironment.getEnvironmentEntries() != null)
+         setEnvironmentEntries(existingEnvironment.getEnvironmentEntries());
+      if(existingEnvironment.getMessageDestinationReferences() != null)
+         setMessageDestinationReferences(existingEnvironment.getMessageDestinationReferences());
+      if(existingEnvironment.getPersistenceContextRefs() != null)
+         setPersistenceContextRefs(existingEnvironment.getPersistenceContextRefs());
+      if(existingEnvironment.getPersistenceUnitRefs() != null)
+         setPersistenceUnitRefs(existingEnvironment.getPersistenceUnitRefs());
+      if(existingEnvironment.getResourceEnvironmentReferences() != null)
+         setResourceEnvironmentReferences(existingEnvironment.getResourceEnvironmentReferences());
+      if(existingEnvironment.getResourceReferences() != null)
+         setResourceReferences(existingEnvironment.getResourceReferences());
+      if(existingEnvironment.getServiceReferences() != null)
+         setServiceReferences(existingEnvironment.getServiceReferences());
+   }
 
    public EJBLocalReferencesMetaData getEjbLocalReferences()
    {
-      return jndiEnvironmentRefsGroup.getEjbLocalReferences();
+      if(ejbLocalReferences == null)
+         ejbLocalReferences = new EJBLocalReferencesMetaData();
+      return ejbLocalReferences;
    }
 
    @XmlElement(name="ejb-local-ref")
-   public void setEjbLocalReferences(EJBLocalReferencesMetaData ejbLocalReferenceMetaData)
+   public void setEjbLocalReferences(EJBLocalReferencesMetaData ejbLocalReferences)
    {
-      jndiEnvironmentRefsGroup.setEjbLocalReferences(ejbLocalReferenceMetaData);
+      this.ejbLocalReferences = ejbLocalReferences;
    }
    
    public EJBLocalReferenceMetaData getEjbLocalReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getEjbLocalReferenceByName(name);
+      return getEjbLocalReferences().get(name);
    }
 
    public PersistenceContextReferencesMetaData getPersistenceContextRefs()
    {
-      return jndiEnvironmentRefsGroup.getPersistenceContextRefs();
+      if(persistenceContextRefs == null)
+         persistenceContextRefs = new PersistenceContextReferencesMetaData();
+      return persistenceContextRefs;
    }
 
    @XmlElement(name="persistence-context-ref")
-   public void setPersistenceContextRefs(PersistenceContextReferencesMetaData persistenceContextReferencesMetaData)
+   public void setPersistenceContextRefs(PersistenceContextReferencesMetaData persistenceContextRefs)
    {
-      jndiEnvironmentRefsGroup.setPersistenceContextRefs(persistenceContextReferencesMetaData);
+      this.persistenceContextRefs = persistenceContextRefs;
    }
 
    public PersistenceContextReferenceMetaData getPersistenceContextReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getPersistenceContextReferenceByName(name);
+      return getPersistenceContextRefs().get(name);
    }
 
    public DataSourcesMetaData getDataSources()
    {
-      return jndiEnvironmentRefsGroup.getDataSources();
+      if(dataSources == null)
+         dataSources = new DataSourcesMetaData();
+      return dataSources;
    }
 
    @XmlElement(name="data-source")
    public void setDataSources(DataSourcesMetaData dataSources)
    {
-      jndiEnvironmentRefsGroup.setDataSources(dataSources);
+      this.dataSources = dataSources;
    }
 
    public DataSourceMetaData getDataSourceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getDataSourceByName(name);
+      return getDataSources().get(name);
    }
 
    public EnvironmentEntriesMetaData getEnvironmentEntries()
    {
-      return jndiEnvironmentRefsGroup.getEnvironmentEntries();
+      if(environmentEntries == null)
+         environmentEntries = new EnvironmentEntriesMetaData();
+      return environmentEntries;
    }
 
    @XmlElement(name="env-entry")
    public void setEnvironmentEntries(EnvironmentEntriesMetaData environmentEntries)
    {
-      jndiEnvironmentRefsGroup.setEnvironmentEntries(environmentEntries);
+      this.environmentEntries = environmentEntries;
    }
 
    public EnvironmentEntryMetaData getEnvironmentEntryByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getEnvironmentEntryByName(name);
+      return getEnvironmentEntries().get(name);
    }
 
    public EJBReferencesMetaData getEjbReferences()
    {
-      return jndiEnvironmentRefsGroup.getEjbReferences();
+      if(ejbReferences == null)
+         ejbReferences = new EJBReferencesMetaData();
+      return ejbReferences;
    }
 
    @XmlElement(name="ejb-ref")
    public void setEjbReferences(EJBReferencesMetaData ejbReferences)
    {
-      jndiEnvironmentRefsGroup.setEjbReferences(ejbReferences);
+      this.ejbReferences = ejbReferences;
    }
 
    public EJBReferenceMetaData getEjbReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getEjbReferenceByName(name);
+      return getEjbReferences().get(name);
    }
 
    @XmlTransient
    public AnnotatedEJBReferencesMetaData getAnnotatedEjbReferences()
    {
-      return jndiEnvironmentRefsGroup.getAnnotatedEjbReferences();
+      if(annotatedEjbReferences == null)
+         annotatedEjbReferences = new AnnotatedEJBReferencesMetaData();
+      return annotatedEjbReferences;
    }
 
    @XmlTransient
    public void setAnnotatedEjbReferences(AnnotatedEJBReferencesMetaData annotatedEjbReferences)
    {
-      jndiEnvironmentRefsGroup.setAnnotatedEjbReferences(annotatedEjbReferences);
+      this.annotatedEjbReferences = annotatedEjbReferences;
    }
 
    public ServiceReferencesMetaData getServiceReferences()
    {
-      return jndiEnvironmentRefsGroup.getServiceReferences();
+      if(serviceReferences == null)
+         serviceReferences = new ServiceReferencesMetaData();
+      return serviceReferences;
    }
 
-   @JBossXmlCollection(type= JBossServiceReferencesMetaData.class)
    @XmlElement(name="service-ref", type= JBossServiceReferenceMetaData.class)
    public void setServiceReferences(ServiceReferencesMetaData serviceReferences)
    {
-      jndiEnvironmentRefsGroup.setServiceReferences(serviceReferences);
+      this.serviceReferences = serviceReferences;
    }
 
    public ServiceReferenceMetaData getServiceReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getServiceReferenceByName(name);
+      return getServiceReferences().get(name);
    }
 
    public ResourceReferencesMetaData getResourceReferences()
    {
-      return jndiEnvironmentRefsGroup.getResourceReferences();
+      if(resourceReferences == null)
+         resourceReferences = new ResourceReferencesMetaData();
+      return resourceReferences;
    }
 
    @XmlElement(name="resource-ref")
    public void setResourceReferences(ResourceReferencesMetaData resourceReferences)
    {
-      jndiEnvironmentRefsGroup.setResourceReferences(resourceReferences);
+      this.resourceReferences = resourceReferences;
    }
 
    public ResourceReferenceMetaData getResourceReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getResourceReferenceByName(name);
+      return getResourceReferences().get(name);
    }
 
    public ResourceEnvironmentReferencesMetaData getResourceEnvironmentReferences()
    {
-      return jndiEnvironmentRefsGroup.getResourceEnvironmentReferences();
+      if(resourceEnvironmentReferences == null)
+         resourceEnvironmentReferences = new ResourceEnvironmentReferencesMetaData();
+      return resourceEnvironmentReferences;
    }
 
    @XmlElement(name="resource-env-ref")
    public void setResourceEnvironmentReferences(ResourceEnvironmentReferencesMetaData resourceEnvironmentReferences)
    {
-      jndiEnvironmentRefsGroup.setResourceEnvironmentReferences(resourceEnvironmentReferences);
+      this.resourceEnvironmentReferences = resourceEnvironmentReferences;
    }
 
    public ResourceEnvironmentReferenceMetaData getResourceEnvironmentReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getResourceEnvironmentReferenceByName(name);
+      return getResourceEnvironmentReferences().get(name);
    }
 
    public MessageDestinationReferencesMetaData getMessageDestinationReferences()
    {
-      return jndiEnvironmentRefsGroup.getMessageDestinationReferences();
+      if(messageDestinationReferences == null)
+         messageDestinationReferences = new MessageDestinationReferencesMetaData();
+      return messageDestinationReferences;
    }
 
    @XmlElement(name="message-destination-ref")
    public void setMessageDestinationReferences(MessageDestinationReferencesMetaData messageDestinationReferences)
    {
-      jndiEnvironmentRefsGroup.setMessageDestinationReferences(messageDestinationReferences);
+      this.messageDestinationReferences = messageDestinationReferences;
    }
 
    public MessageDestinationReferenceMetaData getMessageDestinationReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getMessageDestinationReferenceByName(name);
+      return getMessageDestinationReferences().get(name);
    }
 
    public PersistenceUnitReferencesMetaData getPersistenceUnitRefs()
    {
-      return jndiEnvironmentRefsGroup.getPersistenceUnitRefs();
+      if(persistenceUnitRefs == null)
+         persistenceUnitRefs = new PersistenceUnitReferencesMetaData();
+      return persistenceUnitRefs;
    }
 
    @XmlElement(name="persistence-unit-ref")
-   public void setPersistencenitRefs(PersistenceUnitReferencesMetaData persistencenitRefs)
+   public void setPersistenceUnitRefs(PersistenceUnitReferencesMetaData persistenceUnitRefs)
    {
-      jndiEnvironmentRefsGroup.setPersistenceUnitRefs(persistencenitRefs);
+      this.persistenceUnitRefs = persistenceUnitRefs;
    }
 
    public PersistenceUnitReferenceMetaData getPersistenceUnitReferenceByName(final String name)
    {
-      return jndiEnvironmentRefsGroup.getPersistenceUnitReferenceByName(name);
+      return getPersistenceUnitRefs().get(name);
    }
 
    public LifecycleCallbacksMetaData getPostConstructs()
