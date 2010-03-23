@@ -131,9 +131,9 @@ public class EnvironmentProcessor<C>
    }
 
    @SuppressWarnings("unchecked")
-   protected <M, C, V> Resolver<M, C, V> getResolver(Class<M> metaDataType)
+   protected <M, C> Resolver<M, C, ?> getResolver(Class<M> metaDataType)
    {
-      return (Resolver<M, C, V>) resolvers.get(metaDataType);
+      return (Resolver<M, C, ?>) resolvers.get(metaDataType);
    }
 
    public void addMetaDataVisitor(final EnvironmentMetaDataVisitor<?> visitor)

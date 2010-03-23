@@ -29,9 +29,9 @@ package org.jboss.injection.resolve.spi;
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <M> The required metadata type
  * @param <C> The context in which to resolve (usually DeploymentUnit)
- * @param <V> The resolved value (usually an global JNDI name)
+ * @param <R> The resolved result type 
  */
-public interface Resolver<M, C, V>
+public interface Resolver<M, C, R extends ResolverResult>
 {
    /**
     * Return the type of metaData that can be resolved.
@@ -50,5 +50,5 @@ public interface Resolver<M, C, V>
     * @param metaData The metadata referencing a dependency
     * @return The ResolverResult
     */
-   ResolverResult<V> resolve(C context, M metaData);
+   R resolve(C context, M metaData);
 }

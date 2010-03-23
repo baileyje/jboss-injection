@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EnvironmentProcessorTest extends AbstractResolverTestCase
+public class EnvironmentProcessorTest
 {
 
    @Test
@@ -88,14 +88,14 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
       {
       }
 
-      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit, LinkRef>()
+      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit, ReferenceResolverResult>()
       {
          public Class<EJBReferenceMetaData> getMetaDataType()
          {
             return EJBReferenceMetaData.class;
          }
 
-         public ResolverResult<LinkRef> resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
+         public ReferenceResolverResult resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
          {
             return new ReferenceResolverResult("org.jboss.test.Bean.test", "testBean", "java:testBean");
          }
@@ -142,7 +142,7 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
          }
       });
 
-      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit, String>()
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit, ResolverResult<String>>()
       {
          public Class<EnvironmentEntryMetaData> getMetaDataType()
          {
@@ -200,7 +200,7 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
          }
       });
 
-      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit, String>()
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit, ResolverResult<String>>()
       {
          public Class<EnvironmentEntryMetaData> getMetaDataType()
          {

@@ -52,16 +52,16 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class EJBContextTestCase extends AbstractResolverTestCase
+public class EJBContextTestCase
 {
-   private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit, LinkRef>, EnvironmentMetaDataVisitor<ResourceEnvironmentReferenceMetaData>
+   private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit, ReferenceResolverResult>, EnvironmentMetaDataVisitor<ResourceEnvironmentReferenceMetaData>
    {
       public Class<ResourceEnvironmentReferenceMetaData> getMetaDataType()
       {
          return ResourceEnvironmentReferenceMetaData.class;
       }
 
-      public ResolverResult<LinkRef> resolve(DeploymentUnit unit, ResourceEnvironmentReferenceMetaData metaData)
+      public ReferenceResolverResult resolve(DeploymentUnit unit, ResourceEnvironmentReferenceMetaData metaData)
       {
          try
          {
