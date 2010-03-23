@@ -31,7 +31,6 @@ import javassist.Modifier;
 
 import javax.naming.Context;
 
-import org.jboss.injection.inject.InjectorFactory;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
 import org.jboss.injection.inject.pojo.MethodInjectionPoint;
 import org.jboss.injection.inject.spi.InjectionPoint;
