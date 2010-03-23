@@ -32,7 +32,7 @@ import javax.naming.NamingException;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ContextValueRetriever<M> implements ValueRetriever<Object>
+public class ContextValueRetriever<M> implements ValueRetriever<M>
 {
    private Context context;
    private final String jndiName;
@@ -62,7 +62,7 @@ public class ContextValueRetriever<M> implements ValueRetriever<Object>
    /**
     * {@inheritDoc}
     */
-   public Object getValue()
+   public M getValue()
    {
       return lookup(jndiName);
    }
@@ -70,16 +70,16 @@ public class ContextValueRetriever<M> implements ValueRetriever<Object>
    /**
     * Look up the value at a specific jndi location
     *
-    * @param jndiName
+    * @param jndiName The jndi name to lookup
     * @return The value at the jndi location
     */
-   protected Object lookup(final String jndiName)
+   protected M lookup(final String jndiName)
    {
-      Object dependency = null;
+      M dependency;
       try
       {
          final Context context = getContext();
-         dependency = context.lookup(jndiName);
+         dependency = (M)context.lookup(jndiName);
       }
       catch(NamingException e)
       {

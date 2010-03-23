@@ -42,9 +42,9 @@ public class ContextValueRetrieverTest extends AbstractNamingTestCase
    public void testJndiInjection() throws Exception
    {
       context.rebind("java:test", "Test Value");
-      FieldInjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
+      FieldInjectionPoint<SimpleObject, String> injectionPoint = new FieldInjectionPoint<SimpleObject, String>(SimpleObject.class.getDeclaredField("simpleProperty"));
 
-      Injector<Object> injector = new Injector<Object>(injectionPoint, new ContextValueRetriever<Object>(context, "java:test"));
+      Injector<SimpleObject> injector = new Injector<SimpleObject>(injectionPoint, new ContextValueRetriever<String>(context, "java:test"));
       injector.inject(simpleObject);
 
       Assert.assertNotNull(simpleObject.getSimpleProperty());

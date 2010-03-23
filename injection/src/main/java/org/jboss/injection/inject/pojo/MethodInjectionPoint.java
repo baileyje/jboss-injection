@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class MethodInjectionPoint extends AbstractAccessibleObjectBeanProperty<Method>
+public class MethodInjectionPoint<T, V> extends AbstractAccessibleObjectBeanProperty<Method, T, V>
 {
 
    /**
@@ -48,7 +48,7 @@ public class MethodInjectionPoint extends AbstractAccessibleObjectBeanProperty<M
    /**
     * {@inheritDoc}
     */
-   public void set(final Object target, final Object value)
+   public void set(final T target, final V value)
    {
       Method method = getAccessibleObject();
       Object args[] = {value};

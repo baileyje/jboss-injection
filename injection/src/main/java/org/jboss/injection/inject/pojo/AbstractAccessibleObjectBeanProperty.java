@@ -21,7 +21,7 @@
  */
 package org.jboss.injection.inject.pojo;
 
-import org.jboss.injection.inject.pojo.PojoInjectionPoint;
+import org.jboss.injection.inject.spi.InjectionPoint;
 
 import java.lang.reflect.AccessibleObject;
 
@@ -31,17 +31,17 @@ import java.lang.reflect.AccessibleObject;
  * @author <a href="mailto:carlo.dewolf@jboss.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public abstract class AbstractAccessibleObjectBeanProperty<T extends AccessibleObject> implements PojoInjectionPoint
+public abstract class AbstractAccessibleObjectBeanProperty<A extends AccessibleObject, T, V> implements InjectionPoint<T, V>
 {
-   private T accessibleObject;
+   private A accessibleObject;
 
-   protected AbstractAccessibleObjectBeanProperty(T accessibleObject)
+   protected AbstractAccessibleObjectBeanProperty(A accessibleObject)
    {
       this.accessibleObject = accessibleObject;
       accessibleObject.setAccessible(true);
    }
 
-   protected T getAccessibleObject()
+   protected A getAccessibleObject()
    {
       return accessibleObject;
    }

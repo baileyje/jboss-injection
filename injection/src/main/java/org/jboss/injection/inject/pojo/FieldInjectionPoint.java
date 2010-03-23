@@ -28,7 +28,7 @@ import java.lang.reflect.Field;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class FieldInjectionPoint extends AbstractAccessibleObjectBeanProperty<Field>
+public class FieldInjectionPoint<T, V> extends AbstractAccessibleObjectBeanProperty<Field, T, V>
 {
 
    /**
@@ -44,7 +44,7 @@ public class FieldInjectionPoint extends AbstractAccessibleObjectBeanProperty<Fi
    /**
     * {@inheritDoc}
     */
-   public void set(final Object target, final Object value)
+   public void set(final T target, final V value)
    {
       Field field = getAccessibleObject();
       try
