@@ -35,7 +35,7 @@ import org.jboss.injection.inject.InjectorFactory;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
 import org.jboss.injection.inject.pojo.MethodInjectionPoint;
 import org.jboss.injection.inject.spi.InjectionPoint;
-import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.ResourceInjectionMetaData;
@@ -66,7 +66,7 @@ public class InjectionProcessor
     * @param enc The ENC of the component to which the <code>environment</code> belongs
     * @param cl The classloader of the component being processed
     * @param environment Environment being processed for injection targets 
-    * @return
+    * @return The injectors for the environment
     * @throws Exception
     */
    public List<Injector<Object>> process(Context enc, ClassLoader cl, Environment environment)
@@ -140,7 +140,7 @@ public class InjectionProcessor
             // find the correct injection point (field or method)
             InjectionPoint<Object, Object> injectionPoint = getInjectionPoint(targetClass, targetName);
             // create an injector
-            Injector<Object> injector = InjectorFactory.create(injectionPoint, encValRetriever);
+            Injector<Object> injector = new Injector<Object>(injectionPoint, encValRetriever);
             
             // add this injector to the injectors to be returned
             injectors.add(injector);
@@ -177,7 +177,7 @@ public class InjectionProcessor
          }
          if (m.getName().equals(methodName))
          {
-            return new MethodInjectionPoint(m);
+            return new MethodInjectionPoint<Object, Object>(m);
          }
       }
       // the target is not a method, so let's try a field
@@ -185,7 +185,7 @@ public class InjectionProcessor
       try
       {
          Field field = injectionTargetClass.getDeclaredField(injectionTargetName);
-         return new FieldInjectionPoint(field);
+         return new FieldInjectionPoint<Object, Object>(field);
       }
       catch (SecurityException e)
       {
