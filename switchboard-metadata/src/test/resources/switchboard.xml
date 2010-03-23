@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<switchboard  xmlns="urn:jboss:switchboard:1.0">
+    <component>
+        <component-name>MyBean</component-name>
+        <ejb-ref>
+            <ejb-ref-name>a</ejb-ref-name>
+            <ejb-link>OtherBean</ejb-link>
+            <injection-target>
+                <injection-target-class>A</injection-target-class>
+                <injection-target-name>someBean</injection-target-name>
+            </injection-target>
+        </ejb-ref>
+    </component>
+    <!-- java:module/a -->
+    <ejb-ref>
+        <ejb-ref-name>a</ejb-ref-name>
+        <ejb-link>OtherBean</ejb-link>
+        <injection-target>
+            <injection-target-class>B</injection-target-class>
+            <injection-target-name>someBean</injection-target-name>
+        </injection-target>
+    </ejb-ref>
+</switchboard>
