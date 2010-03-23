@@ -41,13 +41,6 @@ import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ResolutionException;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.logging.Logger;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossMetaData;
-import org.jboss.metadata.ejb.spec.InterceptorBindingMetaData;
-import org.jboss.metadata.ejb.spec.InterceptorBindingsMetaData;
-import org.jboss.metadata.ejb.spec.InterceptorClassesMetaData;
-import org.jboss.metadata.ejb.spec.InterceptorMetaData;
-import org.jboss.metadata.ejb.spec.InterceptorsMetaData;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 
 import javax.naming.Context;
@@ -131,7 +124,7 @@ public class SwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<Swit
    }
 
    /**
-    * Create the BeanMetaData for the SwitchBoardOperator
+    * Deploy the BeanMetaData for the SwitchBoardOperator
     *
     * @param unit            The deploymentUnit
     * @param componentName   The component name

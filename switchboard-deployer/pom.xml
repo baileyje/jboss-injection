@@ -39,7 +39,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.jboss.injection</groupId>
             <artifactId>jboss-injection</artifactId>
@@ -82,28 +81,11 @@
             <version>${version.jboss.logging}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging-log4j</artifactId>
-            <version>${version.jboss.logging}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.jboss.metadata</groupId>
             <artifactId>jboss-metadata-common</artifactId>
             <version>${version.jboss.metadata.common}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.metadata</groupId>
-            <artifactId>jboss-metadata-ejb</artifactId>
-            <version>${version.jboss.metadata.ejb}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.metadata</groupId>
-            <artifactId>jboss-metadata-war</artifactId>
-            <version>${version.jboss.metadata.war}</version>
         </dependency>
 
         <dependency>
@@ -140,6 +122,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-log4j</artifactId>
+            <version>${version.jboss.logging}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.jboss.bootstrap</groupId>
             <artifactId>jboss-bootstrap-impl-mc</artifactId>
             <version>${version.jboss.bootstrap}</version>
@@ -172,10 +161,25 @@
             <scope>test</scope>
         </dependency>
 
+         <dependency>
+            <groupId>org.jboss.metadata</groupId>
+            <artifactId>jboss-metadata-ejb</artifactId>
+            <version>${version.jboss.metadata.ejb}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.metadata</groupId>
+            <artifactId>jboss-metadata-war</artifactId>
+            <version>${version.jboss.metadata.war}</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.jboss</groupId>
             <artifactId>jboss-mdr</artifactId>
             <version>${version.jboss.mdr}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

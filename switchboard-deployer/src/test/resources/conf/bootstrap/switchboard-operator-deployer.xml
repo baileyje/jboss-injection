@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
-    <bean name="EJBSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.deployer.EJBSwitchBoardOperatorDeployer"/>
-    <bean name="WebSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.deployer.WebSwitchBoardOperatorDeployer"/>
     <bean name="SwitchBoardOperatorDeployer" class="org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer"/>
 
     <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.naming.EnvironmentProcessor">
@@ -14,4 +12,6 @@
     <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
     <bean name="MockEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockAnnotatedEjbReferenceResolver"/>
     <bean name="MockEnvironmentEntryResolver" class="org.jboss.injection.naming.test.deployer.support.MockEnvironmentEntryResolver"/>
+    <bean name="EJBSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.test.deployer.support.EJBSwitchBoardMetaDataDeployer"/>
+    <bean name="WebSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.test.deployer.support.WebSwitchBoardMetaDataDeployer"/>
 </deployment>

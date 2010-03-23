@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.injection.naming.deployer;
+package org.jboss.injection.naming.test.deployer.support;
 
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
@@ -34,10 +34,10 @@ import org.jboss.metadata.web.jboss.JBossWebMetaData;
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class WebSwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<JBossWebMetaData>
+public class WebSwitchBoardMetaDataDeployer extends AbstractSimpleRealDeployer<JBossWebMetaData>
 {
 
-   public WebSwitchBoardOperatorDeployer()
+   public WebSwitchBoardMetaDataDeployer()
    {
       super(JBossWebMetaData.class);
       setOutput(SwitchBoardMetaData.class);
