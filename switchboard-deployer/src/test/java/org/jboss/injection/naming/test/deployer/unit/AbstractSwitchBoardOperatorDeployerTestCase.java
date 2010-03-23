@@ -61,6 +61,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
    protected static MainDeployer mainDeployer;
    protected static Context context;
    protected static Context compContext;
+   protected static Context moduleContext;
 
    @BeforeClass
    public static void setupServer() throws Exception
@@ -90,6 +91,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       context = new InitialContext();
       Context javaContext = (Context)context.lookup("java:");
       compContext = javaContext.createSubcontext("comp");
+      moduleContext = javaContext.createSubcontext("module");
    }
 
    @AfterClass

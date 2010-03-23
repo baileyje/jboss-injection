@@ -21,76 +21,45 @@
  */
 package org.jboss.injection.naming.deployer;
 
-import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.injection.naming.switchboard.SwitchBoardComponentMetaData;
+import org.jboss.injection.naming.switchboard.SwitchBoardMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
- * SwitchBoardOperatorDeployer that handles EJB only deployments.
+ * Deployer that handles EJB only deployments.
  * Will skip any deployment units that also have JBossWebMetaData.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class EJBSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorDeployer<JBossEnterpriseBeanMetaData>
+public class EJBSwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<JBossMetaData>
 {
-   private JavaEEComponentInformer componentInformer;
 
    public EJBSwitchBoardOperatorDeployer()
    {
-      super(JBossEnterpriseBeanMetaData.class);
-      setComponentsOnly(true);
+      super(JBossMetaData.class);
+      setOutput(SwitchBoardMetaData.class);
    }
 
-   /**
-    * Deploy a SwitchBoardOperator for a single EJB component.  Will skip any EJB components found within a WAR.
-    *
-    * @param unit The deployment unit
-    * @param metaData The metadata to process
-    * @throws org.jboss.deployers.spi.DeploymentException if any deployment issues occur
-    */
-   public void deploy(final DeploymentUnit unit, final JBossEnterpriseBeanMetaData metaData) throws DeploymentException
+   @Override
+   public void deploy(final DeploymentUnit unit, final JBossMetaData deployment) throws DeploymentException
    {
-      // Make sure this is not a war deployment with ejbs
       if(unit.isAttachmentPresent(JBossWebMetaData.class))
          return;
 
-      final List<Environment> environments = new LinkedList<Environment>();
-      environments.add(metaData);
-      environments.addAll(collectInterceptors(metaData));
-      deploy(unit, environments);
-   }
+      final SwitchBoardMetaData switchBoardMetaData = new SwitchBoardMetaData();
 
-   /** {@inheritDoc} */
-   protected String getBeanNameQualifier(final DeploymentUnit deploymentUnit)
-   {
-      final String applicationName = componentInformer.getApplicationName(deploymentUnit);
-      final String moduleName = componentInformer.getModulePath(deploymentUnit);
-      final String componentName = componentInformer.getComponentName(deploymentUnit);
-      final StringBuilder builder = new StringBuilder();
-      if(applicationName != null)
+      for(JBossEnterpriseBeanMetaData enterpriseBeanMetaData : deployment.getEnterpriseBeans())
       {
-         builder.append("application=").append(applicationName).append(",");
+         final SwitchBoardComponentMetaData switchBoardComponentMetaData = new SwitchBoardComponentMetaData(enterpriseBeanMetaData);
+         switchBoardComponentMetaData.setComponentName(enterpriseBeanMetaData.getName());
+         switchBoardMetaData.addComponent(switchBoardComponentMetaData);
       }
-      builder.append("module=").append(moduleName);
-      builder.append(",component=").append(componentName);
-      return builder.toString();
+      unit.addAttachment(SwitchBoardMetaData.class, switchBoardMetaData);
    }
 
-   /**
-    * Set the component informer
-    *
-    * @param componentInformer The component informer
-    */
-   @Inject
-   public void setComponentInformer(final JavaEEComponentInformer componentInformer)
-   {
-      this.componentInformer = componentInformer;
-   }
 }

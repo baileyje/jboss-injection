@@ -35,6 +35,8 @@ import org.jboss.injection.inject.naming.SwitchBoardOperator;
 import org.jboss.injection.inject.Injector;
 import org.jboss.injection.inject.pojo.GenericValueRetriever;
 import org.jboss.injection.inject.spi.ValueRetriever;
+import org.jboss.injection.naming.switchboard.SwitchBoardComponentMetaData;
+import org.jboss.injection.naming.switchboard.SwitchBoardMetaData;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ResolutionException;
 import org.jboss.injection.resolve.spi.ResolverResult;
@@ -46,7 +48,7 @@ import org.jboss.metadata.ejb.spec.InterceptorBindingsMetaData;
 import org.jboss.metadata.ejb.spec.InterceptorClassesMetaData;
 import org.jboss.metadata.ejb.spec.InterceptorMetaData;
 import org.jboss.metadata.ejb.spec.InterceptorsMetaData;
-import org.jboss.metadata.javaee.spec.Environment;
+import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 
 import javax.naming.Context;
 import java.util.ArrayList;
@@ -57,74 +59,91 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Deployer capable of creating SwitchBoardOperator beans from Environment MetaData.
- *
- * @param <M> The metadata attachment type to deploy a SwitchBoardOperator for.
+ * Deployer capable of creating SwitchBoardOperator beans from SwitchBoardMetaData.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSimpleRealDeployer<M>
+public class SwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<SwitchBoardMetaData>
 {
-   private static final Logger log = Logger.getLogger(AbstractSwitchBoardOperatorDeployer.class);
-   
+   private static final Logger log = Logger.getLogger(SwitchBoardOperatorDeployer.class);
+
+   private JavaEEComponentInformer componentInformer;
+
    private EnvironmentProcessor<DeploymentUnit> environmentProcessor;
 
    /**
     * Create the deployer and setup the inputs
-    *
-    * @param metaDataType The metadata attachement type
     */
-   public AbstractSwitchBoardOperatorDeployer(Class<M> metaDataType)
+   public SwitchBoardOperatorDeployer()
    {
-      super(metaDataType);
+      super(SwitchBoardMetaData.class);
       setOutput(BeanMetaData.class);
    }
 
    /**
     * Deploy a list of Environments as a single SwitchBoardOperator
     *
-    * @param unit The deployment unit
-    * @param environments  The list of environments to process
+    * @param unit                The deployment unit
+    * @param switchBoardMetaData The switchboard metadata
     * @throws DeploymentException if any deployment issues occur
     */
-   protected void deploy(final DeploymentUnit unit, final List<Environment> environments) throws DeploymentException
+   public void deploy(final DeploymentUnit unit, final SwitchBoardMetaData switchBoardMetaData) throws DeploymentException
    {
       final EnvironmentProcessor<DeploymentUnit> environmentProcessor = getEnvironmentProcessor();
       if(environmentProcessor == null)
          throw new IllegalStateException("SwitchBoardOperator deployers require an EnvironmentPorcessor, which has not been set.");
 
-      List<ResolverResult<?>> results;
+      //First the module level entries
       try
       {
-         results = environmentProcessor.process(unit, environments);
+         List<ResolverResult<?>> results = environmentProcessor.process(unit, switchBoardMetaData);
+         if(results != null && !results.isEmpty())
+         {
+            deployBeanMetaData(unit, null, results);
+         }
       }
       catch(ResolutionException e)
       {
-         throw DeploymentException.rethrowAsDeploymentException("Failed to resolve Environment references", e);
+         throw DeploymentException.rethrowAsDeploymentException("Failed to resolve module level references for " + unit, e);
       }
 
-      if(results != null && !results.isEmpty())
+      //Now the component level entries
+      if(switchBoardMetaData.getComponents() == null)
+         return;
+      for(SwitchBoardComponentMetaData componentMetaData : switchBoardMetaData.getComponents())
       {
-         final BeanMetaData beanMetaData = createBeanMetaData(unit, results);
-         unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + beanMetaData.getName(), beanMetaData, BeanMetaData.class);
-         log.debugf("Deploying SwitchBoardOperator [%s] for deployment [%s]", beanMetaData.getName(), unit);
+         try
+         {
+
+            List<ResolverResult<?>> results = environmentProcessor.process(unit, componentMetaData);
+            if(results != null && !results.isEmpty())
+            {
+               deployBeanMetaData(unit, componentMetaData.getComponentName(), results);
+            }
+         }
+         catch(ResolutionException e)
+         {
+            throw DeploymentException.rethrowAsDeploymentException("Failed to resolve references for component " + componentMetaData.getComponentName() + " in " + unit, e);
+         }
       }
+
+
    }
 
    /**
     * Create the BeanMetaData for the SwitchBoardOperator
     *
-    * @param unit The deploymentUnit
+    * @param unit            The deploymentUnit
+    * @param componentName   The component name
     * @param resolverResults The list of resolver results
-    * @return The BeanMetaData
     */
-   protected BeanMetaData createBeanMetaData(final DeploymentUnit unit, final List<ResolverResult<?>> resolverResults)
+   protected void deployBeanMetaData(final DeploymentUnit unit, final String componentName, final List<ResolverResult<?>> resolverResults)
    {
-      final String name = getBeanName(unit);
+      final String name = getBeanName(unit, componentName);
 
       final BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, SwitchBoardOperator.class.getName());
 
-      final ValueMetaData contextValueMetaData = createContextValueMetaData(unit);
+      final ValueMetaData contextValueMetaData = createContextValueMetaData(unit, componentName);
       builder.addConstructorParameter(Context.class.getName(), contextValueMetaData);
 
       final List<Injector<Context>> injectors = createInjectors(resolverResults);
@@ -139,18 +158,22 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
          }
 
       }
-      return builder.getBeanMetaData();
+
+      final BeanMetaData beanMetaData = builder.getBeanMetaData();
+      unit.getTopLevel().addAttachment(BeanMetaData.class.getName() + "." + name, beanMetaData, BeanMetaData.class);
+      log.debugf("Deploying SwitchBoardOperator [%s] for deployment [%s]", name, unit);
    }
 
    /**
     * Create the metdata required to access the correct Context for this deployment.
     *
-    * @param unit The deploymentUnit
+    * @param unit          The deploymentUnit
+    * @param componentName The component name
     * @return The injection value metadata
     */
-   protected ValueMetaData createContextValueMetaData(final DeploymentUnit unit)
+   protected ValueMetaData createContextValueMetaData(final DeploymentUnit unit, String componentName)
    {
-      final String contextBeanName = "jboss.naming:" + getBeanNameQualifier(unit);
+      final String contextBeanName = "jboss.naming:" + getBeanNameQualifier(unit, componentName);
       return new AbstractInjectionValueMetaData(contextBeanName, "context");
    }
 
@@ -175,7 +198,7 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
     * Create an injector for a specified resolver result
     *
     * @param resolverResult The resolver result to create an injection for
-    * @param <V> The value type for the resolver result
+    * @param <V>            The value type for the resolver result
     * @return An injector
     */
    protected <V> Injector<Context> createInjector(ResolverResult<V> resolverResult)
@@ -190,70 +213,38 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
     * Create the bean name
     *
     * @param deploymentUnit The deployment unit
+    * @param componentName  The component name
     * @return The bean name to use
     */
-   protected String getBeanName(final DeploymentUnit deploymentUnit)
+   protected String getBeanName(final DeploymentUnit deploymentUnit, final String componentName)
    {
-      return "jboss.naming:service=SwitchBoardOperator," + getBeanNameQualifier(deploymentUnit);
+      return "jboss.naming:service=SwitchBoardOperator," + getBeanNameQualifier(deploymentUnit, componentName);
    }
 
    /**
     * Create the qualifier used in the bean name.
     *
     * @param deploymentUnit The deployment unit
+    * @param componentName  The component name
     * @return The bean name to use
     */
-   protected abstract String getBeanNameQualifier(final DeploymentUnit deploymentUnit);
-
-
-   /**
-    * Collect the interceptors for an enterprise bean.
-    *
-    * @param enterpriseBean The enterprise bean
-    * @return The interceptors used by this enterprise bean
-    */
-   protected Collection<InterceptorMetaData> collectInterceptors(final JBossEnterpriseBeanMetaData enterpriseBean)
+   protected String getBeanNameQualifier(final DeploymentUnit deploymentUnit, final String componentName)
    {
-      final JBossMetaData jBossMetaData = enterpriseBean.getJBossMetaData();
+      final String applicationName = componentInformer.getApplicationName(deploymentUnit);
+      final String moduleName = componentInformer.getModulePath(deploymentUnit);
 
-      // Lets get out of here early if there is no interceptor metadata
-      if(jBossMetaData.getInterceptors() == null)
-         return Collections.emptySet();
-
-      final Set<InterceptorMetaData> interceptors = new HashSet<InterceptorMetaData>();
-
-      final InterceptorBindingsMetaData interceptorBindings = enterpriseBean.getJBossMetaData().getAssemblyDescriptor().getInterceptorBindings();
-      for(InterceptorBindingMetaData interceptorBinding : interceptorBindings)
+      final StringBuilder builder = new StringBuilder();
+      if(applicationName != null)
       {
-         if(interceptorBinding.getEjbName().equals(enterpriseBean.getName()))
-         {
-            final InterceptorClassesMetaData interceptorClasses = interceptorBinding.getInterceptorClasses();
-            collectInterceptors(jBossMetaData, interceptorClasses, interceptors);
-         }
+         builder.append("application=").append(applicationName).append(",");
       }
-      return interceptors;
-   }
-
-   /**
-    * Collect the interceptors based on InterceptorClassesMetaData 
-    *
-    * @param jbossMetaData The JbossMetaData
-    * @param interceptorClasses The interceptor classes to find
-    * @param interceptors The collected interceptors
-    */
-   protected void collectInterceptors(final JBossMetaData jbossMetaData, final InterceptorClassesMetaData interceptorClasses, final Collection<InterceptorMetaData> interceptors)
-   {
-      final InterceptorsMetaData allInterceptors = jbossMetaData.getInterceptors();
-      for(InterceptorMetaData interceptor : allInterceptors)
+      builder.append("module=").append(moduleName);
+      if(componentName != null)
       {
-         if(interceptorClasses.contains(interceptor.getInterceptorClass()))
-         {
-            if(interceptor != null)
-               interceptors.add(interceptor);
-         }
+         builder.append(",component=").append(componentName);
       }
+      return builder.toString();
    }
-
 
    /**
     * Get the environment processor
@@ -274,5 +265,16 @@ public abstract class AbstractSwitchBoardOperatorDeployer<M> extends AbstractSim
    public void setEnvironmentProcessor(final EnvironmentProcessor<DeploymentUnit> environmentProcessor)
    {
       this.environmentProcessor = environmentProcessor;
+   }
+
+   /**
+    * Set the component informer
+    *
+    * @param componentInformer The component informer
+    */
+   @Inject
+   public void setComponentInformer(final JavaEEComponentInformer componentInformer)
+   {
+      this.componentInformer = componentInformer;
    }
 }

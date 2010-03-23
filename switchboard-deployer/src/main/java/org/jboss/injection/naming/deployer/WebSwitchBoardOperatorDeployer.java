@@ -21,30 +21,26 @@
  */
 package org.jboss.injection.naming.deployer;
 
-import org.jboss.beans.metadata.api.annotations.Inject;
 import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.injection.naming.switchboard.SwitchBoardMetaData;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
-import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.reloaded.naming.deployers.javaee.JavaEEModuleInformer;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
- * SwitchBoardOperatorDeployer that handles WEB/WEB+EJB deployments.
+ * Deployer that handles WEB/WEB+EJB deployments.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class WebSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorDeployer<JBossWebMetaData>
+public class WebSwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<JBossWebMetaData>
 {
-   private JavaEEModuleInformer moduleInformer;
 
    public WebSwitchBoardOperatorDeployer()
    {
       super(JBossWebMetaData.class);
+      setOutput(SwitchBoardMetaData.class);
    }
 
    /**
@@ -56,44 +52,41 @@ public class WebSwitchBoardOperatorDeployer extends AbstractSwitchBoardOperatorD
     */
    public void deploy(final DeploymentUnit unit, final JBossWebMetaData metaData) throws DeploymentException
    {
-      final List<Environment> environments = new LinkedList<Environment>();
-      environments.add(metaData.getJndiEnvironmentRefsGroup());
+      SwitchBoardMetaData switchBoardMetaData = new SwitchBoardMetaData(metaData.getJndiEnvironmentRefsGroup());
+
 
       if(unit.isAttachmentPresent(JBossMetaData.class))
       {
+         // We are not going to do components since they all share a name space
          final JBossMetaData jBossMetaData = unit.getAttachment(JBossMetaData.class);
          for(JBossEnterpriseBeanMetaData beanMetaData : jBossMetaData.getEnterpriseBeans())
          {
-            environments.add(beanMetaData);
-            environments.addAll(collectInterceptors(beanMetaData));
+            if(beanMetaData.getAnnotatedEjbReferences() != null)
+               switchBoardMetaData.getAnnotatedEjbReferences().addAll(beanMetaData.getAnnotatedEjbReferences());
+            if(beanMetaData.getDataSources() != null)
+               switchBoardMetaData.getDataSources().addAll(beanMetaData.getDataSources());
+            if(beanMetaData.getEjbLocalReferences() != null)
+               switchBoardMetaData.getEjbLocalReferences().addAll(beanMetaData.getEjbLocalReferences());
+            if(beanMetaData.getEjbReferences() != null)
+               switchBoardMetaData.getEjbReferences().addAll(beanMetaData.getEjbReferences());
+            if(beanMetaData.getEnvironmentEntries() != null)
+               switchBoardMetaData.getEnvironmentEntries().addAll(beanMetaData.getEnvironmentEntries());
+            if(beanMetaData.getMessageDestinationReferences() != null)
+               switchBoardMetaData.getMessageDestinationReferences().addAll(beanMetaData.getMessageDestinationReferences());
+            if(beanMetaData.getPersistenceContextRefs() != null)
+               switchBoardMetaData.getPersistenceContextRefs().addAll(beanMetaData.getPersistenceContextRefs());
+            if(beanMetaData.getPersistenceUnitRefs() != null)
+               switchBoardMetaData.getPersistenceUnitRefs().addAll(beanMetaData.getPersistenceUnitRefs());
+            if(beanMetaData.getResourceEnvironmentReferences() != null)
+               switchBoardMetaData.getResourceEnvironmentReferences().addAll(beanMetaData.getResourceEnvironmentReferences());
+            if(beanMetaData.getResourceReferences() != null)
+               switchBoardMetaData.getResourceReferences().addAll(beanMetaData.getResourceReferences());
+            if(beanMetaData.getServiceReferences() != null)
+               switchBoardMetaData.getServiceReferences().addAll(beanMetaData.getServiceReferences());
          }
       }
-      deploy(unit, environments);
-   }
 
-   /** {@inheritDoc} */
-   protected String getBeanNameQualifier(final DeploymentUnit deploymentUnit)
-   {
-      String applicationName = moduleInformer.getApplicationName(deploymentUnit);
-      String moduleName = moduleInformer.getModulePath(deploymentUnit);
-      final StringBuilder builder = new StringBuilder();
-      if(applicationName != null)
-      {
-         builder.append("application=").append(applicationName).append(",");
-      }
-      builder.append("module=").append(moduleName);
-      return builder.toString();
-   }
-
-   /**
-    * Set the module informer
-    *
-    * @param moduleInformer The module informer
-    */
-   @Inject
-   public void setModuleInformer(final JavaEEModuleInformer moduleInformer)
-   {
-      this.moduleInformer = moduleInformer;
+      unit.addAttachment(SwitchBoardMetaData.class, switchBoardMetaData);
    }
 
 }
