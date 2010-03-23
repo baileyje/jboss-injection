@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class EnvironmentProcessor<C>
 {
-   private Map<Class<?>, Resolver<?, C>> resolvers;
+   private Map<Class<?>, Resolver<?, C, ?>> resolvers;
    private List<EnvironmentMetaDataVisitor<?>> visitors;
 
    /**
@@ -51,7 +51,7 @@ public class EnvironmentProcessor<C>
     */
    public EnvironmentProcessor()
    {
-      this(new LinkedList<EnvironmentMetaDataVisitor<?>>(), new HashMap<Class<?>, Resolver<?, C>>());
+      this(new LinkedList<EnvironmentMetaDataVisitor<?>>(), new HashMap<Class<?>, Resolver<?, C, ?>>());
    }
 
    /**
@@ -60,7 +60,7 @@ public class EnvironmentProcessor<C>
     * @param visitors A list of visitors
     * @param resolvers A map from class to Resolver
     */
-   public EnvironmentProcessor(final List<EnvironmentMetaDataVisitor<?>> visitors, final Map<Class<?>, Resolver<?, C>> resolvers)
+   public EnvironmentProcessor(final List<EnvironmentMetaDataVisitor<?>> visitors, final Map<Class<?>, Resolver<?, C, ?>> resolvers)
    {
       this.visitors = visitors;
       this.resolvers = resolvers;
@@ -74,7 +74,7 @@ public class EnvironmentProcessor<C>
     * @return The resolver results
     * @throws ResolutionException if any resolution problems occur
     */
-   public List<ResolverResult> process(C context, Environment... environments) throws ResolutionException
+   public List<ResolverResult<?>> process(C context, Environment... environments) throws ResolutionException
    {
       return process(context, Arrays.asList(environments));
    }
@@ -87,7 +87,7 @@ public class EnvironmentProcessor<C>
     * @return The resolver results
     * @throws ResolutionException if any resolution problems occur
     */
-   public List<ResolverResult> process(C context, Iterable<Environment> environments) throws ResolutionException {
+   public List<ResolverResult<?>> process(C context, Iterable<Environment> environments) throws ResolutionException {
       final MappedResults mappedresults = new MappedResults();
 
       for(Environment environment : environments)
@@ -117,23 +117,23 @@ public class EnvironmentProcessor<C>
       if(reference == null)
          return;
 
-      final Resolver<M, C> resolver = getResolver(referenceType);
+      final Resolver<M, C, ?> resolver = getResolver(referenceType);
 
       if(resolver == null)
       {
          throw new ResolutionException("Found reference [" + reference + "] but no Resolver could be found for type [" + referenceType + "]");
       }
 
-      final ResolverResult result = resolver.resolve(context, reference);
+      final ResolverResult<?> result = resolver.resolve(context, reference);
       if(result == null)
          throw new ResolutionException("Found reference [" + reference + "] but resolution failed to produce a result");
       mappedresults.add(reference, result);
    }
 
    @SuppressWarnings("unchecked")
-   protected <M, C> Resolver<M, C> getResolver(Class<M> metaDataType)
+   protected <M, C, V> Resolver<M, C, V> getResolver(Class<M> metaDataType)
    {
-      return (Resolver<M, C>) resolvers.get(metaDataType);
+      return (Resolver<M, C, V>) resolvers.get(metaDataType);
    }
 
    public void addMetaDataVisitor(final EnvironmentMetaDataVisitor<?> visitor)
@@ -141,7 +141,7 @@ public class EnvironmentProcessor<C>
       visitors.add(visitor);
    }
 
-   public <M> void addResolver(final Resolver<M, C> resolver)
+   public <M> void addResolver(final Resolver<M, C, ?> resolver)
    {
       Class<M> metaDataType = resolver.getMetaDataType();
       resolvers.put(metaDataType, resolver);
@@ -150,7 +150,7 @@ public class EnvironmentProcessor<C>
    private static class MappedResults
    {
       private final Map<String, Object> referenceMap = new HashMap<String, Object>();
-      private final List<ResolverResult> results = new LinkedList<ResolverResult>();
+      private final List<ResolverResult<?>> results = new LinkedList<ResolverResult<?>>();
 
       public <M> void add(final M newReference, final ResolverResult result) throws ResolutionException
       {

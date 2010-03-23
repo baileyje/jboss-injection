@@ -21,34 +21,34 @@
  */
 package org.jboss.injection.resolve.spi;
 
-import org.jboss.injection.inject.spi.ValueRetriever;
-
 /**
  * The results of executing a Resolver.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
+ *
+ * @param <V> The value of the resolution
  */
-public class ResolverResult
+public class ResolverResult<V>
 {
-   private ValueRetriever<?> valueRetriever;
+   private V resolvedValue;
    private String refName;
    private String beanName;
 
-   public ResolverResult(String refName, String beanName, ValueRetriever<?> valueRetriever)
+   public ResolverResult(String refName, String beanName, V resolvedValue)
    {
-      this.valueRetriever = valueRetriever;
+      this.resolvedValue = resolvedValue;
       this.refName = refName;
       this.beanName = beanName;
    }
 
    /**
-    * Get the value retriever to use when injecting the reference.
+    * Get the resolved value to use when injecting the reference.
     *
     * @return The value retriever to use a injection time
     */
-   public ValueRetriever<?> getValueRetriever()
+   public V getValue()
    {
-      return valueRetriever;
+      return resolvedValue;
    }
 
    /**

@@ -25,7 +25,6 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.naming.ResolutionException;
-import org.jboss.injection.resolve.naming.ValueResolverResult;
 import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
@@ -37,6 +36,7 @@ import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.naming.LinkRef;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -88,26 +88,26 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
       {
       }
 
-      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit>()
+      processor.addResolver(new Resolver<EJBReferenceMetaData, DeploymentUnit, LinkRef>()
       {
          public Class<EJBReferenceMetaData> getMetaDataType()
          {
             return EJBReferenceMetaData.class;
          }
 
-         public ResolverResult resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
+         public ResolverResult<LinkRef> resolve(final DeploymentUnit context, final EJBReferenceMetaData metaData)
          {
             return new ReferenceResolverResult("org.jboss.test.Bean.test", "testBean", "java:testBean");
          }
       });
 
-      List<ResolverResult> results = processor.process(unit, environment);
+      List<ResolverResult<?>> results = processor.process(unit, environment);
       Assert.assertNotNull(results);
       Assert.assertEquals(1, results.size());
       ResolverResult result = results.get(0);
       Assert.assertEquals("org.jboss.test.Bean.test", result.getRefName());
       Assert.assertEquals("testBean", result.getBeanName());
-      Assert.assertEquals("java:testBean", getPrivateField(result.getValueRetriever(), "jndiName"));
+      Assert.assertEquals("java:testBean", ((LinkRef)result.getValue()).getLinkName());
    }
 
 
@@ -142,22 +142,23 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
          }
       });
 
-      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>()
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit, String>()
       {
          public Class<EnvironmentEntryMetaData> getMetaDataType()
          {
             return EnvironmentEntryMetaData.class;
          }
 
-         public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
+         public ResolverResult<String> resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
          {
-            return new ValueResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
+            return new ResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
          }
       });
 
 
-      List<ResolverResult> result = processor.process(unit, environmentOne, environmentTwo);
+      List<ResolverResult<?>> result = processor.process(unit, environmentOne, environmentTwo);
       Assert.assertEquals(1, result.size());
+      Assert.assertEquals("value", result.get(0).getValue());
    }
 
    @Test
@@ -199,16 +200,16 @@ public class EnvironmentProcessorTest extends AbstractResolverTestCase
          }
       });
 
-      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit>()
+      processor.addResolver(new Resolver<EnvironmentEntryMetaData, DeploymentUnit, String>()
       {
          public Class<EnvironmentEntryMetaData> getMetaDataType()
          {
             return EnvironmentEntryMetaData.class;
          }
 
-         public ResolverResult resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
+         public ResolverResult<String> resolve(final DeploymentUnit context, final EnvironmentEntryMetaData metaData)
          {
-            return new ValueResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
+            return new ResolverResult<String>("java:comp/env/test", "testBean", metaData.getValue());
          }
       });
 

@@ -39,6 +39,7 @@ import org.jboss.metadata.javaee.spec.ResourceEnvironmentReferenceMetaData;
 import org.junit.Test;
 
 import javax.ejb.EJBContext;
+import javax.naming.LinkRef;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;
@@ -53,14 +54,14 @@ import static org.mockito.Mockito.when;
  */
 public class EJBContextTestCase extends AbstractResolverTestCase
 {
-   private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit>, EnvironmentMetaDataVisitor<ResourceEnvironmentReferenceMetaData>
+   private static class ResourceEnvRefResolver implements Resolver<ResourceEnvironmentReferenceMetaData, DeploymentUnit, LinkRef>, EnvironmentMetaDataVisitor<ResourceEnvironmentReferenceMetaData>
    {
       public Class<ResourceEnvironmentReferenceMetaData> getMetaDataType()
       {
          return ResourceEnvironmentReferenceMetaData.class;
       }
 
-      public ResolverResult resolve(DeploymentUnit unit, ResourceEnvironmentReferenceMetaData metaData)
+      public ResolverResult<LinkRef> resolve(DeploymentUnit unit, ResourceEnvironmentReferenceMetaData metaData)
       {
          try
          {
@@ -103,8 +104,8 @@ public class EJBContextTestCase extends AbstractResolverTestCase
       ResourceEnvRefResolver resolver = new ResourceEnvRefResolver();
       processor.addResolver(resolver);
       processor.addMetaDataVisitor(resolver);
-      List<ResolverResult> result = processor.process(unit, environment);
+      List<ResolverResult<?>> result = processor.process(unit, environment);
       assertEquals("org.jboss.injection.resolve.test.ejb.YASessionBean/ctx", result.get(0).getRefName());
-      assertEquals("java:comp/EJBContext", getPrivateField(result.get(0).getValueRetriever(), "jndiName"));
+      assertEquals("java:comp/EJBContext", ((LinkRef)result.get(0).getValue()).getLinkName());
    }
 }

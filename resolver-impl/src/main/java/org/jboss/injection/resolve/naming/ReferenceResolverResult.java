@@ -21,15 +21,16 @@
  */
 package org.jboss.injection.resolve.naming;
 
-import org.jboss.injection.inject.naming.LinkRefValueRetriever;
 import org.jboss.injection.resolve.spi.ResolverResult;
+
+import javax.naming.LinkRef;
 
 /**
  * ResolverResult implementation that supports JNDI based references.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
-public class ReferenceResolverResult extends ResolverResult
+public class ReferenceResolverResult extends ResolverResult<LinkRef>
 {
    /**
     * Creates a new instance
@@ -40,6 +41,6 @@ public class ReferenceResolverResult extends ResolverResult
     */
    public ReferenceResolverResult(final String refName, final String beanName, String targetJndiName)
    {
-      super(refName, beanName, new LinkRefValueRetriever(targetJndiName));
+      super(refName, beanName, new LinkRef(targetJndiName));
    }
 }
