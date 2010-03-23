@@ -21,19 +21,17 @@
  */
 package org.jboss.injection.inject.test.naming.unit;
 
-import org.jboss.injection.inject.InjectorFactory;
 import org.jboss.injection.inject.naming.ContextInjectionPoint;
 import org.jboss.injection.inject.naming.LinkRefValueRetriever;
-import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.Injector;
 import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.naming.Context;
 import javax.naming.LinkRef;
 
 /**
- * Basic test to verify EncInjection function as expected.
+ * Basic test to verify ContextInjection functions as expected.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  */
@@ -43,7 +41,7 @@ public class ContextInjectionTest extends AbstractNamingTestCase
    @Test
    public void testEncInjection() throws Exception
    {
-      Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<String>("java:test"), new SimpleValueRetriever("Test Value"));
+      Injector<Context> injector = new Injector<Context>(new ContextInjectionPoint<String>("java:test"), new SimpleValueRetriever<String>("Test Value"));
 
       injector.inject(context);
 
@@ -55,7 +53,7 @@ public class ContextInjectionTest extends AbstractNamingTestCase
    {
       context.rebind("java:test", "Test Value");
 
-      Injector<Context> injector = InjectorFactory.create(new ContextInjectionPoint<LinkRef>("java:comp/test"), new LinkRefValueRetriever("java:test"));
+      Injector<Context> injector = new Injector<Context>(new ContextInjectionPoint<LinkRef>("java:comp/test"), new LinkRefValueRetriever("java:test"));
 
       assertNameNotFound("java:comp/test");
       injector.inject(context);

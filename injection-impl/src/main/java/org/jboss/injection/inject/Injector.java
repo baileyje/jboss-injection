@@ -22,20 +22,17 @@
 package org.jboss.injection.inject;
 
 import org.jboss.injection.inject.spi.InjectionPoint;
-import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 
 /**
- * Default injector that performs the basic injection logic with parametrized types.
+ * Injectors injectInto an inject into a target.
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
  * @param <T> The target object type
- * @param <V> The injected value type
  */
-public class DefaultInjector<T, V> implements Injector<T>
+public class Injector<T>
 {
-   private final InjectionPoint<T, V> injectionPoint;
-   private final ValueRetriever<V> valueRetriever;
+   private final TypedDelegate<T, ?> delegate;
 
    /**
     * Create a new Injector with an injection point and value retriever
@@ -43,31 +40,56 @@ public class DefaultInjector<T, V> implements Injector<T>
     * @param injectionPoint The injection point to inject into
     * @param valueRetriever The value retriever used to obtain the injected value
     */
-   public DefaultInjector(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
+   public <V> Injector(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
    {
-      if(injectionPoint == null) throw new IllegalArgumentException("Injection point can not be null");
+      if(injectionPoint == null) throw new IllegalArgumentException("TypedDelegate point can not be null");
       if(valueRetriever == null) throw new IllegalArgumentException("Value retriever can not be null");
-      this.injectionPoint = injectionPoint;
-      this.valueRetriever = valueRetriever;
+      delegate = new TypedDelegate<T, V>(injectionPoint, valueRetriever);
    }
 
    /**
-    * {@inheritDoc}
+    * Performs the injection
+    *
+    * @param target The target object receiving the injection
     */
-   public void inject(final T target)
+   public void inject(T target)
    {
-      final V vaue = getValue();
-      injectionPoint.set(target, vaue);
+      delegate.injectInto(target);
    }
 
-   protected V getValue()
+   /**
+    *  The purpose of this delegate is to hide the <V> value parameter from the public API of the
+    *  Injector class as it is only used creation time, and is no longer needed for the call to inject.
+    *  Basically internally formalizing the contract between the injection point's required value type
+    *  and the type returned by the value retriever.
+   */
+   private static class TypedDelegate<T, V>
    {
-      return valueRetriever.getValue();
+      private final ValueRetriever<V> valueRetriever;
+      private final InjectionPoint<T, V> injectionPoint;
+
+      private TypedDelegate(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
+      {
+         this.injectionPoint = injectionPoint;
+         this.valueRetriever = valueRetriever;
+      }
+
+      private void injectInto(T target)
+      {
+         final V value = getValue();
+         injectionPoint.set(target, value);
+      }
+
+
+      protected V getValue()
+      {
+         return valueRetriever.getValue();
+      }
    }
 
    @Override
    public String toString()
    {
-      return "DefaultInjector{" + "injectionPoint=" + injectionPoint + ", valueRetriever=" + valueRetriever +  '}';
+      return "Injector{" + "injectionPoint=" + delegate.injectionPoint + ", valueRetriever=" + delegate.valueRetriever +  '}';
    }
 }

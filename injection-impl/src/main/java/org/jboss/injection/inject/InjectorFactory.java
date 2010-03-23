@@ -22,13 +22,14 @@
 package org.jboss.injection.inject;
 
 import org.jboss.injection.inject.spi.InjectionPoint;
-import org.jboss.injection.inject.spi.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
 
 /**
  * Create an Injector based on an InjectionPoint and a ValueRetriever
  *
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>
+ *
+ * @deprecated Default Injector constructor should be used instead 
  */
 public class InjectorFactory
 {
@@ -41,9 +42,10 @@ public class InjectorFactory
     * @param <T>            The injection target type
     * @param <V>            The injection value type
     * @return An injector that can inject into the target type
+    *
     */
    public static <T, V> Injector<T> create(final InjectionPoint<T, V> injectionPoint, final ValueRetriever<V> valueRetriever)
    {
-      return new DefaultInjector<T, V>(injectionPoint, valueRetriever);
+      return new Injector<T>(injectionPoint, valueRetriever);
    }
 }

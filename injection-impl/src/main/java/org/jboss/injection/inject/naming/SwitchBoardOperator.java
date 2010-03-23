@@ -1,6 +1,6 @@
 package org.jboss.injection.inject.naming;
 
-import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.Injector;
 import org.jboss.logging.Logger;
 
 import javax.naming.Context;
@@ -36,7 +36,7 @@ public class SwitchBoardOperator
    /**
     * Called when this bean's dependencies are met.
     */
-   public void start() throws RuntimeException
+   public void start()
    {
       log.debugf("Executing %s", this);
       for(Injector<Context> injection : injectors)

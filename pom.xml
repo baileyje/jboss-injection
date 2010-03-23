@@ -24,9 +24,8 @@
     <description>JBoss Injection Parent</description>
 
     <modules>
-        <module>injection-spi</module>
-        <module>resolver-spi</module>
         <module>injection-impl</module>
+        <module>resolver-spi</module>
         <module>resolver-impl</module>
         <module>switchboard-deployer</module>
     </modules>

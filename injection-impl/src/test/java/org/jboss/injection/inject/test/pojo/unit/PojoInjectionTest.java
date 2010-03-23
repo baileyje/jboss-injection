@@ -21,8 +21,7 @@
  */
 package org.jboss.injection.inject.test.pojo.unit;
 
-import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.Injector;
 import org.jboss.injection.inject.test.pojo.support.SimpleObject;
 import org.jboss.injection.inject.test.pojo.support.SimpleValueRetriever;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
@@ -41,15 +40,14 @@ import java.lang.reflect.Method;
  */
 public class PojoInjectionTest
 {
-
-   private SimpleValueRetriever valueRetriever = new SimpleValueRetriever("Test Value");
+   private SimpleValueRetriever<Object> valueRetriever = new SimpleValueRetriever<Object>("Test Value");
    private SimpleObject simpleObject = new SimpleObject();
 
    @Test
    public void testFieldInjection() throws Exception
    {
-      InjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
-      Injector<Object> injector = InjectorFactory.create(injectionPoint, valueRetriever);
+      InjectionPoint<Object, Object> injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
+      Injector<Object> injector = new Injector<Object>(injectionPoint, valueRetriever);
       injector.inject(simpleObject);
 
       Assert.assertNotNull(simpleObject.getSimpleProperty());
@@ -60,7 +58,7 @@ public class PojoInjectionTest
    public void testMethodInjection() throws Exception
    {
       InjectionPoint injectionPoint = new MethodInjectionPoint(SimpleObject.class.getDeclaredMethod("setSimpleProperty", String.class));
-      Injector<Object> injector = InjectorFactory.create(injectionPoint, valueRetriever);
+      Injector<Object> injector = new Injector<Object>(injectionPoint, valueRetriever);
       injector.inject(simpleObject);
 
       Assert.assertNotNull(simpleObject.getSimpleProperty());
@@ -89,22 +87,22 @@ public class PojoInjectionTest
 
 
       // Reuse same injection point for multiple targets
-      Injector<Object> injector = InjectorFactory.create(injectionPoint, new SimpleValueRetriever("Test Value One"));
+      Injector<Object> injector = new Injector<Object>(injectionPoint, new SimpleValueRetriever("Test Value One"));
       injector.inject(simpleObject);
       org.junit.Assert.assertEquals("Test Value One", simpleObject.getSimpleProperty());
 
       simpleObject = new SimpleObject();
-      injector = InjectorFactory.create(injectionPoint, new SimpleValueRetriever("Test Value Two"));
+      injector = new Injector<Object>(injectionPoint, new SimpleValueRetriever("Test Value Two"));
       injector.inject(simpleObject);
       org.junit.Assert.assertEquals("Test Value Two", simpleObject.getSimpleProperty());
 
       simpleObject = new SimpleObject();
-      injector = InjectorFactory.create(injectionPoint, new SimpleValueRetriever("Test Value Three"));
+      injector = new Injector<Object>(injectionPoint, new SimpleValueRetriever("Test Value Three"));
       injector.inject(simpleObject);
       org.junit.Assert.assertEquals("Test Value Three", simpleObject.getSimpleProperty());
 
       simpleObject = new SimpleObject();
-      injector = InjectorFactory.create(injectionPoint, new SimpleValueRetriever("Test Value Four"));
+      injector = new Injector<Object>(injectionPoint, new SimpleValueRetriever("Test Value Four"));
       injector.inject(simpleObject);
       org.junit.Assert.assertEquals("Test Value Four", simpleObject.getSimpleProperty());
    }

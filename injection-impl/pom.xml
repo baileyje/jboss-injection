@@ -30,12 +30,6 @@
         <!-- Compile Dependencies -->
         <dependency>
             <groupId>org.jboss.injection</groupId>
-            <artifactId>jboss-injection-spi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.injection</groupId>
             <artifactId>jboss-resolver-spi</artifactId>
             <version>${project.version}</version>
         </dependency>

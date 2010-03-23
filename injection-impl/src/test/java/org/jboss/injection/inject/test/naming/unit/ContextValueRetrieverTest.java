@@ -21,13 +21,11 @@
  */
 package org.jboss.injection.inject.test.naming.unit;
 
-import org.jboss.injection.inject.InjectorFactory;
-import org.jboss.injection.inject.spi.Injector;
+import org.jboss.injection.inject.Injector;
 import org.jboss.injection.inject.test.pojo.support.SimpleObject;
 import org.jboss.injection.inject.pojo.FieldInjectionPoint;
 import org.jboss.injection.inject.naming.ContextValueRetriever;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -46,7 +44,7 @@ public class ContextValueRetrieverTest extends AbstractNamingTestCase
       context.rebind("java:test", "Test Value");
       FieldInjectionPoint injectionPoint = new FieldInjectionPoint(SimpleObject.class.getDeclaredField("simpleProperty"));
 
-      Injector<Object> injector = InjectorFactory.create(injectionPoint, new ContextValueRetriever(context, "java:test"));
+      Injector<Object> injector = new Injector<Object>(injectionPoint, new ContextValueRetriever<Object>(context, "java:test"));
       injector.inject(simpleObject);
 
       Assert.assertNotNull(simpleObject.getSimpleProperty());
