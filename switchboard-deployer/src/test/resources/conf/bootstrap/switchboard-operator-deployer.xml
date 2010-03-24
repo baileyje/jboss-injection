@@ -2,6 +2,8 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
     <bean name="SwitchBoardOperatorDeployer" class="org.jboss.injection.naming.deployer.SwitchBoardOperatorDeployer"/>
 
+    <bean name="SwitchBoardParsingDeployer" class="org.jboss.injection.naming.deployer.SwitchBoardParsingDeployer"/>
+
     <bean name="EnvironmentProcessor" class="org.jboss.injection.resolve.naming.EnvironmentProcessor">
         <incallback method="addResolver"/>
         <incallback method="addMetaDataVisitor"/>
@@ -10,7 +12,8 @@
 
     <!-- Mocks -->
     <bean name="JavaEEComponentInformer" class="org.jboss.injection.naming.test.deployer.support.MockJavaEEComponentInformer"/>
-    <bean name="MockEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockAnnotatedEjbReferenceResolver"/>
+    <bean name="MockAnnotatedEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockAnnotatedEjbReferenceResolver"/>
+    <bean name="MockEjbReferenceResolver" class="org.jboss.injection.naming.test.deployer.support.MockEjbReferenceResolver"/>
     <bean name="MockEnvironmentEntryResolver" class="org.jboss.injection.naming.test.deployer.support.MockEnvironmentEntryResolver"/>
     <bean name="EJBSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.test.deployer.support.EJBSwitchBoardMetaDataDeployer"/>
     <bean name="WebSwitchBoardOperatorDeployer" class="org.jboss.injection.naming.test.deployer.support.WebSwitchBoardMetaDataDeployer"/>

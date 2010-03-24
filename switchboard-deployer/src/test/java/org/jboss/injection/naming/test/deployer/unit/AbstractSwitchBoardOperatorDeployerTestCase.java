@@ -46,6 +46,7 @@ import org.junit.BeforeClass;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.net.URL;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -89,7 +90,7 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
          Thread.currentThread().setContextClassLoader(oldClassLoader);
       }
       context = new InitialContext();
-      Context javaContext = (Context)context.lookup("java:");
+      Context javaContext = (Context) context.lookup("java:");
       compContext = javaContext.createSubcontext("comp");
       moduleContext = javaContext.createSubcontext("module");
    }
@@ -110,13 +111,26 @@ public abstract class AbstractSwitchBoardOperatorDeployerTestCase
       mainDeployer.undeploy(deployments);
    }
 
+   protected static Deployment createDeployment(URL url)
+   {
+      try
+      {
+         VirtualFile root = VFS.getChild(url);
+         return VFSDeploymentFactory.getInstance().createVFSDeployment(root);
+      }
+      catch(Exception e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+
    protected static Deployment createDeployment(String name)
    {
       try
       {
          VirtualFile root = VFS.getChild(name);
-         VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(root);
-         return deployment;
+         return VFSDeploymentFactory.getInstance().createVFSDeployment(root);
       }
       catch(Exception e)
       {
