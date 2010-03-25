@@ -25,6 +25,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ReferenceResolverResult;
 import org.jboss.injection.resolve.naming.ResolutionException;
+import org.jboss.injection.resolve.spi.DuplicateReferenceValidator;
 import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
@@ -33,6 +34,10 @@ import org.jboss.metadata.javaee.spec.EJBReferencesMetaData;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
+import org.jboss.metadata.javaee.spec.ResourceAuthorityType;
+import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
+import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
+import org.jboss.metadata.javaee.spec.ResourceSharingScopeType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -222,4 +227,137 @@ public class EnvironmentProcessorTest
       {
       }
    }
+
+   @Test
+   public void testCustomReferenceValidatorNonConflicting() throws Exception
+   {
+      ResourceReferencesMetaData referencesMetaData = new ResourceReferencesMetaData();
+      ResourceReferenceMetaData referenceMetaData = new ResourceReferenceMetaData();
+      referenceMetaData.setType(String.class.getName());
+      referenceMetaData.setResAuth(ResourceAuthorityType.Application);
+      referenceMetaData.setResSharingScope(ResourceSharingScopeType.Shareable);
+      referenceMetaData.setResourceRefName("java:test");
+      referencesMetaData.add(referenceMetaData);
+
+      Environment environmentOne = mock(Environment.class);
+      when(environmentOne.getResourceReferences()).thenReturn(referencesMetaData);
+      Environment environmentTwo = mock(Environment.class);
+      when(environmentTwo.getResourceReferences()).thenReturn(referencesMetaData);
+
+      EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
+      DeploymentUnit unit = mock(DeploymentUnit.class);
+
+      processor.addMetaDataVisitor(new EnvironmentMetaDataVisitor<ResourceReferenceMetaData>()
+      {
+         public Iterable<ResourceReferenceMetaData> getMetaData(final Environment environment)
+         {
+            return environment.getResourceReferences();
+         }
+
+         public Class<ResourceReferenceMetaData> getMetaDataType()
+         {
+            return ResourceReferenceMetaData.class;
+         }
+      });
+
+      processor.addResolver(new Resolver<ResourceReferenceMetaData, DeploymentUnit, ResolverResult<String>>()
+      {
+         public Class<ResourceReferenceMetaData> getMetaDataType()
+         {
+            return ResourceReferenceMetaData.class;
+         }
+
+         public ResolverResult<String> resolve(final DeploymentUnit context, final ResourceReferenceMetaData metaData)
+         {
+            return new ResolverResult<String>("java:comp/env/test", "testBean", metaData.getResourceRefName());
+         }
+      });
+
+      processor.addDuplicateReferenceValidator(new DuplicateReferenceValidator<ResourceReferenceMetaData>(ResourceReferenceMetaData.class) {
+         @Override
+         protected boolean attributesEqual(final ResourceReferenceMetaData previousReference, final ResourceReferenceMetaData newReference)
+         {
+            return previousReference.getResAuth().equals(newReference.getResAuth()) && previousReference.getResSharingScope().equals(newReference.getResSharingScope());
+         }
+      });
+
+      List<ResolverResult<?>> result = processor.process(unit, environmentOne, environmentTwo);
+      Assert.assertEquals(1, result.size());
+      Assert.assertEquals("java:test", result.get(0).getValue());
+   }
+
+   @Test
+   public void testCustomReferenceValidatorConflicting() throws Exception
+   {
+
+      ResourceReferencesMetaData referencesMetaData = new ResourceReferencesMetaData();
+      ResourceReferenceMetaData referenceMetaData = new ResourceReferenceMetaData();
+      referenceMetaData.setType(String.class.getName());
+      referenceMetaData.setResAuth(ResourceAuthorityType.Application);
+      referenceMetaData.setResSharingScope(ResourceSharingScopeType.Shareable);
+      referenceMetaData.setResourceRefName("java:test");
+      referencesMetaData.add(referenceMetaData);
+
+      Environment environmentOne = mock(Environment.class);
+      when(environmentOne.getResourceReferences()).thenReturn(referencesMetaData);
+
+
+      referencesMetaData = new ResourceReferencesMetaData();
+      referenceMetaData = new ResourceReferenceMetaData();
+      referenceMetaData.setType(String.class.getName());
+      referenceMetaData.setResAuth(ResourceAuthorityType.Application);
+      referenceMetaData.setResSharingScope(ResourceSharingScopeType.Unshareable);
+      referenceMetaData.setResourceRefName("java:test");
+      referencesMetaData.add(referenceMetaData);
+
+      Environment environmentTwo = mock(Environment.class);
+      when(environmentTwo.getResourceReferences()).thenReturn(referencesMetaData);
+
+      EnvironmentProcessor<DeploymentUnit> processor = new EnvironmentProcessor<DeploymentUnit>();
+      DeploymentUnit unit = mock(DeploymentUnit.class);
+
+      processor.addMetaDataVisitor(new EnvironmentMetaDataVisitor<ResourceReferenceMetaData>()
+      {
+         public Iterable<ResourceReferenceMetaData> getMetaData(final Environment environment)
+         {
+            return environment.getResourceReferences();
+         }
+
+         public Class<ResourceReferenceMetaData> getMetaDataType()
+         {
+            return ResourceReferenceMetaData.class;
+         }
+      });
+
+      processor.addResolver(new Resolver<ResourceReferenceMetaData, DeploymentUnit, ResolverResult<String>>()
+      {
+         public Class<ResourceReferenceMetaData> getMetaDataType()
+         {
+            return ResourceReferenceMetaData.class;
+         }
+
+         public ResolverResult<String> resolve(final DeploymentUnit context, final ResourceReferenceMetaData metaData)
+         {
+            return new ResolverResult<String>("java:comp/env/test", "testBean", metaData.getResourceRefName());
+         }
+      });
+
+      processor.addDuplicateReferenceValidator(new DuplicateReferenceValidator<ResourceReferenceMetaData>(ResourceReferenceMetaData.class) {
+         @Override
+         protected boolean attributesEqual(final ResourceReferenceMetaData previousReference, final ResourceReferenceMetaData newReference)
+         {
+            return previousReference.getResAuth().equals(newReference.getResAuth()) && previousReference.getResSharingScope().equals(newReference.getResSharingScope());
+         }
+      });
+
+      try
+      {
+         processor.process(unit, environmentOne, environmentTwo);
+         Assert.fail("Should have thrown ResolutionException based on conflicting references");
+      }
+      catch(ResolutionException expected)
+      {
+      }
+   }
+
 }

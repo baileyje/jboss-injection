@@ -21,11 +21,12 @@
  */
 package org.jboss.injection.resolve.naming;
 
+import org.jboss.injection.resolve.spi.DuplicateReferenceValidator;
+import org.jboss.injection.resolve.spi.DuplicateReferenceValidator.ReferenceResultPair;
 import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.injection.resolve.spi.Resolver;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.metadata.javaee.spec.Environment;
-import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,13 +46,15 @@ public class EnvironmentProcessor<C>
 {
    private Map<Class<?>, Resolver<?, C, ?>> resolvers;
    private List<EnvironmentMetaDataVisitor<?>> visitors;
+   private Map<Class<?>, DuplicateReferenceValidator<?>> duplicateReferenceValidators;
 
    /**
     * Construct a new processor.  There will be no visitors or resolvers available.
     */
    public EnvironmentProcessor()
    {
-      this(new LinkedList<EnvironmentMetaDataVisitor<?>>(), new HashMap<Class<?>, Resolver<?, C, ?>>());
+      this(new LinkedList<EnvironmentMetaDataVisitor<?>>(), new HashMap<Class<?>, Resolver<?, C, ?>>(),
+         new HashMap<Class<?>, DuplicateReferenceValidator<?>>());
    }
 
    /**
@@ -59,11 +62,14 @@ public class EnvironmentProcessor<C>
     *
     * @param visitors A list of visitors
     * @param resolvers A map from class to Resolver
+    * @param validators A map from clsss to DuplicateReferenceValidator 
     */
-   public EnvironmentProcessor(final List<EnvironmentMetaDataVisitor<?>> visitors, final Map<Class<?>, Resolver<?, C, ?>> resolvers)
+   public EnvironmentProcessor(final List<EnvironmentMetaDataVisitor<?>> visitors,
+      final Map<Class<?>, Resolver<?, C, ?>> resolvers, Map<Class<?>, DuplicateReferenceValidator<?>> validators)
    {
       this.visitors = visitors;
       this.resolvers = resolvers;
+      this.duplicateReferenceValidators = validators;
    }
 
    /**
@@ -127,7 +133,7 @@ public class EnvironmentProcessor<C>
       final ResolverResult<?> result = resolver.resolve(context, reference);
       if(result == null)
          throw new ResolutionException("Found reference [" + reference + "] but resolution failed to produce a result");
-      mappedresults.add(reference, result);
+      mappedresults.add(referenceType, reference, result);
    }
 
    @SuppressWarnings("unchecked")
@@ -147,21 +153,28 @@ public class EnvironmentProcessor<C>
       resolvers.put(metaDataType, resolver);
    }
 
-   private static class MappedResults
+   public <M> void addDuplicateReferenceValidator(final DuplicateReferenceValidator<M> duplicateReferenceValidator)
    {
-      private final Map<String, Object> referenceMap = new HashMap<String, Object>();
+      Class<M> metaDataType = duplicateReferenceValidator.getMetaDataType();
+      duplicateReferenceValidators.put(metaDataType, duplicateReferenceValidator);
+   }
+
+   private class MappedResults
+   {
+      private final Map<String, ReferenceResultPair<?>> referenceMap = new HashMap<String, ReferenceResultPair<?>>();
       private final List<ResolverResult<?>> results = new LinkedList<ResolverResult<?>>();
 
-      public <M> void add(final M newReference, final ResolverResult result) throws ResolutionException
+      public <M> void add(Class<M> referenceType, final M newReference, final ResolverResult result) throws ResolutionException
       {
-         Object previousRef = referenceMap.put(result.getRefName(), newReference);
-         if(previousRef == null)
+         final ReferenceResultPair<M> newReferenceResult =  new ReferenceResultPair<M>(newReference, result);
+         final ReferenceResultPair<?> previousReferenceResult = referenceMap.put(result.getRefName(), newReferenceResult);
+         if(previousReferenceResult == null)
          {
             results.add(result);
          }
          else
          {
-            checkForConflict(previousRef, newReference);
+            checkForConflict(referenceType, previousReferenceResult, newReferenceResult);
          }
       }
 
@@ -171,30 +184,37 @@ public class EnvironmentProcessor<C>
        * This method will be called anytime there are duplicate ResolverResults
        * created from separate references.
        *
-       * TODO: Update to check shareable and authentication @see EE.6 5.2.2
-       *
-       * @param previousReference The previous reference
-       * @param newReference The new reference
+       * @param referenceType The type of reference being processed
+       * @param previousReferencePair The previous reference
+       * @param newReferencePair      The new reference
        * @throws ResolutionException if a the reference conflict with one another
        */
-      private <M> void checkForConflict(M previousReference, M newReference) throws ResolutionException
+      private <M> void checkForConflict(Class<M> referenceType, ReferenceResultPair<?> previousReferencePair, ReferenceResultPair<M> newReferencePair) throws ResolutionException
       {
-         if(newReference instanceof EnvironmentEntryMetaData)
-         {
-            final EnvironmentEntryMetaData newEnvironmentEntry = EnvironmentEntryMetaData.class.cast(newReference);
-            final EnvironmentEntryMetaData previousEnvironmentEntry = EnvironmentEntryMetaData.class.cast(previousReference);
+         final String envReferenceName = previousReferencePair.getResolverResult().getRefName();
 
-            boolean conflict = !newEnvironmentEntry.getType().equals(previousEnvironmentEntry.getType());
-            conflict = conflict || !newEnvironmentEntry.getValue().equals(previousEnvironmentEntry.getValue());
-            if(conflict)
-            {
-               throw new ResolutionException("Conflicting environment entries were found during resolution.  The following references resolve to the same JNDI name: [" + previousReference + ", " + newReference + "]");
-            }
-         }
-         else
+         if(!previousReferencePair.getReference().getClass().isAssignableFrom(referenceType))
          {
-            throw new ResolutionException("Conflicting references found during resolution.  The following references resolve to a single JNDI name: [" + previousReference + ", " + newReference + "]");
+            throw new ResolutionException("Conflicting references found during resolution.  The references ["
+               + previousReferencePair.getReference() + ", " + newReferencePair.getReference()
+               + "] resolve to the same JNDI name [" + envReferenceName
+               + "] and are not of the same reference type.");
+         }
+
+         final ReferenceResultPair<M> typedPreviousReferencePair = (ReferenceResultPair<M>) previousReferencePair;
+
+         DuplicateReferenceValidator<M> duplicateReferenceValidator = (DuplicateReferenceValidator<M>) duplicateReferenceValidators.get(referenceType);
+
+         if(duplicateReferenceValidator == null)
+            duplicateReferenceValidator = new ResultOnlyReferenceValidator<M>(referenceType);
+
+         if(!duplicateReferenceValidator.isValid(typedPreviousReferencePair, newReferencePair))
+         {
+            throw new ResolutionException("Conflicting environment entries were found during resolution.  The references ["
+               + previousReferencePair.getReference() + ", " + newReferencePair.getReference()
+               + "] resolve to the same JNDI name " + envReferenceName
+               + "] and were not found to result in the same environment entry value.");
          }
       }
-   }
+    }
 }
