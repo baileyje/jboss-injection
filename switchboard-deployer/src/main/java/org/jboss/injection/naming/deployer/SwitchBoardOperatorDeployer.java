@@ -41,15 +41,16 @@ import org.jboss.injection.resolve.naming.EnvironmentProcessor;
 import org.jboss.injection.resolve.naming.ResolutionException;
 import org.jboss.injection.resolve.spi.ResolverResult;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 
 import javax.naming.Context;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Deployer capable of creating SwitchBoardOperator beans from SwitchBoardMetaData.
@@ -103,20 +104,31 @@ public class SwitchBoardOperatorDeployer extends AbstractSimpleRealDeployer<Swit
       //Now the component level entries
       if(switchBoardMetaData.getComponents() == null)
          return;
+      final Map<String, Collection<Environment>> componentsByName = new HashMap<String, Collection<Environment>>();
       for(SwitchBoardComponentMetaData componentMetaData : switchBoardMetaData.getComponents())
       {
+         String componentName = componentMetaData.getComponentName();
+         if(!componentsByName.containsKey(componentName))
+         {
+            componentsByName.put(componentName, new LinkedList<Environment>());
+         }
+         componentsByName.get(componentName).add(componentMetaData);
+      }
+      for(Map.Entry<String, Collection<Environment>> entry : componentsByName.entrySet())
+      {
+         final String componentName = entry.getKey();
+         final Collection<Environment> componentMetaData = entry.getValue();
          try
          {
-
             List<ResolverResult<?>> results = environmentProcessor.process(unit, componentMetaData);
             if(results != null && !results.isEmpty())
             {
-               deployBeanMetaData(unit, componentMetaData.getComponentName(), results);
+               deployBeanMetaData(unit, componentName, results);
             }
          }
          catch(ResolutionException e)
          {
-            throw DeploymentException.rethrowAsDeploymentException("Failed to resolve references for component " + componentMetaData.getComponentName() + " in " + unit, e);
+            throw DeploymentException.rethrowAsDeploymentException("Failed to resolve references for component " + componentName + " in " + unit, e);
          }
       }
 
