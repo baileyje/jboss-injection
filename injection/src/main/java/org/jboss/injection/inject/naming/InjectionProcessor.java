@@ -36,6 +36,7 @@ import org.jboss.injection.inject.pojo.MethodInjectionPoint;
 import org.jboss.injection.inject.spi.InjectionPoint;
 import org.jboss.injection.inject.Injector;
 import org.jboss.injection.inject.spi.ValueRetriever;
+import org.jboss.injection.resolve.spi.EnvironmentMetaDataVisitor;
 import org.jboss.metadata.javaee.spec.Environment;
 import org.jboss.metadata.javaee.spec.ResourceInjectionMetaData;
 import org.jboss.metadata.javaee.spec.ResourceInjectionTargetMetaData;
@@ -58,6 +59,19 @@ import org.jboss.metadata.javaee.spec.ResourceInjectionTargetMetaData;
  */
 public class InjectionProcessor
 {
+   
+   private List<EnvironmentMetaDataVisitor<ResourceInjectionMetaData>> visitors;
+   
+   public InjectionProcessor()
+   {
+      this(new ArrayList<EnvironmentMetaDataVisitor<ResourceInjectionMetaData>>());
+   }
+   
+   public InjectionProcessor(List<EnvironmentMetaDataVisitor<ResourceInjectionMetaData>> visitors)
+   {
+      this.visitors = visitors;
+   }
+   
    /**
     * Process a <code>environment</code> for injection targets and creates 
     * a list of {@link Injector}s
@@ -72,14 +86,10 @@ public class InjectionProcessor
          throws Exception
    {
       List<Injector<Object>> injectors = new ArrayList<Injector<Object>>();
-      injectors.addAll(this.process(enc, cl, environment.getAnnotatedEjbReferences()));
-      injectors.addAll(this.process(enc, cl, environment.getEnvironmentEntries()));
-      injectors.addAll(this.process(enc, cl, environment.getMessageDestinationReferences()));
-      injectors.addAll(this.process(enc, cl, environment.getPersistenceContextRefs()));
-      injectors.addAll(this.process(enc, cl, environment.getPersistenceUnitRefs()));
-      injectors.addAll(this.process(enc, cl, environment.getResourceEnvironmentReferences()));
-      injectors.addAll(this.process(enc, cl, environment.getResourceReferences()));
-      injectors.addAll(this.process(enc, cl, environment.getServiceReferences()));
+      for (EnvironmentMetaDataVisitor<ResourceInjectionMetaData> visitor : this.visitors)
+      {
+         injectors.addAll(this.process(enc, cl, visitor.getMetaData(environment)));   
+      }
       
       return injectors;
    }
@@ -197,4 +207,6 @@ public class InjectionProcessor
                + injectionTargetName);
       }
    }
+   
+   
 }
