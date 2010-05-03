@@ -14,7 +14,7 @@
     <!-- Artifact Information  -->
     <groupId>org.jboss.injection</groupId>
     <artifactId>jboss-injection-parent</artifactId>
-    <version>0.1.0-alpha-2</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>JBoss Injection Parent</name>
     <url>http://www.jboss.org</url>
