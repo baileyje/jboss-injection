@@ -42,7 +42,20 @@
         <version.jboss.test>1.0.5.GA</version.jboss.test>
         <version.junit>4.7</version.junit>
     </properties>
-
+    
+    <build>
+        <plugins>
+            <plugin>
+               <artifactId>maven-release-plugin</artifactId>
+               <version>2.0</version>
+               <configuration>
+                  <autoVersionSubmodules>true</autoVersionSubmodules>
+               </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    
     <scm>
        <connection>scm:git:git://github.com/baileyje/jboss-injection.git</connection>
        <developerConnection>scm:git:git@github.com:baileyje/jboss-injection.git</developerConnection>
